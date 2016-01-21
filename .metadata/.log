@@ -1,0 +1,10 @@
+!SESSION 2016-01-21 18:05:23.921 -----------------------------------------------
+eclipse.buildId=M20120208-0800
+java.version=1.7.0_67
+java.vendor=Oracle Corporation
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=ru_RU
+Framework arguments:  -product org.eclipse.epp.package.cpp.product
+Command-line arguments:  -data C:\Users\PC108\Export_project -os win32 -ws win32 -arch x86_64 -product org.eclipse.epp.package.cpp.product
+
+!ENTRY org.eclipse.cdt.core 1 0 2016-01-21 18:06:45.101
+!MESSAGE Indexed 'stm32_ld_vl' (29 sources, 58 headers) in 10,36 sec: 5 788 declarations; 40 653 references; 3 unresolved inclusions; 0 syntax errors; 1 unresolved names (0,00 %)

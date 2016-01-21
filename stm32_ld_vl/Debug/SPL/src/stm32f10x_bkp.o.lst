@@ -1,0 +1,1287 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"stm32f10x_bkp.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	BKP_DeInit
+  20              		.thumb
+  21              		.thumb_func
+  23              	BKP_DeInit:
+  24              	.LFB29:
+  25              		.file 1 "../SPL/src/stm32f10x_bkp.c"
+   1:../SPL/src/stm32f10x_bkp.c **** /**
+   2:../SPL/src/stm32f10x_bkp.c ****   ******************************************************************************
+   3:../SPL/src/stm32f10x_bkp.c ****   * @file    stm32f10x_bkp.c
+   4:../SPL/src/stm32f10x_bkp.c ****   * @author  MCD Application Team
+   5:../SPL/src/stm32f10x_bkp.c ****   * @version V3.5.0
+   6:../SPL/src/stm32f10x_bkp.c ****   * @date    11-March-2011
+   7:../SPL/src/stm32f10x_bkp.c ****   * @brief   This file provides all the BKP firmware functions.
+   8:../SPL/src/stm32f10x_bkp.c ****   ******************************************************************************
+   9:../SPL/src/stm32f10x_bkp.c ****   * @attention
+  10:../SPL/src/stm32f10x_bkp.c ****   *
+  11:../SPL/src/stm32f10x_bkp.c ****   * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+  12:../SPL/src/stm32f10x_bkp.c ****   * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+  13:../SPL/src/stm32f10x_bkp.c ****   * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+  14:../SPL/src/stm32f10x_bkp.c ****   * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+  15:../SPL/src/stm32f10x_bkp.c ****   * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+  16:../SPL/src/stm32f10x_bkp.c ****   * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+  17:../SPL/src/stm32f10x_bkp.c ****   *
+  18:../SPL/src/stm32f10x_bkp.c ****   * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  19:../SPL/src/stm32f10x_bkp.c ****   ******************************************************************************
+  20:../SPL/src/stm32f10x_bkp.c ****   */
+  21:../SPL/src/stm32f10x_bkp.c **** 
+  22:../SPL/src/stm32f10x_bkp.c **** /* Includes ------------------------------------------------------------------*/
+  23:../SPL/src/stm32f10x_bkp.c **** #include "stm32f10x_bkp.h"
+  24:../SPL/src/stm32f10x_bkp.c **** #include "stm32f10x_rcc.h"
+  25:../SPL/src/stm32f10x_bkp.c **** 
+  26:../SPL/src/stm32f10x_bkp.c **** /** @addtogroup STM32F10x_StdPeriph_Driver
+  27:../SPL/src/stm32f10x_bkp.c ****   * @{
+  28:../SPL/src/stm32f10x_bkp.c ****   */
+  29:../SPL/src/stm32f10x_bkp.c **** 
+  30:../SPL/src/stm32f10x_bkp.c **** /** @defgroup BKP 
+  31:../SPL/src/stm32f10x_bkp.c ****   * @brief BKP driver modules
+  32:../SPL/src/stm32f10x_bkp.c ****   * @{
+  33:../SPL/src/stm32f10x_bkp.c ****   */
+  34:../SPL/src/stm32f10x_bkp.c **** 
+  35:../SPL/src/stm32f10x_bkp.c **** /** @defgroup BKP_Private_TypesDefinitions
+  36:../SPL/src/stm32f10x_bkp.c ****   * @{
+  37:../SPL/src/stm32f10x_bkp.c ****   */
+  38:../SPL/src/stm32f10x_bkp.c **** 
+  39:../SPL/src/stm32f10x_bkp.c **** /**
+  40:../SPL/src/stm32f10x_bkp.c ****   * @}
+  41:../SPL/src/stm32f10x_bkp.c ****   */
+  42:../SPL/src/stm32f10x_bkp.c **** 
+  43:../SPL/src/stm32f10x_bkp.c **** /** @defgroup BKP_Private_Defines
+  44:../SPL/src/stm32f10x_bkp.c ****   * @{
+  45:../SPL/src/stm32f10x_bkp.c ****   */
+  46:../SPL/src/stm32f10x_bkp.c **** 
+  47:../SPL/src/stm32f10x_bkp.c **** /* ------------ BKP registers bit address in the alias region --------------- */
+  48:../SPL/src/stm32f10x_bkp.c **** #define BKP_OFFSET        (BKP_BASE - PERIPH_BASE)
+  49:../SPL/src/stm32f10x_bkp.c **** 
+  50:../SPL/src/stm32f10x_bkp.c **** /* --- CR Register ----*/
+  51:../SPL/src/stm32f10x_bkp.c **** 
+  52:../SPL/src/stm32f10x_bkp.c **** /* Alias word address of TPAL bit */
+  53:../SPL/src/stm32f10x_bkp.c **** #define CR_OFFSET         (BKP_OFFSET + 0x30)
+  54:../SPL/src/stm32f10x_bkp.c **** #define TPAL_BitNumber    0x01
+  55:../SPL/src/stm32f10x_bkp.c **** #define CR_TPAL_BB        (PERIPH_BB_BASE + (CR_OFFSET * 32) + (TPAL_BitNumber * 4))
+  56:../SPL/src/stm32f10x_bkp.c **** 
+  57:../SPL/src/stm32f10x_bkp.c **** /* Alias word address of TPE bit */
+  58:../SPL/src/stm32f10x_bkp.c **** #define TPE_BitNumber     0x00
+  59:../SPL/src/stm32f10x_bkp.c **** #define CR_TPE_BB         (PERIPH_BB_BASE + (CR_OFFSET * 32) + (TPE_BitNumber * 4))
+  60:../SPL/src/stm32f10x_bkp.c **** 
+  61:../SPL/src/stm32f10x_bkp.c **** /* --- CSR Register ---*/
+  62:../SPL/src/stm32f10x_bkp.c **** 
+  63:../SPL/src/stm32f10x_bkp.c **** /* Alias word address of TPIE bit */
+  64:../SPL/src/stm32f10x_bkp.c **** #define CSR_OFFSET        (BKP_OFFSET + 0x34)
+  65:../SPL/src/stm32f10x_bkp.c **** #define TPIE_BitNumber    0x02
+  66:../SPL/src/stm32f10x_bkp.c **** #define CSR_TPIE_BB       (PERIPH_BB_BASE + (CSR_OFFSET * 32) + (TPIE_BitNumber * 4))
+  67:../SPL/src/stm32f10x_bkp.c **** 
+  68:../SPL/src/stm32f10x_bkp.c **** /* Alias word address of TIF bit */
+  69:../SPL/src/stm32f10x_bkp.c **** #define TIF_BitNumber     0x09
+  70:../SPL/src/stm32f10x_bkp.c **** #define CSR_TIF_BB        (PERIPH_BB_BASE + (CSR_OFFSET * 32) + (TIF_BitNumber * 4))
+  71:../SPL/src/stm32f10x_bkp.c **** 
+  72:../SPL/src/stm32f10x_bkp.c **** /* Alias word address of TEF bit */
+  73:../SPL/src/stm32f10x_bkp.c **** #define TEF_BitNumber     0x08
+  74:../SPL/src/stm32f10x_bkp.c **** #define CSR_TEF_BB        (PERIPH_BB_BASE + (CSR_OFFSET * 32) + (TEF_BitNumber * 4))
+  75:../SPL/src/stm32f10x_bkp.c **** 
+  76:../SPL/src/stm32f10x_bkp.c **** /* ---------------------- BKP registers bit mask ------------------------ */
+  77:../SPL/src/stm32f10x_bkp.c **** 
+  78:../SPL/src/stm32f10x_bkp.c **** /* RTCCR register bit mask */
+  79:../SPL/src/stm32f10x_bkp.c **** #define RTCCR_CAL_MASK    ((uint16_t)0xFF80)
+  80:../SPL/src/stm32f10x_bkp.c **** #define RTCCR_MASK        ((uint16_t)0xFC7F)
+  81:../SPL/src/stm32f10x_bkp.c **** 
+  82:../SPL/src/stm32f10x_bkp.c **** /**
+  83:../SPL/src/stm32f10x_bkp.c ****   * @}
+  84:../SPL/src/stm32f10x_bkp.c ****   */ 
+  85:../SPL/src/stm32f10x_bkp.c **** 
+  86:../SPL/src/stm32f10x_bkp.c **** 
+  87:../SPL/src/stm32f10x_bkp.c **** /** @defgroup BKP_Private_Macros
+  88:../SPL/src/stm32f10x_bkp.c ****   * @{
+  89:../SPL/src/stm32f10x_bkp.c ****   */
+  90:../SPL/src/stm32f10x_bkp.c **** 
+  91:../SPL/src/stm32f10x_bkp.c **** /**
+  92:../SPL/src/stm32f10x_bkp.c ****   * @}
+  93:../SPL/src/stm32f10x_bkp.c ****   */
+  94:../SPL/src/stm32f10x_bkp.c **** 
+  95:../SPL/src/stm32f10x_bkp.c **** /** @defgroup BKP_Private_Variables
+  96:../SPL/src/stm32f10x_bkp.c ****   * @{
+  97:../SPL/src/stm32f10x_bkp.c ****   */
+  98:../SPL/src/stm32f10x_bkp.c **** 
+  99:../SPL/src/stm32f10x_bkp.c **** /**
+ 100:../SPL/src/stm32f10x_bkp.c ****   * @}
+ 101:../SPL/src/stm32f10x_bkp.c ****   */
+ 102:../SPL/src/stm32f10x_bkp.c **** 
+ 103:../SPL/src/stm32f10x_bkp.c **** /** @defgroup BKP_Private_FunctionPrototypes
+ 104:../SPL/src/stm32f10x_bkp.c ****   * @{
+ 105:../SPL/src/stm32f10x_bkp.c ****   */
+ 106:../SPL/src/stm32f10x_bkp.c **** 
+ 107:../SPL/src/stm32f10x_bkp.c **** /**
+ 108:../SPL/src/stm32f10x_bkp.c ****   * @}
+ 109:../SPL/src/stm32f10x_bkp.c ****   */
+ 110:../SPL/src/stm32f10x_bkp.c **** 
+ 111:../SPL/src/stm32f10x_bkp.c **** /** @defgroup BKP_Private_Functions
+ 112:../SPL/src/stm32f10x_bkp.c ****   * @{
+ 113:../SPL/src/stm32f10x_bkp.c ****   */
+ 114:../SPL/src/stm32f10x_bkp.c **** 
+ 115:../SPL/src/stm32f10x_bkp.c **** /**
+ 116:../SPL/src/stm32f10x_bkp.c ****   * @brief  Deinitializes the BKP peripheral registers to their default reset values.
+ 117:../SPL/src/stm32f10x_bkp.c ****   * @param  None
+ 118:../SPL/src/stm32f10x_bkp.c ****   * @retval None
+ 119:../SPL/src/stm32f10x_bkp.c ****   */
+ 120:../SPL/src/stm32f10x_bkp.c **** void BKP_DeInit(void)
+ 121:../SPL/src/stm32f10x_bkp.c **** {
+  26              		.loc 1 121 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 0
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30 0000 80B5     		push	{r7, lr}
+  31              	.LCFI0:
+  32              		.cfi_def_cfa_offset 8
+  33              		.cfi_offset 7, -8
+  34              		.cfi_offset 14, -4
+  35 0002 00AF     		add	r7, sp, #0
+  36              	.LCFI1:
+  37              		.cfi_def_cfa_register 7
+ 122:../SPL/src/stm32f10x_bkp.c ****   RCC_BackupResetCmd(ENABLE);
+  38              		.loc 1 122 0
+  39 0004 4FF00100 		mov	r0, #1
+  40 0008 FFF7FEFF 		bl	RCC_BackupResetCmd
+ 123:../SPL/src/stm32f10x_bkp.c ****   RCC_BackupResetCmd(DISABLE);
+  41              		.loc 1 123 0
+  42 000c 4FF00000 		mov	r0, #0
+  43 0010 FFF7FEFF 		bl	RCC_BackupResetCmd
+ 124:../SPL/src/stm32f10x_bkp.c **** }
+  44              		.loc 1 124 0
+  45 0014 80BD     		pop	{r7, pc}
+  46              		.cfi_endproc
+  47              	.LFE29:
+  49              		.section	.rodata
+  50              		.align	2
+  51              	.LC0:
+  52 0000 2E2E2F53 		.ascii	"../SPL/src/stm32f10x_bkp.c\000"
+  52      504C2F73 
+  52      72632F73 
+  52      746D3332 
+  52      66313078 
+  53 001b 00       		.text
+  54 0016 00BF     		.align	2
+  55              		.global	BKP_TamperPinLevelConfig
+  56              		.thumb
+  57              		.thumb_func
+  59              	BKP_TamperPinLevelConfig:
+  60              	.LFB30:
+ 125:../SPL/src/stm32f10x_bkp.c **** 
+ 126:../SPL/src/stm32f10x_bkp.c **** /**
+ 127:../SPL/src/stm32f10x_bkp.c ****   * @brief  Configures the Tamper Pin active level.
+ 128:../SPL/src/stm32f10x_bkp.c ****   * @param  BKP_TamperPinLevel: specifies the Tamper Pin active level.
+ 129:../SPL/src/stm32f10x_bkp.c ****   *   This parameter can be one of the following values:
+ 130:../SPL/src/stm32f10x_bkp.c ****   *     @arg BKP_TamperPinLevel_High: Tamper pin active on high level
+ 131:../SPL/src/stm32f10x_bkp.c ****   *     @arg BKP_TamperPinLevel_Low: Tamper pin active on low level
+ 132:../SPL/src/stm32f10x_bkp.c ****   * @retval None
+ 133:../SPL/src/stm32f10x_bkp.c ****   */
+ 134:../SPL/src/stm32f10x_bkp.c **** void BKP_TamperPinLevelConfig(uint16_t BKP_TamperPinLevel)
+ 135:../SPL/src/stm32f10x_bkp.c **** {
+  61              		.loc 1 135 0
+  62              		.cfi_startproc
+  63              		@ args = 0, pretend = 0, frame = 8
+  64              		@ frame_needed = 1, uses_anonymous_args = 0
+  65 0018 80B5     		push	{r7, lr}
+  66              	.LCFI2:
+  67              		.cfi_def_cfa_offset 8
+  68              		.cfi_offset 7, -8
+  69              		.cfi_offset 14, -4
+  70 001a 82B0     		sub	sp, sp, #8
+  71              	.LCFI3:
+  72              		.cfi_def_cfa_offset 16
+  73 001c 00AF     		add	r7, sp, #0
+  74              	.LCFI4:
+  75              		.cfi_def_cfa_register 7
+  76 001e 0346     		mov	r3, r0
+  77 0020 FB80     		strh	r3, [r7, #6]	@ movhi
+ 136:../SPL/src/stm32f10x_bkp.c ****   /* Check the parameters */
+ 137:../SPL/src/stm32f10x_bkp.c ****   assert_param(IS_BKP_TAMPER_PIN_LEVEL(BKP_TamperPinLevel));
+  78              		.loc 1 137 0
+  79 0022 FB88     		ldrh	r3, [r7, #6]
+  80 0024 002B     		cmp	r3, #0
+  81 0026 07D0     		beq	.L3
+  82              		.loc 1 137 0 is_stmt 0 discriminator 1
+  83 0028 FB88     		ldrh	r3, [r7, #6]
+  84 002a 012B     		cmp	r3, #1
+  85 002c 04D0     		beq	.L3
+  86              		.loc 1 137 0 discriminator 2
+  87 002e 0648     		ldr	r0, .L4
+  88 0030 4FF08901 		mov	r1, #137
+  89 0034 FFF7FEFF 		bl	assert_failed
+  90              	.L3:
+ 138:../SPL/src/stm32f10x_bkp.c ****   *(__IO uint32_t *) CR_TPAL_BB = BKP_TamperPinLevel;
+  91              		.loc 1 138 0 is_stmt 1
+  92 0038 044B     		ldr	r3, .L4+4
+  93 003a FA88     		ldrh	r2, [r7, #6]
+  94 003c 1A60     		str	r2, [r3, #0]
+ 139:../SPL/src/stm32f10x_bkp.c **** }
+  95              		.loc 1 139 0
+  96 003e 07F10807 		add	r7, r7, #8
+  97 0042 BD46     		mov	sp, r7
+  98 0044 80BD     		pop	{r7, pc}
+  99              	.L5:
+ 100 0046 00BF     		.align	2
+ 101              	.L4:
+ 102 0048 00000000 		.word	.LC0
+ 103 004c 04860D42 		.word	1108182532
+ 104              		.cfi_endproc
+ 105              	.LFE30:
+ 107              		.align	2
+ 108              		.global	BKP_TamperPinCmd
+ 109              		.thumb
+ 110              		.thumb_func
+ 112              	BKP_TamperPinCmd:
+ 113              	.LFB31:
+ 140:../SPL/src/stm32f10x_bkp.c **** 
+ 141:../SPL/src/stm32f10x_bkp.c **** /**
+ 142:../SPL/src/stm32f10x_bkp.c ****   * @brief  Enables or disables the Tamper Pin activation.
+ 143:../SPL/src/stm32f10x_bkp.c ****   * @param  NewState: new state of the Tamper Pin activation.
+ 144:../SPL/src/stm32f10x_bkp.c ****   *   This parameter can be: ENABLE or DISABLE.
+ 145:../SPL/src/stm32f10x_bkp.c ****   * @retval None
+ 146:../SPL/src/stm32f10x_bkp.c ****   */
+ 147:../SPL/src/stm32f10x_bkp.c **** void BKP_TamperPinCmd(FunctionalState NewState)
+ 148:../SPL/src/stm32f10x_bkp.c **** {
+ 114              		.loc 1 148 0
+ 115              		.cfi_startproc
+ 116              		@ args = 0, pretend = 0, frame = 8
+ 117              		@ frame_needed = 1, uses_anonymous_args = 0
+ 118 0050 80B5     		push	{r7, lr}
+ 119              	.LCFI5:
+ 120              		.cfi_def_cfa_offset 8
+ 121              		.cfi_offset 7, -8
+ 122              		.cfi_offset 14, -4
+ 123 0052 82B0     		sub	sp, sp, #8
+ 124              	.LCFI6:
+ 125              		.cfi_def_cfa_offset 16
+ 126 0054 00AF     		add	r7, sp, #0
+ 127              	.LCFI7:
+ 128              		.cfi_def_cfa_register 7
+ 129 0056 0346     		mov	r3, r0
+ 130 0058 FB71     		strb	r3, [r7, #7]
+ 149:../SPL/src/stm32f10x_bkp.c ****   /* Check the parameters */
+ 150:../SPL/src/stm32f10x_bkp.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 131              		.loc 1 150 0
+ 132 005a FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 133 005c 002B     		cmp	r3, #0
+ 134 005e 07D0     		beq	.L7
+ 135              		.loc 1 150 0 is_stmt 0 discriminator 1
+ 136 0060 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 137 0062 012B     		cmp	r3, #1
+ 138 0064 04D0     		beq	.L7
+ 139              		.loc 1 150 0 discriminator 2
+ 140 0066 0648     		ldr	r0, .L8
+ 141 0068 4FF09601 		mov	r1, #150
+ 142 006c FFF7FEFF 		bl	assert_failed
+ 143              	.L7:
+ 151:../SPL/src/stm32f10x_bkp.c ****   *(__IO uint32_t *) CR_TPE_BB = (uint32_t)NewState;
+ 144              		.loc 1 151 0 is_stmt 1
+ 145 0070 044B     		ldr	r3, .L8+4
+ 146 0072 FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 147 0074 1A60     		str	r2, [r3, #0]
+ 152:../SPL/src/stm32f10x_bkp.c **** }
+ 148              		.loc 1 152 0
+ 149 0076 07F10807 		add	r7, r7, #8
+ 150 007a BD46     		mov	sp, r7
+ 151 007c 80BD     		pop	{r7, pc}
+ 152              	.L9:
+ 153 007e 00BF     		.align	2
+ 154              	.L8:
+ 155 0080 00000000 		.word	.LC0
+ 156 0084 00860D42 		.word	1108182528
+ 157              		.cfi_endproc
+ 158              	.LFE31:
+ 160              		.align	2
+ 161              		.global	BKP_ITConfig
+ 162              		.thumb
+ 163              		.thumb_func
+ 165              	BKP_ITConfig:
+ 166              	.LFB32:
+ 153:../SPL/src/stm32f10x_bkp.c **** 
+ 154:../SPL/src/stm32f10x_bkp.c **** /**
+ 155:../SPL/src/stm32f10x_bkp.c ****   * @brief  Enables or disables the Tamper Pin Interrupt.
+ 156:../SPL/src/stm32f10x_bkp.c ****   * @param  NewState: new state of the Tamper Pin Interrupt.
+ 157:../SPL/src/stm32f10x_bkp.c ****   *   This parameter can be: ENABLE or DISABLE.
+ 158:../SPL/src/stm32f10x_bkp.c ****   * @retval None
+ 159:../SPL/src/stm32f10x_bkp.c ****   */
+ 160:../SPL/src/stm32f10x_bkp.c **** void BKP_ITConfig(FunctionalState NewState)
+ 161:../SPL/src/stm32f10x_bkp.c **** {
+ 167              		.loc 1 161 0
+ 168              		.cfi_startproc
+ 169              		@ args = 0, pretend = 0, frame = 8
+ 170              		@ frame_needed = 1, uses_anonymous_args = 0
+ 171 0088 80B5     		push	{r7, lr}
+ 172              	.LCFI8:
+ 173              		.cfi_def_cfa_offset 8
+ 174              		.cfi_offset 7, -8
+ 175              		.cfi_offset 14, -4
+ 176 008a 82B0     		sub	sp, sp, #8
+ 177              	.LCFI9:
+ 178              		.cfi_def_cfa_offset 16
+ 179 008c 00AF     		add	r7, sp, #0
+ 180              	.LCFI10:
+ 181              		.cfi_def_cfa_register 7
+ 182 008e 0346     		mov	r3, r0
+ 183 0090 FB71     		strb	r3, [r7, #7]
+ 162:../SPL/src/stm32f10x_bkp.c ****   /* Check the parameters */
+ 163:../SPL/src/stm32f10x_bkp.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 184              		.loc 1 163 0
+ 185 0092 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 186 0094 002B     		cmp	r3, #0
+ 187 0096 07D0     		beq	.L11
+ 188              		.loc 1 163 0 is_stmt 0 discriminator 1
+ 189 0098 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 190 009a 012B     		cmp	r3, #1
+ 191 009c 04D0     		beq	.L11
+ 192              		.loc 1 163 0 discriminator 2
+ 193 009e 0648     		ldr	r0, .L12
+ 194 00a0 4FF0A301 		mov	r1, #163
+ 195 00a4 FFF7FEFF 		bl	assert_failed
+ 196              	.L11:
+ 164:../SPL/src/stm32f10x_bkp.c ****   *(__IO uint32_t *) CSR_TPIE_BB = (uint32_t)NewState;
+ 197              		.loc 1 164 0 is_stmt 1
+ 198 00a8 044B     		ldr	r3, .L12+4
+ 199 00aa FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 200 00ac 1A60     		str	r2, [r3, #0]
+ 165:../SPL/src/stm32f10x_bkp.c **** }
+ 201              		.loc 1 165 0
+ 202 00ae 07F10807 		add	r7, r7, #8
+ 203 00b2 BD46     		mov	sp, r7
+ 204 00b4 80BD     		pop	{r7, pc}
+ 205              	.L13:
+ 206 00b6 00BF     		.align	2
+ 207              	.L12:
+ 208 00b8 00000000 		.word	.LC0
+ 209 00bc 88860D42 		.word	1108182664
+ 210              		.cfi_endproc
+ 211              	.LFE32:
+ 213              		.align	2
+ 214              		.global	BKP_RTCOutputConfig
+ 215              		.thumb
+ 216              		.thumb_func
+ 218              	BKP_RTCOutputConfig:
+ 219              	.LFB33:
+ 166:../SPL/src/stm32f10x_bkp.c **** 
+ 167:../SPL/src/stm32f10x_bkp.c **** /**
+ 168:../SPL/src/stm32f10x_bkp.c ****   * @brief  Select the RTC output source to output on the Tamper pin.
+ 169:../SPL/src/stm32f10x_bkp.c ****   * @param  BKP_RTCOutputSource: specifies the RTC output source.
+ 170:../SPL/src/stm32f10x_bkp.c ****   *   This parameter can be one of the following values:
+ 171:../SPL/src/stm32f10x_bkp.c ****   *     @arg BKP_RTCOutputSource_None: no RTC output on the Tamper pin.
+ 172:../SPL/src/stm32f10x_bkp.c ****   *     @arg BKP_RTCOutputSource_CalibClock: output the RTC clock with frequency
+ 173:../SPL/src/stm32f10x_bkp.c ****   *                                          divided by 64 on the Tamper pin.
+ 174:../SPL/src/stm32f10x_bkp.c ****   *     @arg BKP_RTCOutputSource_Alarm: output the RTC Alarm pulse signal on
+ 175:../SPL/src/stm32f10x_bkp.c ****   *                                     the Tamper pin.
+ 176:../SPL/src/stm32f10x_bkp.c ****   *     @arg BKP_RTCOutputSource_Second: output the RTC Second pulse signal on
+ 177:../SPL/src/stm32f10x_bkp.c ****   *                                      the Tamper pin.  
+ 178:../SPL/src/stm32f10x_bkp.c ****   * @retval None
+ 179:../SPL/src/stm32f10x_bkp.c ****   */
+ 180:../SPL/src/stm32f10x_bkp.c **** void BKP_RTCOutputConfig(uint16_t BKP_RTCOutputSource)
+ 181:../SPL/src/stm32f10x_bkp.c **** {
+ 220              		.loc 1 181 0
+ 221              		.cfi_startproc
+ 222              		@ args = 0, pretend = 0, frame = 16
+ 223              		@ frame_needed = 1, uses_anonymous_args = 0
+ 224 00c0 80B5     		push	{r7, lr}
+ 225              	.LCFI11:
+ 226              		.cfi_def_cfa_offset 8
+ 227              		.cfi_offset 7, -8
+ 228              		.cfi_offset 14, -4
+ 229 00c2 84B0     		sub	sp, sp, #16
+ 230              	.LCFI12:
+ 231              		.cfi_def_cfa_offset 24
+ 232 00c4 00AF     		add	r7, sp, #0
+ 233              	.LCFI13:
+ 234              		.cfi_def_cfa_register 7
+ 235 00c6 0346     		mov	r3, r0
+ 236 00c8 FB80     		strh	r3, [r7, #6]	@ movhi
+ 182:../SPL/src/stm32f10x_bkp.c ****   uint16_t tmpreg = 0;
+ 237              		.loc 1 182 0
+ 238 00ca 4FF00003 		mov	r3, #0
+ 239 00ce FB81     		strh	r3, [r7, #14]	@ movhi
+ 183:../SPL/src/stm32f10x_bkp.c ****   /* Check the parameters */
+ 184:../SPL/src/stm32f10x_bkp.c ****   assert_param(IS_BKP_RTC_OUTPUT_SOURCE(BKP_RTCOutputSource));
+ 240              		.loc 1 184 0
+ 241 00d0 FB88     		ldrh	r3, [r7, #6]
+ 242 00d2 002B     		cmp	r3, #0
+ 243 00d4 0FD0     		beq	.L15
+ 244              		.loc 1 184 0 is_stmt 0 discriminator 1
+ 245 00d6 FB88     		ldrh	r3, [r7, #6]
+ 246 00d8 802B     		cmp	r3, #128
+ 247 00da 0CD0     		beq	.L15
+ 248              		.loc 1 184 0 discriminator 2
+ 249 00dc FB88     		ldrh	r3, [r7, #6]
+ 250 00de B3F5807F 		cmp	r3, #256
+ 251 00e2 08D0     		beq	.L15
+ 252              		.loc 1 184 0 discriminator 3
+ 253 00e4 FB88     		ldrh	r3, [r7, #6]
+ 254 00e6 B3F5407F 		cmp	r3, #768
+ 255 00ea 04D0     		beq	.L15
+ 256              		.loc 1 184 0 discriminator 4
+ 257 00ec 0B48     		ldr	r0, .L16
+ 258 00ee 4FF0B801 		mov	r1, #184
+ 259 00f2 FFF7FEFF 		bl	assert_failed
+ 260              	.L15:
+ 185:../SPL/src/stm32f10x_bkp.c ****   tmpreg = BKP->RTCCR;
+ 261              		.loc 1 185 0 is_stmt 1
+ 262 00f6 0A4B     		ldr	r3, .L16+4
+ 263 00f8 9B8D     		ldrh	r3, [r3, #44]	@ movhi
+ 264 00fa FB81     		strh	r3, [r7, #14]	@ movhi
+ 186:../SPL/src/stm32f10x_bkp.c ****   /* Clear CCO, ASOE and ASOS bits */
+ 187:../SPL/src/stm32f10x_bkp.c ****   tmpreg &= RTCCR_MASK;
+ 265              		.loc 1 187 0
+ 266 00fc FB89     		ldrh	r3, [r7, #14]	@ movhi
+ 267 00fe 23F46073 		bic	r3, r3, #896
+ 268 0102 FB81     		strh	r3, [r7, #14]	@ movhi
+ 188:../SPL/src/stm32f10x_bkp.c ****   
+ 189:../SPL/src/stm32f10x_bkp.c ****   /* Set CCO, ASOE and ASOS bits according to BKP_RTCOutputSource value */
+ 190:../SPL/src/stm32f10x_bkp.c ****   tmpreg |= BKP_RTCOutputSource;
+ 269              		.loc 1 190 0
+ 270 0104 FA89     		ldrh	r2, [r7, #14]	@ movhi
+ 271 0106 FB88     		ldrh	r3, [r7, #6]	@ movhi
+ 272 0108 1343     		orrs	r3, r3, r2
+ 273 010a FB81     		strh	r3, [r7, #14]	@ movhi
+ 191:../SPL/src/stm32f10x_bkp.c ****   /* Store the new value */
+ 192:../SPL/src/stm32f10x_bkp.c ****   BKP->RTCCR = tmpreg;
+ 274              		.loc 1 192 0
+ 275 010c 044B     		ldr	r3, .L16+4
+ 276 010e FA89     		ldrh	r2, [r7, #14]	@ movhi
+ 277 0110 9A85     		strh	r2, [r3, #44]	@ movhi
+ 193:../SPL/src/stm32f10x_bkp.c **** }
+ 278              		.loc 1 193 0
+ 279 0112 07F11007 		add	r7, r7, #16
+ 280 0116 BD46     		mov	sp, r7
+ 281 0118 80BD     		pop	{r7, pc}
+ 282              	.L17:
+ 283 011a 00BF     		.align	2
+ 284              	.L16:
+ 285 011c 00000000 		.word	.LC0
+ 286 0120 006C0040 		.word	1073769472
+ 287              		.cfi_endproc
+ 288              	.LFE33:
+ 290              		.align	2
+ 291              		.global	BKP_SetRTCCalibrationValue
+ 292              		.thumb
+ 293              		.thumb_func
+ 295              	BKP_SetRTCCalibrationValue:
+ 296              	.LFB34:
+ 194:../SPL/src/stm32f10x_bkp.c **** 
+ 195:../SPL/src/stm32f10x_bkp.c **** /**
+ 196:../SPL/src/stm32f10x_bkp.c ****   * @brief  Sets RTC Clock Calibration value.
+ 197:../SPL/src/stm32f10x_bkp.c ****   * @param  CalibrationValue: specifies the RTC Clock Calibration value.
+ 198:../SPL/src/stm32f10x_bkp.c ****   *   This parameter must be a number between 0 and 0x7F.
+ 199:../SPL/src/stm32f10x_bkp.c ****   * @retval None
+ 200:../SPL/src/stm32f10x_bkp.c ****   */
+ 201:../SPL/src/stm32f10x_bkp.c **** void BKP_SetRTCCalibrationValue(uint8_t CalibrationValue)
+ 202:../SPL/src/stm32f10x_bkp.c **** {
+ 297              		.loc 1 202 0
+ 298              		.cfi_startproc
+ 299              		@ args = 0, pretend = 0, frame = 16
+ 300              		@ frame_needed = 1, uses_anonymous_args = 0
+ 301 0124 80B5     		push	{r7, lr}
+ 302              	.LCFI14:
+ 303              		.cfi_def_cfa_offset 8
+ 304              		.cfi_offset 7, -8
+ 305              		.cfi_offset 14, -4
+ 306 0126 84B0     		sub	sp, sp, #16
+ 307              	.LCFI15:
+ 308              		.cfi_def_cfa_offset 24
+ 309 0128 00AF     		add	r7, sp, #0
+ 310              	.LCFI16:
+ 311              		.cfi_def_cfa_register 7
+ 312 012a 0346     		mov	r3, r0
+ 313 012c FB71     		strb	r3, [r7, #7]
+ 203:../SPL/src/stm32f10x_bkp.c ****   uint16_t tmpreg = 0;
+ 314              		.loc 1 203 0
+ 315 012e 4FF00003 		mov	r3, #0
+ 316 0132 FB81     		strh	r3, [r7, #14]	@ movhi
+ 204:../SPL/src/stm32f10x_bkp.c ****   /* Check the parameters */
+ 205:../SPL/src/stm32f10x_bkp.c ****   assert_param(IS_BKP_CALIBRATION_VALUE(CalibrationValue));
+ 317              		.loc 1 205 0
+ 318 0134 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 319 0136 5BB2     		sxtb	r3, r3
+ 320 0138 002B     		cmp	r3, #0
+ 321 013a 04DA     		bge	.L19
+ 322              		.loc 1 205 0 is_stmt 0 discriminator 1
+ 323 013c 0B48     		ldr	r0, .L20
+ 324 013e 4FF0CD01 		mov	r1, #205
+ 325 0142 FFF7FEFF 		bl	assert_failed
+ 326              	.L19:
+ 206:../SPL/src/stm32f10x_bkp.c ****   tmpreg = BKP->RTCCR;
+ 327              		.loc 1 206 0 is_stmt 1
+ 328 0146 0A4B     		ldr	r3, .L20+4
+ 329 0148 9B8D     		ldrh	r3, [r3, #44]	@ movhi
+ 330 014a FB81     		strh	r3, [r7, #14]	@ movhi
+ 207:../SPL/src/stm32f10x_bkp.c ****   /* Clear CAL[6:0] bits */
+ 208:../SPL/src/stm32f10x_bkp.c ****   tmpreg &= RTCCR_CAL_MASK;
+ 331              		.loc 1 208 0
+ 332 014c FB89     		ldrh	r3, [r7, #14]	@ movhi
+ 333 014e 23F07F03 		bic	r3, r3, #127
+ 334 0152 FB81     		strh	r3, [r7, #14]	@ movhi
+ 209:../SPL/src/stm32f10x_bkp.c ****   /* Set CAL[6:0] bits according to CalibrationValue value */
+ 210:../SPL/src/stm32f10x_bkp.c ****   tmpreg |= CalibrationValue;
+ 335              		.loc 1 210 0
+ 336 0154 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 337 0156 9AB2     		uxth	r2, r3
+ 338 0158 FB89     		ldrh	r3, [r7, #14]	@ movhi
+ 339 015a 1343     		orrs	r3, r3, r2
+ 340 015c FB81     		strh	r3, [r7, #14]	@ movhi
+ 211:../SPL/src/stm32f10x_bkp.c ****   /* Store the new value */
+ 212:../SPL/src/stm32f10x_bkp.c ****   BKP->RTCCR = tmpreg;
+ 341              		.loc 1 212 0
+ 342 015e 044B     		ldr	r3, .L20+4
+ 343 0160 FA89     		ldrh	r2, [r7, #14]	@ movhi
+ 344 0162 9A85     		strh	r2, [r3, #44]	@ movhi
+ 213:../SPL/src/stm32f10x_bkp.c **** }
+ 345              		.loc 1 213 0
+ 346 0164 07F11007 		add	r7, r7, #16
+ 347 0168 BD46     		mov	sp, r7
+ 348 016a 80BD     		pop	{r7, pc}
+ 349              	.L21:
+ 350              		.align	2
+ 351              	.L20:
+ 352 016c 00000000 		.word	.LC0
+ 353 0170 006C0040 		.word	1073769472
+ 354              		.cfi_endproc
+ 355              	.LFE34:
+ 357              		.align	2
+ 358              		.global	BKP_WriteBackupRegister
+ 359              		.thumb
+ 360              		.thumb_func
+ 362              	BKP_WriteBackupRegister:
+ 363              	.LFB35:
+ 214:../SPL/src/stm32f10x_bkp.c **** 
+ 215:../SPL/src/stm32f10x_bkp.c **** /**
+ 216:../SPL/src/stm32f10x_bkp.c ****   * @brief  Writes user data to the specified Data Backup Register.
+ 217:../SPL/src/stm32f10x_bkp.c ****   * @param  BKP_DR: specifies the Data Backup Register.
+ 218:../SPL/src/stm32f10x_bkp.c ****   *   This parameter can be BKP_DRx where x:[1, 42]
+ 219:../SPL/src/stm32f10x_bkp.c ****   * @param  Data: data to write
+ 220:../SPL/src/stm32f10x_bkp.c ****   * @retval None
+ 221:../SPL/src/stm32f10x_bkp.c ****   */
+ 222:../SPL/src/stm32f10x_bkp.c **** void BKP_WriteBackupRegister(uint16_t BKP_DR, uint16_t Data)
+ 223:../SPL/src/stm32f10x_bkp.c **** {
+ 364              		.loc 1 223 0
+ 365              		.cfi_startproc
+ 366              		@ args = 0, pretend = 0, frame = 16
+ 367              		@ frame_needed = 1, uses_anonymous_args = 0
+ 368 0174 80B5     		push	{r7, lr}
+ 369              	.LCFI17:
+ 370              		.cfi_def_cfa_offset 8
+ 371              		.cfi_offset 7, -8
+ 372              		.cfi_offset 14, -4
+ 373 0176 84B0     		sub	sp, sp, #16
+ 374              	.LCFI18:
+ 375              		.cfi_def_cfa_offset 24
+ 376 0178 00AF     		add	r7, sp, #0
+ 377              	.LCFI19:
+ 378              		.cfi_def_cfa_register 7
+ 379 017a 0246     		mov	r2, r0
+ 380 017c 0B46     		mov	r3, r1
+ 381 017e FA80     		strh	r2, [r7, #6]	@ movhi
+ 382 0180 BB80     		strh	r3, [r7, #4]	@ movhi
+ 224:../SPL/src/stm32f10x_bkp.c ****   __IO uint32_t tmp = 0;
+ 383              		.loc 1 224 0
+ 384 0182 4FF00003 		mov	r3, #0
+ 385 0186 FB60     		str	r3, [r7, #12]
+ 225:../SPL/src/stm32f10x_bkp.c **** 
+ 226:../SPL/src/stm32f10x_bkp.c ****   /* Check the parameters */
+ 227:../SPL/src/stm32f10x_bkp.c ****   assert_param(IS_BKP_DR(BKP_DR));
+ 386              		.loc 1 227 0
+ 387 0188 FB88     		ldrh	r3, [r7, #6]
+ 388 018a 042B     		cmp	r3, #4
+ 389 018c 7FD0     		beq	.L23
+ 390              		.loc 1 227 0 is_stmt 0 discriminator 1
+ 391 018e FB88     		ldrh	r3, [r7, #6]
+ 392 0190 082B     		cmp	r3, #8
+ 393 0192 7CD0     		beq	.L23
+ 394              		.loc 1 227 0 discriminator 2
+ 395 0194 FB88     		ldrh	r3, [r7, #6]
+ 396 0196 0C2B     		cmp	r3, #12
+ 397 0198 79D0     		beq	.L23
+ 398              		.loc 1 227 0 discriminator 3
+ 399 019a FB88     		ldrh	r3, [r7, #6]
+ 400 019c 102B     		cmp	r3, #16
+ 401 019e 76D0     		beq	.L23
+ 402              		.loc 1 227 0 discriminator 4
+ 403 01a0 FB88     		ldrh	r3, [r7, #6]
+ 404 01a2 142B     		cmp	r3, #20
+ 405 01a4 73D0     		beq	.L23
+ 406              		.loc 1 227 0 discriminator 5
+ 407 01a6 FB88     		ldrh	r3, [r7, #6]
+ 408 01a8 182B     		cmp	r3, #24
+ 409 01aa 70D0     		beq	.L23
+ 410              		.loc 1 227 0 discriminator 6
+ 411 01ac FB88     		ldrh	r3, [r7, #6]
+ 412 01ae 1C2B     		cmp	r3, #28
+ 413 01b0 6DD0     		beq	.L23
+ 414              		.loc 1 227 0 discriminator 7
+ 415 01b2 FB88     		ldrh	r3, [r7, #6]
+ 416 01b4 202B     		cmp	r3, #32
+ 417 01b6 6AD0     		beq	.L23
+ 418              		.loc 1 227 0 discriminator 8
+ 419 01b8 FB88     		ldrh	r3, [r7, #6]
+ 420 01ba 242B     		cmp	r3, #36
+ 421 01bc 67D0     		beq	.L23
+ 422              		.loc 1 227 0 discriminator 9
+ 423 01be FB88     		ldrh	r3, [r7, #6]
+ 424 01c0 282B     		cmp	r3, #40
+ 425 01c2 64D0     		beq	.L23
+ 426              		.loc 1 227 0 discriminator 10
+ 427 01c4 FB88     		ldrh	r3, [r7, #6]
+ 428 01c6 402B     		cmp	r3, #64
+ 429 01c8 61D0     		beq	.L23
+ 430              		.loc 1 227 0 discriminator 11
+ 431 01ca FB88     		ldrh	r3, [r7, #6]
+ 432 01cc 442B     		cmp	r3, #68
+ 433 01ce 5ED0     		beq	.L23
+ 434              		.loc 1 227 0 discriminator 12
+ 435 01d0 FB88     		ldrh	r3, [r7, #6]
+ 436 01d2 482B     		cmp	r3, #72
+ 437 01d4 5BD0     		beq	.L23
+ 438              		.loc 1 227 0 discriminator 13
+ 439 01d6 FB88     		ldrh	r3, [r7, #6]
+ 440 01d8 4C2B     		cmp	r3, #76
+ 441 01da 58D0     		beq	.L23
+ 442              		.loc 1 227 0 discriminator 14
+ 443 01dc FB88     		ldrh	r3, [r7, #6]
+ 444 01de 502B     		cmp	r3, #80
+ 445 01e0 55D0     		beq	.L23
+ 446              		.loc 1 227 0 discriminator 15
+ 447 01e2 FB88     		ldrh	r3, [r7, #6]
+ 448 01e4 542B     		cmp	r3, #84
+ 449 01e6 52D0     		beq	.L23
+ 450              		.loc 1 227 0 discriminator 16
+ 451 01e8 FB88     		ldrh	r3, [r7, #6]
+ 452 01ea 582B     		cmp	r3, #88
+ 453 01ec 4FD0     		beq	.L23
+ 454              		.loc 1 227 0 discriminator 17
+ 455 01ee FB88     		ldrh	r3, [r7, #6]
+ 456 01f0 5C2B     		cmp	r3, #92
+ 457 01f2 4CD0     		beq	.L23
+ 458              		.loc 1 227 0 discriminator 18
+ 459 01f4 FB88     		ldrh	r3, [r7, #6]
+ 460 01f6 602B     		cmp	r3, #96
+ 461 01f8 49D0     		beq	.L23
+ 462              		.loc 1 227 0 discriminator 19
+ 463 01fa FB88     		ldrh	r3, [r7, #6]
+ 464 01fc 642B     		cmp	r3, #100
+ 465 01fe 46D0     		beq	.L23
+ 466              		.loc 1 227 0 discriminator 20
+ 467 0200 FB88     		ldrh	r3, [r7, #6]
+ 468 0202 682B     		cmp	r3, #104
+ 469 0204 43D0     		beq	.L23
+ 470              		.loc 1 227 0 discriminator 21
+ 471 0206 FB88     		ldrh	r3, [r7, #6]
+ 472 0208 6C2B     		cmp	r3, #108
+ 473 020a 40D0     		beq	.L23
+ 474              		.loc 1 227 0 discriminator 22
+ 475 020c FB88     		ldrh	r3, [r7, #6]
+ 476 020e 702B     		cmp	r3, #112
+ 477 0210 3DD0     		beq	.L23
+ 478              		.loc 1 227 0 discriminator 23
+ 479 0212 FB88     		ldrh	r3, [r7, #6]
+ 480 0214 742B     		cmp	r3, #116
+ 481 0216 3AD0     		beq	.L23
+ 482              		.loc 1 227 0 discriminator 24
+ 483 0218 FB88     		ldrh	r3, [r7, #6]
+ 484 021a 782B     		cmp	r3, #120
+ 485 021c 37D0     		beq	.L23
+ 486              		.loc 1 227 0 discriminator 25
+ 487 021e FB88     		ldrh	r3, [r7, #6]
+ 488 0220 7C2B     		cmp	r3, #124
+ 489 0222 34D0     		beq	.L23
+ 490              		.loc 1 227 0 discriminator 26
+ 491 0224 FB88     		ldrh	r3, [r7, #6]
+ 492 0226 802B     		cmp	r3, #128
+ 493 0228 31D0     		beq	.L23
+ 494              		.loc 1 227 0 discriminator 27
+ 495 022a FB88     		ldrh	r3, [r7, #6]
+ 496 022c 842B     		cmp	r3, #132
+ 497 022e 2ED0     		beq	.L23
+ 498              		.loc 1 227 0 discriminator 28
+ 499 0230 FB88     		ldrh	r3, [r7, #6]
+ 500 0232 882B     		cmp	r3, #136
+ 501 0234 2BD0     		beq	.L23
+ 502              		.loc 1 227 0 discriminator 29
+ 503 0236 FB88     		ldrh	r3, [r7, #6]
+ 504 0238 8C2B     		cmp	r3, #140
+ 505 023a 28D0     		beq	.L23
+ 506              		.loc 1 227 0 discriminator 30
+ 507 023c FB88     		ldrh	r3, [r7, #6]
+ 508 023e 902B     		cmp	r3, #144
+ 509 0240 25D0     		beq	.L23
+ 510              		.loc 1 227 0 discriminator 31
+ 511 0242 FB88     		ldrh	r3, [r7, #6]
+ 512 0244 942B     		cmp	r3, #148
+ 513 0246 22D0     		beq	.L23
+ 514              		.loc 1 227 0 discriminator 32
+ 515 0248 FB88     		ldrh	r3, [r7, #6]
+ 516 024a 982B     		cmp	r3, #152
+ 517 024c 1FD0     		beq	.L23
+ 518              		.loc 1 227 0 discriminator 33
+ 519 024e FB88     		ldrh	r3, [r7, #6]
+ 520 0250 9C2B     		cmp	r3, #156
+ 521 0252 1CD0     		beq	.L23
+ 522              		.loc 1 227 0 discriminator 34
+ 523 0254 FB88     		ldrh	r3, [r7, #6]
+ 524 0256 A02B     		cmp	r3, #160
+ 525 0258 19D0     		beq	.L23
+ 526              		.loc 1 227 0 discriminator 35
+ 527 025a FB88     		ldrh	r3, [r7, #6]
+ 528 025c A42B     		cmp	r3, #164
+ 529 025e 16D0     		beq	.L23
+ 530              		.loc 1 227 0 discriminator 36
+ 531 0260 FB88     		ldrh	r3, [r7, #6]
+ 532 0262 A82B     		cmp	r3, #168
+ 533 0264 13D0     		beq	.L23
+ 534              		.loc 1 227 0 discriminator 37
+ 535 0266 FB88     		ldrh	r3, [r7, #6]
+ 536 0268 AC2B     		cmp	r3, #172
+ 537 026a 10D0     		beq	.L23
+ 538              		.loc 1 227 0 discriminator 38
+ 539 026c FB88     		ldrh	r3, [r7, #6]
+ 540 026e B02B     		cmp	r3, #176
+ 541 0270 0DD0     		beq	.L23
+ 542              		.loc 1 227 0 discriminator 39
+ 543 0272 FB88     		ldrh	r3, [r7, #6]
+ 544 0274 B42B     		cmp	r3, #180
+ 545 0276 0AD0     		beq	.L23
+ 546              		.loc 1 227 0 discriminator 40
+ 547 0278 FB88     		ldrh	r3, [r7, #6]
+ 548 027a B82B     		cmp	r3, #184
+ 549 027c 07D0     		beq	.L23
+ 550              		.loc 1 227 0 discriminator 41
+ 551 027e FB88     		ldrh	r3, [r7, #6]
+ 552 0280 BC2B     		cmp	r3, #188
+ 553 0282 04D0     		beq	.L23
+ 554              		.loc 1 227 0 discriminator 42
+ 555 0284 0848     		ldr	r0, .L24
+ 556 0286 4FF0E301 		mov	r1, #227
+ 557 028a FFF7FEFF 		bl	assert_failed
+ 558              	.L23:
+ 228:../SPL/src/stm32f10x_bkp.c **** 
+ 229:../SPL/src/stm32f10x_bkp.c ****   tmp = (uint32_t)BKP_BASE; 
+ 559              		.loc 1 229 0 is_stmt 1
+ 560 028e 074B     		ldr	r3, .L24+4
+ 561 0290 FB60     		str	r3, [r7, #12]
+ 230:../SPL/src/stm32f10x_bkp.c ****   tmp += BKP_DR;
+ 562              		.loc 1 230 0
+ 563 0292 FA88     		ldrh	r2, [r7, #6]
+ 564 0294 FB68     		ldr	r3, [r7, #12]
+ 565 0296 D318     		adds	r3, r2, r3
+ 566 0298 FB60     		str	r3, [r7, #12]
+ 231:../SPL/src/stm32f10x_bkp.c **** 
+ 232:../SPL/src/stm32f10x_bkp.c ****   *(__IO uint32_t *) tmp = Data;
+ 567              		.loc 1 232 0
+ 568 029a FB68     		ldr	r3, [r7, #12]
+ 569 029c BA88     		ldrh	r2, [r7, #4]
+ 570 029e 1A60     		str	r2, [r3, #0]
+ 233:../SPL/src/stm32f10x_bkp.c **** }
+ 571              		.loc 1 233 0
+ 572 02a0 07F11007 		add	r7, r7, #16
+ 573 02a4 BD46     		mov	sp, r7
+ 574 02a6 80BD     		pop	{r7, pc}
+ 575              	.L25:
+ 576              		.align	2
+ 577              	.L24:
+ 578 02a8 00000000 		.word	.LC0
+ 579 02ac 006C0040 		.word	1073769472
+ 580              		.cfi_endproc
+ 581              	.LFE35:
+ 583              		.align	2
+ 584              		.global	BKP_ReadBackupRegister
+ 585              		.thumb
+ 586              		.thumb_func
+ 588              	BKP_ReadBackupRegister:
+ 589              	.LFB36:
+ 234:../SPL/src/stm32f10x_bkp.c **** 
+ 235:../SPL/src/stm32f10x_bkp.c **** /**
+ 236:../SPL/src/stm32f10x_bkp.c ****   * @brief  Reads data from the specified Data Backup Register.
+ 237:../SPL/src/stm32f10x_bkp.c ****   * @param  BKP_DR: specifies the Data Backup Register.
+ 238:../SPL/src/stm32f10x_bkp.c ****   *   This parameter can be BKP_DRx where x:[1, 42]
+ 239:../SPL/src/stm32f10x_bkp.c ****   * @retval The content of the specified Data Backup Register
+ 240:../SPL/src/stm32f10x_bkp.c ****   */
+ 241:../SPL/src/stm32f10x_bkp.c **** uint16_t BKP_ReadBackupRegister(uint16_t BKP_DR)
+ 242:../SPL/src/stm32f10x_bkp.c **** {
+ 590              		.loc 1 242 0
+ 591              		.cfi_startproc
+ 592              		@ args = 0, pretend = 0, frame = 16
+ 593              		@ frame_needed = 1, uses_anonymous_args = 0
+ 594 02b0 80B5     		push	{r7, lr}
+ 595              	.LCFI20:
+ 596              		.cfi_def_cfa_offset 8
+ 597              		.cfi_offset 7, -8
+ 598              		.cfi_offset 14, -4
+ 599 02b2 84B0     		sub	sp, sp, #16
+ 600              	.LCFI21:
+ 601              		.cfi_def_cfa_offset 24
+ 602 02b4 00AF     		add	r7, sp, #0
+ 603              	.LCFI22:
+ 604              		.cfi_def_cfa_register 7
+ 605 02b6 0346     		mov	r3, r0
+ 606 02b8 FB80     		strh	r3, [r7, #6]	@ movhi
+ 243:../SPL/src/stm32f10x_bkp.c ****   __IO uint32_t tmp = 0;
+ 607              		.loc 1 243 0
+ 608 02ba 4FF00003 		mov	r3, #0
+ 609 02be FB60     		str	r3, [r7, #12]
+ 244:../SPL/src/stm32f10x_bkp.c **** 
+ 245:../SPL/src/stm32f10x_bkp.c ****   /* Check the parameters */
+ 246:../SPL/src/stm32f10x_bkp.c ****   assert_param(IS_BKP_DR(BKP_DR));
+ 610              		.loc 1 246 0
+ 611 02c0 FB88     		ldrh	r3, [r7, #6]
+ 612 02c2 042B     		cmp	r3, #4
+ 613 02c4 7FD0     		beq	.L27
+ 614              		.loc 1 246 0 is_stmt 0 discriminator 1
+ 615 02c6 FB88     		ldrh	r3, [r7, #6]
+ 616 02c8 082B     		cmp	r3, #8
+ 617 02ca 7CD0     		beq	.L27
+ 618              		.loc 1 246 0 discriminator 2
+ 619 02cc FB88     		ldrh	r3, [r7, #6]
+ 620 02ce 0C2B     		cmp	r3, #12
+ 621 02d0 79D0     		beq	.L27
+ 622              		.loc 1 246 0 discriminator 3
+ 623 02d2 FB88     		ldrh	r3, [r7, #6]
+ 624 02d4 102B     		cmp	r3, #16
+ 625 02d6 76D0     		beq	.L27
+ 626              		.loc 1 246 0 discriminator 4
+ 627 02d8 FB88     		ldrh	r3, [r7, #6]
+ 628 02da 142B     		cmp	r3, #20
+ 629 02dc 73D0     		beq	.L27
+ 630              		.loc 1 246 0 discriminator 5
+ 631 02de FB88     		ldrh	r3, [r7, #6]
+ 632 02e0 182B     		cmp	r3, #24
+ 633 02e2 70D0     		beq	.L27
+ 634              		.loc 1 246 0 discriminator 6
+ 635 02e4 FB88     		ldrh	r3, [r7, #6]
+ 636 02e6 1C2B     		cmp	r3, #28
+ 637 02e8 6DD0     		beq	.L27
+ 638              		.loc 1 246 0 discriminator 7
+ 639 02ea FB88     		ldrh	r3, [r7, #6]
+ 640 02ec 202B     		cmp	r3, #32
+ 641 02ee 6AD0     		beq	.L27
+ 642              		.loc 1 246 0 discriminator 8
+ 643 02f0 FB88     		ldrh	r3, [r7, #6]
+ 644 02f2 242B     		cmp	r3, #36
+ 645 02f4 67D0     		beq	.L27
+ 646              		.loc 1 246 0 discriminator 9
+ 647 02f6 FB88     		ldrh	r3, [r7, #6]
+ 648 02f8 282B     		cmp	r3, #40
+ 649 02fa 64D0     		beq	.L27
+ 650              		.loc 1 246 0 discriminator 10
+ 651 02fc FB88     		ldrh	r3, [r7, #6]
+ 652 02fe 402B     		cmp	r3, #64
+ 653 0300 61D0     		beq	.L27
+ 654              		.loc 1 246 0 discriminator 11
+ 655 0302 FB88     		ldrh	r3, [r7, #6]
+ 656 0304 442B     		cmp	r3, #68
+ 657 0306 5ED0     		beq	.L27
+ 658              		.loc 1 246 0 discriminator 12
+ 659 0308 FB88     		ldrh	r3, [r7, #6]
+ 660 030a 482B     		cmp	r3, #72
+ 661 030c 5BD0     		beq	.L27
+ 662              		.loc 1 246 0 discriminator 13
+ 663 030e FB88     		ldrh	r3, [r7, #6]
+ 664 0310 4C2B     		cmp	r3, #76
+ 665 0312 58D0     		beq	.L27
+ 666              		.loc 1 246 0 discriminator 14
+ 667 0314 FB88     		ldrh	r3, [r7, #6]
+ 668 0316 502B     		cmp	r3, #80
+ 669 0318 55D0     		beq	.L27
+ 670              		.loc 1 246 0 discriminator 15
+ 671 031a FB88     		ldrh	r3, [r7, #6]
+ 672 031c 542B     		cmp	r3, #84
+ 673 031e 52D0     		beq	.L27
+ 674              		.loc 1 246 0 discriminator 16
+ 675 0320 FB88     		ldrh	r3, [r7, #6]
+ 676 0322 582B     		cmp	r3, #88
+ 677 0324 4FD0     		beq	.L27
+ 678              		.loc 1 246 0 discriminator 17
+ 679 0326 FB88     		ldrh	r3, [r7, #6]
+ 680 0328 5C2B     		cmp	r3, #92
+ 681 032a 4CD0     		beq	.L27
+ 682              		.loc 1 246 0 discriminator 18
+ 683 032c FB88     		ldrh	r3, [r7, #6]
+ 684 032e 602B     		cmp	r3, #96
+ 685 0330 49D0     		beq	.L27
+ 686              		.loc 1 246 0 discriminator 19
+ 687 0332 FB88     		ldrh	r3, [r7, #6]
+ 688 0334 642B     		cmp	r3, #100
+ 689 0336 46D0     		beq	.L27
+ 690              		.loc 1 246 0 discriminator 20
+ 691 0338 FB88     		ldrh	r3, [r7, #6]
+ 692 033a 682B     		cmp	r3, #104
+ 693 033c 43D0     		beq	.L27
+ 694              		.loc 1 246 0 discriminator 21
+ 695 033e FB88     		ldrh	r3, [r7, #6]
+ 696 0340 6C2B     		cmp	r3, #108
+ 697 0342 40D0     		beq	.L27
+ 698              		.loc 1 246 0 discriminator 22
+ 699 0344 FB88     		ldrh	r3, [r7, #6]
+ 700 0346 702B     		cmp	r3, #112
+ 701 0348 3DD0     		beq	.L27
+ 702              		.loc 1 246 0 discriminator 23
+ 703 034a FB88     		ldrh	r3, [r7, #6]
+ 704 034c 742B     		cmp	r3, #116
+ 705 034e 3AD0     		beq	.L27
+ 706              		.loc 1 246 0 discriminator 24
+ 707 0350 FB88     		ldrh	r3, [r7, #6]
+ 708 0352 782B     		cmp	r3, #120
+ 709 0354 37D0     		beq	.L27
+ 710              		.loc 1 246 0 discriminator 25
+ 711 0356 FB88     		ldrh	r3, [r7, #6]
+ 712 0358 7C2B     		cmp	r3, #124
+ 713 035a 34D0     		beq	.L27
+ 714              		.loc 1 246 0 discriminator 26
+ 715 035c FB88     		ldrh	r3, [r7, #6]
+ 716 035e 802B     		cmp	r3, #128
+ 717 0360 31D0     		beq	.L27
+ 718              		.loc 1 246 0 discriminator 27
+ 719 0362 FB88     		ldrh	r3, [r7, #6]
+ 720 0364 842B     		cmp	r3, #132
+ 721 0366 2ED0     		beq	.L27
+ 722              		.loc 1 246 0 discriminator 28
+ 723 0368 FB88     		ldrh	r3, [r7, #6]
+ 724 036a 882B     		cmp	r3, #136
+ 725 036c 2BD0     		beq	.L27
+ 726              		.loc 1 246 0 discriminator 29
+ 727 036e FB88     		ldrh	r3, [r7, #6]
+ 728 0370 8C2B     		cmp	r3, #140
+ 729 0372 28D0     		beq	.L27
+ 730              		.loc 1 246 0 discriminator 30
+ 731 0374 FB88     		ldrh	r3, [r7, #6]
+ 732 0376 902B     		cmp	r3, #144
+ 733 0378 25D0     		beq	.L27
+ 734              		.loc 1 246 0 discriminator 31
+ 735 037a FB88     		ldrh	r3, [r7, #6]
+ 736 037c 942B     		cmp	r3, #148
+ 737 037e 22D0     		beq	.L27
+ 738              		.loc 1 246 0 discriminator 32
+ 739 0380 FB88     		ldrh	r3, [r7, #6]
+ 740 0382 982B     		cmp	r3, #152
+ 741 0384 1FD0     		beq	.L27
+ 742              		.loc 1 246 0 discriminator 33
+ 743 0386 FB88     		ldrh	r3, [r7, #6]
+ 744 0388 9C2B     		cmp	r3, #156
+ 745 038a 1CD0     		beq	.L27
+ 746              		.loc 1 246 0 discriminator 34
+ 747 038c FB88     		ldrh	r3, [r7, #6]
+ 748 038e A02B     		cmp	r3, #160
+ 749 0390 19D0     		beq	.L27
+ 750              		.loc 1 246 0 discriminator 35
+ 751 0392 FB88     		ldrh	r3, [r7, #6]
+ 752 0394 A42B     		cmp	r3, #164
+ 753 0396 16D0     		beq	.L27
+ 754              		.loc 1 246 0 discriminator 36
+ 755 0398 FB88     		ldrh	r3, [r7, #6]
+ 756 039a A82B     		cmp	r3, #168
+ 757 039c 13D0     		beq	.L27
+ 758              		.loc 1 246 0 discriminator 37
+ 759 039e FB88     		ldrh	r3, [r7, #6]
+ 760 03a0 AC2B     		cmp	r3, #172
+ 761 03a2 10D0     		beq	.L27
+ 762              		.loc 1 246 0 discriminator 38
+ 763 03a4 FB88     		ldrh	r3, [r7, #6]
+ 764 03a6 B02B     		cmp	r3, #176
+ 765 03a8 0DD0     		beq	.L27
+ 766              		.loc 1 246 0 discriminator 39
+ 767 03aa FB88     		ldrh	r3, [r7, #6]
+ 768 03ac B42B     		cmp	r3, #180
+ 769 03ae 0AD0     		beq	.L27
+ 770              		.loc 1 246 0 discriminator 40
+ 771 03b0 FB88     		ldrh	r3, [r7, #6]
+ 772 03b2 B82B     		cmp	r3, #184
+ 773 03b4 07D0     		beq	.L27
+ 774              		.loc 1 246 0 discriminator 41
+ 775 03b6 FB88     		ldrh	r3, [r7, #6]
+ 776 03b8 BC2B     		cmp	r3, #188
+ 777 03ba 04D0     		beq	.L27
+ 778              		.loc 1 246 0 discriminator 42
+ 779 03bc 0948     		ldr	r0, .L29
+ 780 03be 4FF0F601 		mov	r1, #246
+ 781 03c2 FFF7FEFF 		bl	assert_failed
+ 782              	.L27:
+ 247:../SPL/src/stm32f10x_bkp.c **** 
+ 248:../SPL/src/stm32f10x_bkp.c ****   tmp = (uint32_t)BKP_BASE; 
+ 783              		.loc 1 248 0 is_stmt 1
+ 784 03c6 084B     		ldr	r3, .L29+4
+ 785 03c8 FB60     		str	r3, [r7, #12]
+ 249:../SPL/src/stm32f10x_bkp.c ****   tmp += BKP_DR;
+ 786              		.loc 1 249 0
+ 787 03ca FA88     		ldrh	r2, [r7, #6]
+ 788 03cc FB68     		ldr	r3, [r7, #12]
+ 789 03ce D318     		adds	r3, r2, r3
+ 790 03d0 FB60     		str	r3, [r7, #12]
+ 250:../SPL/src/stm32f10x_bkp.c **** 
+ 251:../SPL/src/stm32f10x_bkp.c ****   return (*(__IO uint16_t *) tmp);
+ 791              		.loc 1 251 0
+ 792 03d2 FB68     		ldr	r3, [r7, #12]
+ 793 03d4 1B88     		ldrh	r3, [r3, #0]	@ movhi
+ 794 03d6 9BB2     		uxth	r3, r3
+ 252:../SPL/src/stm32f10x_bkp.c **** }
+ 795              		.loc 1 252 0
+ 796 03d8 1846     		mov	r0, r3
+ 797 03da 07F11007 		add	r7, r7, #16
+ 798 03de BD46     		mov	sp, r7
+ 799 03e0 80BD     		pop	{r7, pc}
+ 800              	.L30:
+ 801 03e2 00BF     		.align	2
+ 802              	.L29:
+ 803 03e4 00000000 		.word	.LC0
+ 804 03e8 006C0040 		.word	1073769472
+ 805              		.cfi_endproc
+ 806              	.LFE36:
+ 808              		.align	2
+ 809              		.global	BKP_GetFlagStatus
+ 810              		.thumb
+ 811              		.thumb_func
+ 813              	BKP_GetFlagStatus:
+ 814              	.LFB37:
+ 253:../SPL/src/stm32f10x_bkp.c **** 
+ 254:../SPL/src/stm32f10x_bkp.c **** /**
+ 255:../SPL/src/stm32f10x_bkp.c ****   * @brief  Checks whether the Tamper Pin Event flag is set or not.
+ 256:../SPL/src/stm32f10x_bkp.c ****   * @param  None
+ 257:../SPL/src/stm32f10x_bkp.c ****   * @retval The new state of the Tamper Pin Event flag (SET or RESET).
+ 258:../SPL/src/stm32f10x_bkp.c ****   */
+ 259:../SPL/src/stm32f10x_bkp.c **** FlagStatus BKP_GetFlagStatus(void)
+ 260:../SPL/src/stm32f10x_bkp.c **** {
+ 815              		.loc 1 260 0
+ 816              		.cfi_startproc
+ 817              		@ args = 0, pretend = 0, frame = 0
+ 818              		@ frame_needed = 1, uses_anonymous_args = 0
+ 819              		@ link register save eliminated.
+ 820 03ec 80B4     		push	{r7}
+ 821              	.LCFI23:
+ 822              		.cfi_def_cfa_offset 4
+ 823              		.cfi_offset 7, -4
+ 824 03ee 00AF     		add	r7, sp, #0
+ 825              	.LCFI24:
+ 826              		.cfi_def_cfa_register 7
+ 261:../SPL/src/stm32f10x_bkp.c ****   return (FlagStatus)(*(__IO uint32_t *) CSR_TEF_BB);
+ 827              		.loc 1 261 0
+ 828 03f0 034B     		ldr	r3, .L33
+ 829 03f2 1B68     		ldr	r3, [r3, #0]
+ 830 03f4 DBB2     		uxtb	r3, r3
+ 262:../SPL/src/stm32f10x_bkp.c **** }
+ 831              		.loc 1 262 0
+ 832 03f6 1846     		mov	r0, r3
+ 833 03f8 BD46     		mov	sp, r7
+ 834 03fa 80BC     		pop	{r7}
+ 835 03fc 7047     		bx	lr
+ 836              	.L34:
+ 837 03fe 00BF     		.align	2
+ 838              	.L33:
+ 839 0400 A0860D42 		.word	1108182688
+ 840              		.cfi_endproc
+ 841              	.LFE37:
+ 843              		.align	2
+ 844              		.global	BKP_ClearFlag
+ 845              		.thumb
+ 846              		.thumb_func
+ 848              	BKP_ClearFlag:
+ 849              	.LFB38:
+ 263:../SPL/src/stm32f10x_bkp.c **** 
+ 264:../SPL/src/stm32f10x_bkp.c **** /**
+ 265:../SPL/src/stm32f10x_bkp.c ****   * @brief  Clears Tamper Pin Event pending flag.
+ 266:../SPL/src/stm32f10x_bkp.c ****   * @param  None
+ 267:../SPL/src/stm32f10x_bkp.c ****   * @retval None
+ 268:../SPL/src/stm32f10x_bkp.c ****   */
+ 269:../SPL/src/stm32f10x_bkp.c **** void BKP_ClearFlag(void)
+ 270:../SPL/src/stm32f10x_bkp.c **** {
+ 850              		.loc 1 270 0
+ 851              		.cfi_startproc
+ 852              		@ args = 0, pretend = 0, frame = 0
+ 853              		@ frame_needed = 1, uses_anonymous_args = 0
+ 854              		@ link register save eliminated.
+ 855 0404 80B4     		push	{r7}
+ 856              	.LCFI25:
+ 857              		.cfi_def_cfa_offset 4
+ 858              		.cfi_offset 7, -4
+ 859 0406 00AF     		add	r7, sp, #0
+ 860              	.LCFI26:
+ 861              		.cfi_def_cfa_register 7
+ 271:../SPL/src/stm32f10x_bkp.c ****   /* Set CTE bit to clear Tamper Pin Event flag */
+ 272:../SPL/src/stm32f10x_bkp.c ****   BKP->CSR |= BKP_CSR_CTE;
+ 862              		.loc 1 272 0
+ 863 0408 054B     		ldr	r3, .L36
+ 864 040a 054A     		ldr	r2, .L36
+ 865 040c 928E     		ldrh	r2, [r2, #52]	@ movhi
+ 866 040e 92B2     		uxth	r2, r2
+ 867 0410 42F00102 		orr	r2, r2, #1
+ 868 0414 92B2     		uxth	r2, r2
+ 869 0416 9A86     		strh	r2, [r3, #52]	@ movhi
+ 273:../SPL/src/stm32f10x_bkp.c **** }
+ 870              		.loc 1 273 0
+ 871 0418 BD46     		mov	sp, r7
+ 872 041a 80BC     		pop	{r7}
+ 873 041c 7047     		bx	lr
+ 874              	.L37:
+ 875 041e 00BF     		.align	2
+ 876              	.L36:
+ 877 0420 006C0040 		.word	1073769472
+ 878              		.cfi_endproc
+ 879              	.LFE38:
+ 881              		.align	2
+ 882              		.global	BKP_GetITStatus
+ 883              		.thumb
+ 884              		.thumb_func
+ 886              	BKP_GetITStatus:
+ 887              	.LFB39:
+ 274:../SPL/src/stm32f10x_bkp.c **** 
+ 275:../SPL/src/stm32f10x_bkp.c **** /**
+ 276:../SPL/src/stm32f10x_bkp.c ****   * @brief  Checks whether the Tamper Pin Interrupt has occurred or not.
+ 277:../SPL/src/stm32f10x_bkp.c ****   * @param  None
+ 278:../SPL/src/stm32f10x_bkp.c ****   * @retval The new state of the Tamper Pin Interrupt (SET or RESET).
+ 279:../SPL/src/stm32f10x_bkp.c ****   */
+ 280:../SPL/src/stm32f10x_bkp.c **** ITStatus BKP_GetITStatus(void)
+ 281:../SPL/src/stm32f10x_bkp.c **** {
+ 888              		.loc 1 281 0
+ 889              		.cfi_startproc
+ 890              		@ args = 0, pretend = 0, frame = 0
+ 891              		@ frame_needed = 1, uses_anonymous_args = 0
+ 892              		@ link register save eliminated.
+ 893 0424 80B4     		push	{r7}
+ 894              	.LCFI27:
+ 895              		.cfi_def_cfa_offset 4
+ 896              		.cfi_offset 7, -4
+ 897 0426 00AF     		add	r7, sp, #0
+ 898              	.LCFI28:
+ 899              		.cfi_def_cfa_register 7
+ 282:../SPL/src/stm32f10x_bkp.c ****   return (ITStatus)(*(__IO uint32_t *) CSR_TIF_BB);
+ 900              		.loc 1 282 0
+ 901 0428 034B     		ldr	r3, .L40
+ 902 042a 1B68     		ldr	r3, [r3, #0]
+ 903 042c DBB2     		uxtb	r3, r3
+ 283:../SPL/src/stm32f10x_bkp.c **** }
+ 904              		.loc 1 283 0
+ 905 042e 1846     		mov	r0, r3
+ 906 0430 BD46     		mov	sp, r7
+ 907 0432 80BC     		pop	{r7}
+ 908 0434 7047     		bx	lr
+ 909              	.L41:
+ 910 0436 00BF     		.align	2
+ 911              	.L40:
+ 912 0438 A4860D42 		.word	1108182692
+ 913              		.cfi_endproc
+ 914              	.LFE39:
+ 916              		.align	2
+ 917              		.global	BKP_ClearITPendingBit
+ 918              		.thumb
+ 919              		.thumb_func
+ 921              	BKP_ClearITPendingBit:
+ 922              	.LFB40:
+ 284:../SPL/src/stm32f10x_bkp.c **** 
+ 285:../SPL/src/stm32f10x_bkp.c **** /**
+ 286:../SPL/src/stm32f10x_bkp.c ****   * @brief  Clears Tamper Pin Interrupt pending bit.
+ 287:../SPL/src/stm32f10x_bkp.c ****   * @param  None
+ 288:../SPL/src/stm32f10x_bkp.c ****   * @retval None
+ 289:../SPL/src/stm32f10x_bkp.c ****   */
+ 290:../SPL/src/stm32f10x_bkp.c **** void BKP_ClearITPendingBit(void)
+ 291:../SPL/src/stm32f10x_bkp.c **** {
+ 923              		.loc 1 291 0
+ 924              		.cfi_startproc
+ 925              		@ args = 0, pretend = 0, frame = 0
+ 926              		@ frame_needed = 1, uses_anonymous_args = 0
+ 927              		@ link register save eliminated.
+ 928 043c 80B4     		push	{r7}
+ 929              	.LCFI29:
+ 930              		.cfi_def_cfa_offset 4
+ 931              		.cfi_offset 7, -4
+ 932 043e 00AF     		add	r7, sp, #0
+ 933              	.LCFI30:
+ 934              		.cfi_def_cfa_register 7
+ 292:../SPL/src/stm32f10x_bkp.c ****   /* Set CTI bit to clear Tamper Pin Interrupt pending bit */
+ 293:../SPL/src/stm32f10x_bkp.c ****   BKP->CSR |= BKP_CSR_CTI;
+ 935              		.loc 1 293 0
+ 936 0440 054B     		ldr	r3, .L43
+ 937 0442 054A     		ldr	r2, .L43
+ 938 0444 928E     		ldrh	r2, [r2, #52]	@ movhi
+ 939 0446 92B2     		uxth	r2, r2
+ 940 0448 42F00202 		orr	r2, r2, #2
+ 941 044c 92B2     		uxth	r2, r2
+ 942 044e 9A86     		strh	r2, [r3, #52]	@ movhi
+ 294:../SPL/src/stm32f10x_bkp.c **** }
+ 943              		.loc 1 294 0
+ 944 0450 BD46     		mov	sp, r7
+ 945 0452 80BC     		pop	{r7}
+ 946 0454 7047     		bx	lr
+ 947              	.L44:
+ 948 0456 00BF     		.align	2
+ 949              	.L43:
+ 950 0458 006C0040 		.word	1073769472
+ 951              		.cfi_endproc
+ 952              	.LFE40:
+ 954              	.Letext0:
+ 955              		.file 2 "c:\\program files (x86)\\codesourcery\\sourcery_codebench_lite_for_arm_eabi\\bin\\../lib/
+ 956              		.file 3 "C:\\Users\\PC108\\Export_project\\stm32_ld_vl\\CMSIS/stm32f10x.h"
+ 957              		.file 4 "C:\\Users\\PC108\\Export_project\\stm32_ld_vl\\CMSIS/core_cm3.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 stm32f10x_bkp.c
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:18     .text:00000000 $t
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:23     .text:00000000 BKP_DeInit
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:50     .rodata:00000000 $d
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:59     .text:00000018 BKP_TamperPinLevelConfig
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:102    .text:00000048 $d
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:107    .text:00000050 $t
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:112    .text:00000050 BKP_TamperPinCmd
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:155    .text:00000080 $d
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:160    .text:00000088 $t
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:165    .text:00000088 BKP_ITConfig
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:208    .text:000000b8 $d
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:213    .text:000000c0 $t
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:218    .text:000000c0 BKP_RTCOutputConfig
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:285    .text:0000011c $d
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:290    .text:00000124 $t
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:295    .text:00000124 BKP_SetRTCCalibrationValue
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:352    .text:0000016c $d
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:357    .text:00000174 $t
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:362    .text:00000174 BKP_WriteBackupRegister
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:578    .text:000002a8 $d
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:583    .text:000002b0 $t
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:588    .text:000002b0 BKP_ReadBackupRegister
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:803    .text:000003e4 $d
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:808    .text:000003ec $t
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:813    .text:000003ec BKP_GetFlagStatus
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:839    .text:00000400 $d
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:843    .text:00000404 $t
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:848    .text:00000404 BKP_ClearFlag
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:877    .text:00000420 $d
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:881    .text:00000424 $t
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:886    .text:00000424 BKP_GetITStatus
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:912    .text:00000438 $d
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:916    .text:0000043c $t
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:921    .text:0000043c BKP_ClearITPendingBit
+C:\Users\PC108\AppData\Local\Temp\cckgIZ2c.s:950    .text:00000458 $d
+                     .debug_frame:00000010 $d
+                           .group:00000000 wm4.1.9001f459856fa07d79ce9793bb17c6cd
+                           .group:00000000 wm4.stm32f10x.h.51.b859cb68ed44ee02c916b41cb8c68f1c
+                           .group:00000000 wm4.core_cm3.h.25.d35e9a9b04ec4aaebae9bf79fff061f9
+                           .group:00000000 wm4.stdint.h.10.90b695f550ca6cc3fb08fa83baf01e05
+                           .group:00000000 wm4.core_cm3.h.113.b286929a54d33b4c8909a7132437b244
+                           .group:00000000 wm4.stm32f10x.h.522.115ebb8291fa96f8c9e0b9a9b670f703
+                           .group:00000000 wm4.stm32f10x_exti.h.56.8b2f216f9ded9d03a9eb42ed6973fc04
+                           .group:00000000 wm4.stm32f10x_gpio.h.25.80c981af0e637567395034c576cfb3ce
+                           .group:00000000 wm4.stm32f10x_rcc.h.25.fe8897e7491f2eb0cff54551d08eb765
+                           .group:00000000 wm4.stm32f10x_tim.h.25.21c6ec062f1e74898cb96a57da276fec
+                           .group:00000000 wm4.stm32f10x_usart.h.25.29629c699b65db3f3efd3561f66b0bf6
+                           .group:00000000 wm4.misc.h.25.068e106f368fa5369a681ef57c106f4b
+                           .group:00000000 wm4.stm32f10x.h.8304.f7d8ad90959e99679b3257267c3aadfe
+                           .group:00000000 wm4.stm32f10x_bkp.h.58.6453665ad39dc78c618a75ac337c70d3
+
+UNDEFINED SYMBOLS
+RCC_BackupResetCmd
+assert_failed

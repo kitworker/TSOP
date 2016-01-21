@@ -1,0 +1,1538 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"RC5_IR_Emul_Receiver.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.global	EdgesNumber
+  19              		.bss
+  22              	EdgesNumber:
+  23 0000 00       		.space	1
+  24              		.global	Bit4_HasBeen_Sampled
+  27              	Bit4_HasBeen_Sampled:
+  28 0001 00       		.space	1
+  29              		.global	RC5_FrameReceived
+  32              	RC5_FrameReceived:
+  33 0002 00       		.space	1
+  34              		.global	BitTimeStatus
+  35              		.data
+  38              	BitTimeStatus:
+  39 0000 01       		.byte	1
+  40              		.global	FieldBit
+  41              		.bss
+  44              	FieldBit:
+  45 0003 00       		.space	1
+  46              		.comm	RC5_data,26,4
+  47              		.global	RC5_Indexdata
+  50              	RC5_Indexdata:
+  51 0004 00       		.space	1
+  52              		.global	LowDuration
+  53 0005 00       		.align	1
+  56              	LowDuration:
+  57 0006 0000     		.space	2
+  58              		.global	RC5_TIM_CLKValuekHz
+  59              		.align	2
+  62              	RC5_TIM_CLKValuekHz:
+  63 0008 00000000 		.space	4
+  64              		.global	HalfBitDurationCount_Min
+  65              		.align	1
+  68              	HalfBitDurationCount_Min:
+  69 000c 0000     		.space	2
+  70              		.global	HalfBitDurationCount_Max
+  71              		.align	1
+  74              	HalfBitDurationCount_Max:
+  75 000e 0000     		.space	2
+  76              		.global	NominalHalfBitDurationCount
+  77              		.align	1
+  80              	NominalHalfBitDurationCount:
+  81 0010 0000     		.space	2
+  82              		.global	FullBitDurationCount_Min
+  83              		.align	1
+  86              	FullBitDurationCount_Min:
+  87 0012 0000     		.space	2
+  88              		.global	FullBitDurationCount_Max
+  89              		.align	1
+  92              	FullBitDurationCount_Max:
+  93 0014 0000     		.space	2
+  94              		.global	NominalBitDurationCount
+  95              		.align	1
+  98              	NominalBitDurationCount:
+  99 0016 0000     		.space	2
+ 100              		.global	NominalBitDurationCount_3div4
+ 101              		.align	1
+ 104              	NominalBitDurationCount_3div4:
+ 105 0018 0000     		.space	2
+ 106              		.comm	TIM_TimeBaseStructure,10,4
+ 107 001a 0000     		.text
+ 108              		.align	2
+ 109              		.global	RC5_Receiver_Init
+ 110              		.thumb
+ 111              		.thumb_func
+ 113              	RC5_Receiver_Init:
+ 114              	.LFB29:
+ 115              		.file 1 "../src/RC5_IR_Emul_Receiver.c"
+   1:../src/RC5_IR_Emul_Receiver.c **** /**
+   2:../src/RC5_IR_Emul_Receiver.c ****   ******************************************************************************
+   3:../src/RC5_IR_Emul_Receiver.c ****   * @file  STM32F10x_RC5_Receiver_Lib/src/RC5_IR_Emul_Receiver.c 
+   4:../src/RC5_IR_Emul_Receiver.c ****   * @author  MCD Application Team
+   5:../src/RC5_IR_Emul_Receiver.c ****   * @version V1.0.0
+   6:../src/RC5_IR_Emul_Receiver.c ****   * @date    03/16/2010
+   7:../src/RC5_IR_Emul_Receiver.c ****   * @brief   This file provides all the RC5 firmware functions. 
+   8:../src/RC5_IR_Emul_Receiver.c ****   ******************************************************************************
+   9:../src/RC5_IR_Emul_Receiver.c ****   * @copy
+  10:../src/RC5_IR_Emul_Receiver.c ****   *
+  11:../src/RC5_IR_Emul_Receiver.c ****   * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+  12:../src/RC5_IR_Emul_Receiver.c ****   * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+  13:../src/RC5_IR_Emul_Receiver.c ****   * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+  14:../src/RC5_IR_Emul_Receiver.c ****   * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+  15:../src/RC5_IR_Emul_Receiver.c ****   * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+  16:../src/RC5_IR_Emul_Receiver.c ****   * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+  17:../src/RC5_IR_Emul_Receiver.c ****   *
+  18:../src/RC5_IR_Emul_Receiver.c ****   * <h2><center>&copy; COPYRIGHT 2010 STMicroelectronics</center></h2>
+  19:../src/RC5_IR_Emul_Receiver.c ****   */ 
+  20:../src/RC5_IR_Emul_Receiver.c **** 
+  21:../src/RC5_IR_Emul_Receiver.c **** /* Includes ------------------------------------------------------------------*/
+  22:../src/RC5_IR_Emul_Receiver.c **** #include "stm32f10x.h"
+  23:../src/RC5_IR_Emul_Receiver.c **** #include "RC5_IR_Emul_Receiver.h"
+  24:../src/RC5_IR_Emul_Receiver.c **** 
+  25:../src/RC5_IR_Emul_Receiver.c **** 
+  26:../src/RC5_IR_Emul_Receiver.c **** /** @addtogroup RC5_IR_Receiver
+  27:../src/RC5_IR_Emul_Receiver.c ****   * @{
+  28:../src/RC5_IR_Emul_Receiver.c ****   */ 
+  29:../src/RC5_IR_Emul_Receiver.c **** 
+  30:../src/RC5_IR_Emul_Receiver.c **** /* Private typedef -----------------------------------------------------------*/
+  31:../src/RC5_IR_Emul_Receiver.c **** typedef enum { NOTOK = 0, OK = !NOTOK} BitTimigStatus;
+  32:../src/RC5_IR_Emul_Receiver.c **** 
+  33:../src/RC5_IR_Emul_Receiver.c **** /* Private define ------------------------------------------------------------*/
+  34:../src/RC5_IR_Emul_Receiver.c **** #define   NOMINAL_HALF_BIT_TIME_US   889  /* Nominal half bit time in 탎 */
+  35:../src/RC5_IR_Emul_Receiver.c **** #define   MIN_HALF_BIT_TIME_US       640  /* Minimum half bit time in 탎 */
+  36:../src/RC5_IR_Emul_Receiver.c **** #define   MAX_HALF_BIT_TIME_US       1140 /* Maximum half bit time in 탎 */
+  37:../src/RC5_IR_Emul_Receiver.c **** 
+  38:../src/RC5_IR_Emul_Receiver.c **** #define   NOMINAL_FULL_BIT_TIME_US   1778 /* Nominal Full bit time in 탎 */
+  39:../src/RC5_IR_Emul_Receiver.c **** #define   MIN_FULL_BIT_TIME_US       1340 /* Minimum Full bit time in 탎 */
+  40:../src/RC5_IR_Emul_Receiver.c **** #define   MAX_FULL_BIT_TIME_US       2220 /* Maximum Full bit time in 탎 */
+  41:../src/RC5_IR_Emul_Receiver.c **** 
+  42:../src/RC5_IR_Emul_Receiver.c **** #define   RC5_TIM_PRESCALER          2
+  43:../src/RC5_IR_Emul_Receiver.c **** 
+  44:../src/RC5_IR_Emul_Receiver.c **** /* Private macro -------------------------------------------------------------*/
+  45:../src/RC5_IR_Emul_Receiver.c **** /* Private EdgesNumberiables ---------------------------------------------------------*/
+  46:../src/RC5_IR_Emul_Receiver.c **** __IO uint8_t EdgesNumber = 0; /* To count the first edges of the frame (max 3 edges) */
+  47:../src/RC5_IR_Emul_Receiver.c **** StatusYesOrNo Bit4_HasBeen_Sampled = NO; /* To know if the next sampling will be after 3/4 bit time
+  48:../src/RC5_IR_Emul_Receiver.c **** StatusYesOrNo RC5_FrameReceived = NO; /* Will be used by the user to check if an RC5 has been recei
+  49:../src/RC5_IR_Emul_Receiver.c **** BitTimigStatus BitTimeStatus = OK; /* Variable to store the timing status of the first low duration
+  50:../src/RC5_IR_Emul_Receiver.c **** __IO uint8_t FieldBit = 0; /* Bit field value (command between 0-63 or 64-127 */
+  51:../src/RC5_IR_Emul_Receiver.c **** __IO uint16_t RC5_data[13]; /* Table that contains the value of the GPIOx_IDR register each samplin
+  52:../src/RC5_IR_Emul_Receiver.c **** uint8_t RC5_Indexdata = 0; /* Variable that increments each time a RC5 bit is sampled */
+  53:../src/RC5_IR_Emul_Receiver.c **** __IO uint16_t LowDuration = 0; /* Contains the first low duration in in TIM count */
+  54:../src/RC5_IR_Emul_Receiver.c **** __IO uint32_t RC5_TIM_CLKValuekHz = 0; /* Contains the frequency input of RC5_TIM in Khz */
+  55:../src/RC5_IR_Emul_Receiver.c **** uint16_t HalfBitDurationCount_Min = 0; /* Minimum Half bit duration in TIM count */
+  56:../src/RC5_IR_Emul_Receiver.c **** uint16_t HalfBitDurationCount_Max = 0; /* Maximum Half bit duration in TIM count*/
+  57:../src/RC5_IR_Emul_Receiver.c **** uint16_t NominalHalfBitDurationCount  = 0; /* Nominal Half bit duration in TIM count */
+  58:../src/RC5_IR_Emul_Receiver.c **** uint16_t FullBitDurationCount_Min = 0; /* Minimum Full bit duration in TIM count */
+  59:../src/RC5_IR_Emul_Receiver.c **** uint16_t FullBitDurationCount_Max = 0; /* Maximum Full bit duration in TIM count */
+  60:../src/RC5_IR_Emul_Receiver.c **** uint16_t NominalBitDurationCount  = 0; /* Nominal Full bit duration in TIM count */
+  61:../src/RC5_IR_Emul_Receiver.c **** uint16_t NominalBitDurationCount_3div4 = 0; /* 3/4 of nominal bit time in TIM count */
+  62:../src/RC5_IR_Emul_Receiver.c **** TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+  63:../src/RC5_IR_Emul_Receiver.c **** 
+  64:../src/RC5_IR_Emul_Receiver.c **** /* Private function prototypes -----------------------------------------------*/
+  65:../src/RC5_IR_Emul_Receiver.c **** static void RC5_RCC_Configuration(void);
+  66:../src/RC5_IR_Emul_Receiver.c **** static void RC5_GPIO_Configuration(void);
+  67:../src/RC5_IR_Emul_Receiver.c **** static void RC5_NVIC_Configuration(void);
+  68:../src/RC5_IR_Emul_Receiver.c **** static uint32_t RC5_TIM_GetCounterCLKValue(void);
+  69:../src/RC5_IR_Emul_Receiver.c **** static void RC5_WaitForNextFallingEdge(void);
+  70:../src/RC5_IR_Emul_Receiver.c **** 
+  71:../src/RC5_IR_Emul_Receiver.c **** 
+  72:../src/RC5_IR_Emul_Receiver.c **** /* Private functions ---------------------------------------------------------*/
+  73:../src/RC5_IR_Emul_Receiver.c **** /**
+  74:../src/RC5_IR_Emul_Receiver.c ****   * @brief  Initialize the RC5 reception.
+  75:../src/RC5_IR_Emul_Receiver.c ****   * @param  None
+  76:../src/RC5_IR_Emul_Receiver.c ****   * @retval None
+  77:../src/RC5_IR_Emul_Receiver.c ****   */
+  78:../src/RC5_IR_Emul_Receiver.c **** void RC5_Receiver_Init(void)
+  79:../src/RC5_IR_Emul_Receiver.c **** {
+ 116              		.loc 1 79 0
+ 117              		.cfi_startproc
+ 118              		@ args = 0, pretend = 0, frame = 8
+ 119              		@ frame_needed = 1, uses_anonymous_args = 0
+ 120 0000 80B5     		push	{r7, lr}
+ 121              	.LCFI0:
+ 122              		.cfi_def_cfa_offset 8
+ 123              		.cfi_offset 7, -8
+ 124              		.cfi_offset 14, -4
+ 125 0002 82B0     		sub	sp, sp, #8
+ 126              	.LCFI1:
+ 127              		.cfi_def_cfa_offset 16
+ 128 0004 00AF     		add	r7, sp, #0
+ 129              	.LCFI2:
+ 130              		.cfi_def_cfa_register 7
+  80:../src/RC5_IR_Emul_Receiver.c ****   EXTI_InitTypeDef EXTI_InitStructure;
+  81:../src/RC5_IR_Emul_Receiver.c **** 
+  82:../src/RC5_IR_Emul_Receiver.c ****   /* System Clocks Configuration for RC5 reception */
+  83:../src/RC5_IR_Emul_Receiver.c ****   RC5_RCC_Configuration();
+ 131              		.loc 1 83 0
+ 132 0006 00F08DFA 		bl	RC5_RCC_Configuration
+  84:../src/RC5_IR_Emul_Receiver.c **** 
+  85:../src/RC5_IR_Emul_Receiver.c ****   /* NVIC configuration for RC5 reception */
+  86:../src/RC5_IR_Emul_Receiver.c ****   RC5_NVIC_Configuration();
+ 133              		.loc 1 86 0
+ 134 000a 00F0B9FA 		bl	RC5_NVIC_Configuration
+  87:../src/RC5_IR_Emul_Receiver.c **** 
+  88:../src/RC5_IR_Emul_Receiver.c ****   /* Configure the GPIO port for RC5 reception */
+  89:../src/RC5_IR_Emul_Receiver.c ****   RC5_GPIO_Configuration();
+ 135              		.loc 1 89 0
+ 136 000e 00F099FA 		bl	RC5_GPIO_Configuration
+  90:../src/RC5_IR_Emul_Receiver.c **** 
+  91:../src/RC5_IR_Emul_Receiver.c ****   /* Get frequency input of RC5_TIM in Khz */
+  92:../src/RC5_IR_Emul_Receiver.c ****   RC5_TIM_CLKValuekHz = RC5_TIM_GetCounterCLKValue()/1000;
+ 137              		.loc 1 92 0
+ 138 0012 00F0DFFA 		bl	RC5_TIM_GetCounterCLKValue
+ 139 0016 0246     		mov	r2, r0
+ 140 0018 454B     		ldr	r3, .L3
+ 141 001a A3FB0213 		umull	r1, r3, r3, r2
+ 142 001e 4FEA9312 		lsr	r2, r3, #6
+ 143 0022 444B     		ldr	r3, .L3+4
+ 144 0024 1A60     		str	r2, [r3, #0]
+  93:../src/RC5_IR_Emul_Receiver.c ****   
+  94:../src/RC5_IR_Emul_Receiver.c ****   /* Compute the different timing tolerences in TIM count */
+  95:../src/RC5_IR_Emul_Receiver.c ****   NominalBitDurationCount =  (RC5_TIM_CLKValuekHz * NOMINAL_FULL_BIT_TIME_US)/1000;
+ 145              		.loc 1 95 0
+ 146 0026 434B     		ldr	r3, .L3+4
+ 147 0028 1B68     		ldr	r3, [r3, #0]
+ 148 002a 40F2F262 		movw	r2, #1778
+ 149 002e 02FB03F2 		mul	r2, r2, r3
+ 150 0032 3F4B     		ldr	r3, .L3
+ 151 0034 A3FB0213 		umull	r1, r3, r3, r2
+ 152 0038 4FEA9313 		lsr	r3, r3, #6
+ 153 003c 9AB2     		uxth	r2, r3
+ 154 003e 3E4B     		ldr	r3, .L3+8
+ 155 0040 1A80     		strh	r2, [r3, #0]	@ movhi
+  96:../src/RC5_IR_Emul_Receiver.c ****   NominalHalfBitDurationCount = (RC5_TIM_CLKValuekHz * NOMINAL_HALF_BIT_TIME_US)/1000;
+ 156              		.loc 1 96 0
+ 157 0042 3C4B     		ldr	r3, .L3+4
+ 158 0044 1A68     		ldr	r2, [r3, #0]
+ 159 0046 1346     		mov	r3, r2
+ 160 0048 4FEAC303 		lsl	r3, r3, #3
+ 161 004c 9B1A     		subs	r3, r3, r2
+ 162 004e 4FEAC312 		lsl	r2, r3, #7
+ 163 0052 D21A     		subs	r2, r2, r3
+ 164 0054 364B     		ldr	r3, .L3
+ 165 0056 A3FB0213 		umull	r1, r3, r3, r2
+ 166 005a 4FEA9313 		lsr	r3, r3, #6
+ 167 005e 9AB2     		uxth	r2, r3
+ 168 0060 364B     		ldr	r3, .L3+12
+ 169 0062 1A80     		strh	r2, [r3, #0]	@ movhi
+  97:../src/RC5_IR_Emul_Receiver.c ****   HalfBitDurationCount_Min = (RC5_TIM_CLKValuekHz * MIN_HALF_BIT_TIME_US)/1000;
+ 170              		.loc 1 97 0
+ 171 0064 334B     		ldr	r3, .L3+4
+ 172 0066 1A68     		ldr	r2, [r3, #0]
+ 173 0068 1346     		mov	r3, r2
+ 174 006a 4FEA8303 		lsl	r3, r3, #2
+ 175 006e 9B18     		adds	r3, r3, r2
+ 176 0070 4FEAC313 		lsl	r3, r3, #7
+ 177 0074 1A46     		mov	r2, r3
+ 178 0076 2E4B     		ldr	r3, .L3
+ 179 0078 A3FB0213 		umull	r1, r3, r3, r2
+ 180 007c 4FEA9313 		lsr	r3, r3, #6
+ 181 0080 9AB2     		uxth	r2, r3
+ 182 0082 2F4B     		ldr	r3, .L3+16
+ 183 0084 1A80     		strh	r2, [r3, #0]	@ movhi
+  98:../src/RC5_IR_Emul_Receiver.c ****   HalfBitDurationCount_Max = (RC5_TIM_CLKValuekHz * MAX_HALF_BIT_TIME_US)/1000;
+ 184              		.loc 1 98 0
+ 185 0086 2B4B     		ldr	r3, .L3+4
+ 186 0088 1B68     		ldr	r3, [r3, #0]
+ 187 008a 40F27442 		movw	r2, #1140
+ 188 008e 02FB03F2 		mul	r2, r2, r3
+ 189 0092 274B     		ldr	r3, .L3
+ 190 0094 A3FB0213 		umull	r1, r3, r3, r2
+ 191 0098 4FEA9313 		lsr	r3, r3, #6
+ 192 009c 9AB2     		uxth	r2, r3
+ 193 009e 294B     		ldr	r3, .L3+20
+ 194 00a0 1A80     		strh	r2, [r3, #0]	@ movhi
+  99:../src/RC5_IR_Emul_Receiver.c ****   FullBitDurationCount_Min = (RC5_TIM_CLKValuekHz * MIN_FULL_BIT_TIME_US)/1000;
+ 195              		.loc 1 99 0
+ 196 00a2 244B     		ldr	r3, .L3+4
+ 197 00a4 1B68     		ldr	r3, [r3, #0]
+ 198 00a6 40F23C52 		movw	r2, #1340
+ 199 00aa 02FB03F2 		mul	r2, r2, r3
+ 200 00ae 204B     		ldr	r3, .L3
+ 201 00b0 A3FB0213 		umull	r1, r3, r3, r2
+ 202 00b4 4FEA9313 		lsr	r3, r3, #6
+ 203 00b8 9AB2     		uxth	r2, r3
+ 204 00ba 234B     		ldr	r3, .L3+24
+ 205 00bc 1A80     		strh	r2, [r3, #0]	@ movhi
+ 100:../src/RC5_IR_Emul_Receiver.c ****   FullBitDurationCount_Max = (RC5_TIM_CLKValuekHz * MAX_FULL_BIT_TIME_US)/1000;
+ 206              		.loc 1 100 0
+ 207 00be 1D4B     		ldr	r3, .L3+4
+ 208 00c0 1B68     		ldr	r3, [r3, #0]
+ 209 00c2 40F6AC02 		movw	r2, #2220
+ 210 00c6 02FB03F2 		mul	r2, r2, r3
+ 211 00ca 194B     		ldr	r3, .L3
+ 212 00cc A3FB0213 		umull	r1, r3, r3, r2
+ 213 00d0 4FEA9313 		lsr	r3, r3, #6
+ 214 00d4 9AB2     		uxth	r2, r3
+ 215 00d6 1D4B     		ldr	r3, .L3+28
+ 216 00d8 1A80     		strh	r2, [r3, #0]	@ movhi
+ 101:../src/RC5_IR_Emul_Receiver.c ****   
+ 102:../src/RC5_IR_Emul_Receiver.c ****   /* Compute the 3/4 bit time duration in TIM count */
+ 103:../src/RC5_IR_Emul_Receiver.c ****   NominalBitDurationCount_3div4 = (NominalBitDurationCount * 3)/4;
+ 217              		.loc 1 103 0
+ 218 00da 174B     		ldr	r3, .L3+8
+ 219 00dc 1B88     		ldrh	r3, [r3, #0]
+ 220 00de 1A46     		mov	r2, r3
+ 221 00e0 1346     		mov	r3, r2
+ 222 00e2 4FEA4303 		lsl	r3, r3, #1
+ 223 00e6 9B18     		adds	r3, r3, r2
+ 224 00e8 002B     		cmp	r3, #0
+ 225 00ea 01DA     		bge	.L2
+ 226 00ec 03F10303 		add	r3, r3, #3
+ 227              	.L2:
+ 228 00f0 4FEAA303 		asr	r3, r3, #2
+ 229 00f4 9AB2     		uxth	r2, r3
+ 230 00f6 164B     		ldr	r3, .L3+32
+ 231 00f8 1A80     		strh	r2, [r3, #0]	@ movhi
+ 104:../src/RC5_IR_Emul_Receiver.c ****   
+ 105:../src/RC5_IR_Emul_Receiver.c ****   /* Enable EXTIx to detect the start bit of the RC5 frame */
+ 106:../src/RC5_IR_Emul_Receiver.c ****   EXTI_ClearITPendingBit(RC5_EXTI_LINE);
+ 232              		.loc 1 106 0
+ 233 00fa 4FF00200 		mov	r0, #2
+ 234 00fe FFF7FEFF 		bl	EXTI_ClearITPendingBit
+ 107:../src/RC5_IR_Emul_Receiver.c ****   EXTI_InitStructure.EXTI_Line = RC5_EXTI_LINE;
+ 235              		.loc 1 107 0
+ 236 0102 4FF00203 		mov	r3, #2
+ 237 0106 3B60     		str	r3, [r7, #0]
+ 108:../src/RC5_IR_Emul_Receiver.c ****   EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+ 238              		.loc 1 108 0
+ 239 0108 4FF00003 		mov	r3, #0
+ 240 010c 3B71     		strb	r3, [r7, #4]
+ 109:../src/RC5_IR_Emul_Receiver.c ****   EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+ 241              		.loc 1 109 0
+ 242 010e 4FF01003 		mov	r3, #16
+ 243 0112 7B71     		strb	r3, [r7, #5]
+ 110:../src/RC5_IR_Emul_Receiver.c ****   EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+ 244              		.loc 1 110 0
+ 245 0114 4FF00103 		mov	r3, #1
+ 246 0118 BB71     		strb	r3, [r7, #6]
+ 111:../src/RC5_IR_Emul_Receiver.c ****   EXTI_Init(&EXTI_InitStructure);
+ 247              		.loc 1 111 0
+ 248 011a 3B46     		mov	r3, r7
+ 249 011c 1846     		mov	r0, r3
+ 250 011e FFF7FEFF 		bl	EXTI_Init
+ 112:../src/RC5_IR_Emul_Receiver.c ****   
+ 113:../src/RC5_IR_Emul_Receiver.c ****   /* Wait for next falling edge of RC5 frame */
+ 114:../src/RC5_IR_Emul_Receiver.c ****   RC5_WaitForNextFallingEdge();
+ 251              		.loc 1 114 0
+ 252 0122 00F017F8 		bl	RC5_WaitForNextFallingEdge
+ 115:../src/RC5_IR_Emul_Receiver.c **** }
+ 253              		.loc 1 115 0
+ 254 0126 07F10807 		add	r7, r7, #8
+ 255 012a BD46     		mov	sp, r7
+ 256 012c 80BD     		pop	{r7, pc}
+ 257              	.L4:
+ 258 012e 00BF     		.align	2
+ 259              	.L3:
+ 260 0130 D34D6210 		.word	274877907
+ 261 0134 00000000 		.word	RC5_TIM_CLKValuekHz
+ 262 0138 00000000 		.word	NominalBitDurationCount
+ 263 013c 00000000 		.word	NominalHalfBitDurationCount
+ 264 0140 00000000 		.word	HalfBitDurationCount_Min
+ 265 0144 00000000 		.word	HalfBitDurationCount_Max
+ 266 0148 00000000 		.word	FullBitDurationCount_Min
+ 267 014c 00000000 		.word	FullBitDurationCount_Max
+ 268 0150 00000000 		.word	NominalBitDurationCount_3div4
+ 269              		.cfi_endproc
+ 270              	.LFE29:
+ 272              		.align	2
+ 273              		.thumb
+ 274              		.thumb_func
+ 276              	RC5_WaitForNextFallingEdge:
+ 277              	.LFB30:
+ 116:../src/RC5_IR_Emul_Receiver.c **** 
+ 117:../src/RC5_IR_Emul_Receiver.c **** /**
+ 118:../src/RC5_IR_Emul_Receiver.c ****   * @brief  Configure the system to receive the next RC5 frame.
+ 119:../src/RC5_IR_Emul_Receiver.c ****   * @param  None
+ 120:../src/RC5_IR_Emul_Receiver.c ****   * @retval None
+ 121:../src/RC5_IR_Emul_Receiver.c ****   */
+ 122:../src/RC5_IR_Emul_Receiver.c **** static void RC5_WaitForNextFallingEdge(void)
+ 123:../src/RC5_IR_Emul_Receiver.c **** {
+ 278              		.loc 1 123 0
+ 279              		.cfi_startproc
+ 280              		@ args = 0, pretend = 0, frame = 0
+ 281              		@ frame_needed = 1, uses_anonymous_args = 0
+ 282 0154 80B5     		push	{r7, lr}
+ 283              	.LCFI3:
+ 284              		.cfi_def_cfa_offset 8
+ 285              		.cfi_offset 7, -8
+ 286              		.cfi_offset 14, -4
+ 287 0156 00AF     		add	r7, sp, #0
+ 288              	.LCFI4:
+ 289              		.cfi_def_cfa_register 7
+ 124:../src/RC5_IR_Emul_Receiver.c ****   /* Enable EXTI line x */
+ 125:../src/RC5_IR_Emul_Receiver.c ****   EXTI->IMR |= RC5_EXTI_LINE;
+ 290              		.loc 1 125 0
+ 291 0158 124B     		ldr	r3, .L6
+ 292 015a 124A     		ldr	r2, .L6
+ 293 015c 1268     		ldr	r2, [r2, #0]
+ 294 015e 42F00202 		orr	r2, r2, #2
+ 295 0162 1A60     		str	r2, [r3, #0]
+ 126:../src/RC5_IR_Emul_Receiver.c ****   
+ 127:../src/RC5_IR_Emul_Receiver.c ****   /* RC5_TIM Configuration ------------------------------------------------------*/
+ 128:../src/RC5_IR_Emul_Receiver.c ****   TIM_DeInit(RC5_TIM); 
+ 296              		.loc 1 128 0
+ 297 0164 4FF08040 		mov	r0, #1073741824
+ 298 0168 FFF7FEFF 		bl	TIM_DeInit
+ 129:../src/RC5_IR_Emul_Receiver.c ****   TIM_TimeBaseStructure.TIM_Period = 0xFFFF;
+ 299              		.loc 1 129 0
+ 300 016c 0E4B     		ldr	r3, .L6+4
+ 301 016e 4FF6FF72 		movw	r2, #65535
+ 302 0172 9A80     		strh	r2, [r3, #4]	@ movhi
+ 130:../src/RC5_IR_Emul_Receiver.c ****   TIM_TimeBaseStructure.TIM_Prescaler = RC5_TIM_PRESCALER;       
+ 303              		.loc 1 130 0
+ 304 0174 0C4B     		ldr	r3, .L6+4
+ 305 0176 4FF00202 		mov	r2, #2
+ 306 017a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 131:../src/RC5_IR_Emul_Receiver.c ****   TIM_TimeBaseStructure.TIM_ClockDivision = 0;    
+ 307              		.loc 1 131 0
+ 308 017c 0A4B     		ldr	r3, .L6+4
+ 309 017e 4FF00002 		mov	r2, #0
+ 310 0182 DA80     		strh	r2, [r3, #6]	@ movhi
+ 132:../src/RC5_IR_Emul_Receiver.c ****   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;   
+ 311              		.loc 1 132 0
+ 312 0184 084B     		ldr	r3, .L6+4
+ 313 0186 4FF00002 		mov	r2, #0
+ 314 018a 5A80     		strh	r2, [r3, #2]	@ movhi
+ 133:../src/RC5_IR_Emul_Receiver.c ****   TIM_TimeBaseInit(RC5_TIM, &TIM_TimeBaseStructure);
+ 315              		.loc 1 133 0
+ 316 018c 4FF08040 		mov	r0, #1073741824
+ 317 0190 0549     		ldr	r1, .L6+4
+ 318 0192 FFF7FEFF 		bl	TIM_TimeBaseInit
+ 134:../src/RC5_IR_Emul_Receiver.c ****   
+ 135:../src/RC5_IR_Emul_Receiver.c ****   /* Clear RC5_TIM Capture compare interrupt pending bit */
+ 136:../src/RC5_IR_Emul_Receiver.c ****   TIM_ClearITPendingBit(RC5_TIM, TIM_IT_Update);	
+ 319              		.loc 1 136 0
+ 320 0196 4FF08040 		mov	r0, #1073741824
+ 321 019a 4FF00101 		mov	r1, #1
+ 322 019e FFF7FEFF 		bl	TIM_ClearITPendingBit
+ 137:../src/RC5_IR_Emul_Receiver.c **** 
+ 138:../src/RC5_IR_Emul_Receiver.c **** }
+ 323              		.loc 1 138 0
+ 324 01a2 80BD     		pop	{r7, pc}
+ 325              	.L7:
+ 326              		.align	2
+ 327              	.L6:
+ 328 01a4 00040140 		.word	1073808384
+ 329 01a8 00000000 		.word	TIM_TimeBaseStructure
+ 330              		.cfi_endproc
+ 331              	.LFE30:
+ 333              		.align	2
+ 334              		.global	RC5_Sample_Data
+ 335              		.thumb
+ 336              		.thumb_func
+ 338              	RC5_Sample_Data:
+ 339              	.LFB31:
+ 139:../src/RC5_IR_Emul_Receiver.c **** /**
+ 140:../src/RC5_IR_Emul_Receiver.c ****   * @brief  Sample the RC5 data bits.
+ 141:../src/RC5_IR_Emul_Receiver.c ****   * @param  None
+ 142:../src/RC5_IR_Emul_Receiver.c ****   * @retval None
+ 143:../src/RC5_IR_Emul_Receiver.c ****   */
+ 144:../src/RC5_IR_Emul_Receiver.c **** void RC5_Sample_Data(void)
+ 145:../src/RC5_IR_Emul_Receiver.c **** {
+ 340              		.loc 1 145 0
+ 341              		.cfi_startproc
+ 342              		@ args = 0, pretend = 0, frame = 0
+ 343              		@ frame_needed = 1, uses_anonymous_args = 0
+ 344 01ac 80B5     		push	{r7, lr}
+ 345              	.LCFI5:
+ 346              		.cfi_def_cfa_offset 8
+ 347              		.cfi_offset 7, -8
+ 348              		.cfi_offset 14, -4
+ 349 01ae 00AF     		add	r7, sp, #0
+ 350              	.LCFI6:
+ 351              		.cfi_def_cfa_register 7
+ 146:../src/RC5_IR_Emul_Receiver.c ****   if (TIM_GetITStatus(RC5_TIM, TIM_IT_Update) != RESET) /* Update event occured */
+ 352              		.loc 1 146 0
+ 353 01b0 4FF08040 		mov	r0, #1073741824
+ 354 01b4 4FF00101 		mov	r1, #1
+ 355 01b8 FFF7FEFF 		bl	TIM_GetITStatus
+ 356 01bc 0346     		mov	r3, r0
+ 357 01be 002B     		cmp	r3, #0
+ 358 01c0 41D0     		beq	.L8
+ 147:../src/RC5_IR_Emul_Receiver.c ****   { 
+ 148:../src/RC5_IR_Emul_Receiver.c ****     /* Sample RC5 GPIO input */
+ 149:../src/RC5_IR_Emul_Receiver.c ****     RC5_data[RC5_Indexdata++] = RC5_GPIO_PORT->IDR & RC5_GPIO_PIN;
+ 359              		.loc 1 149 0
+ 360 01c2 214B     		ldr	r3, .L12
+ 361 01c4 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 362 01c6 1946     		mov	r1, r3
+ 363 01c8 204A     		ldr	r2, .L12+4
+ 364 01ca 9268     		ldr	r2, [r2, #8]
+ 365 01cc 92B2     		uxth	r2, r2
+ 366 01ce 02F00202 		and	r2, r2, #2
+ 367 01d2 90B2     		uxth	r0, r2
+ 368 01d4 1E4A     		ldr	r2, .L12+8
+ 369 01d6 22F81100 		strh	r0, [r2, r1, lsl #1]	@ movhi
+ 370 01da 03F10103 		add	r3, r3, #1
+ 371 01de DAB2     		uxtb	r2, r3
+ 372 01e0 194B     		ldr	r3, .L12
+ 373 01e2 1A70     		strb	r2, [r3, #0]
+ 150:../src/RC5_IR_Emul_Receiver.c ****     
+ 151:../src/RC5_IR_Emul_Receiver.c ****     if(Bit4_HasBeen_Sampled == NO) /* RC5 bit 4 has been sampled? */
+ 374              		.loc 1 151 0
+ 375 01e4 1B4B     		ldr	r3, .L12+12
+ 376 01e6 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 377 01e8 002B     		cmp	r3, #0
+ 378 01ea 08D1     		bne	.L10
+ 152:../src/RC5_IR_Emul_Receiver.c ****     {                              /*(to know if the next sampling will be after 3/4 or 1 bit time)
+ 153:../src/RC5_IR_Emul_Receiver.c **** 
+ 154:../src/RC5_IR_Emul_Receiver.c ****       /* If NO: Set the RC5_TIM auto-reload register to allow the next sampling at 1bit time */ 
+ 155:../src/RC5_IR_Emul_Receiver.c ****       RC5_TIM->ARR = NominalBitDurationCount; 
+ 379              		.loc 1 155 0
+ 380 01ec 4FF08043 		mov	r3, #1073741824
+ 381 01f0 194A     		ldr	r2, .L12+16
+ 382 01f2 1288     		ldrh	r2, [r2, #0]
+ 383 01f4 9A85     		strh	r2, [r3, #44]	@ movhi
+ 156:../src/RC5_IR_Emul_Receiver.c ****       
+ 157:../src/RC5_IR_Emul_Receiver.c ****       /* Set the variable to yes */
+ 158:../src/RC5_IR_Emul_Receiver.c ****       Bit4_HasBeen_Sampled = YES;
+ 384              		.loc 1 158 0
+ 385 01f6 174B     		ldr	r3, .L12+12
+ 386 01f8 4FF00102 		mov	r2, #1
+ 387 01fc 1A70     		strb	r2, [r3, #0]
+ 388              	.L10:
+ 159:../src/RC5_IR_Emul_Receiver.c ****     }
+ 160:../src/RC5_IR_Emul_Receiver.c ****     
+ 161:../src/RC5_IR_Emul_Receiver.c ****     /* If the number of data reaches 13 (without start bit and field bit and extra bit is sampled: 
+ 162:../src/RC5_IR_Emul_Receiver.c ****     if(RC5_Indexdata == 13) 
+ 389              		.loc 1 162 0
+ 390 01fe 124B     		ldr	r3, .L12
+ 391 0200 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 392 0202 0D2B     		cmp	r3, #13
+ 393 0204 19D1     		bne	.L11
+ 163:../src/RC5_IR_Emul_Receiver.c ****     {
+ 164:../src/RC5_IR_Emul_Receiver.c ****       /* Initialize the RC5 data index */
+ 165:../src/RC5_IR_Emul_Receiver.c ****       RC5_Indexdata = 0;
+ 394              		.loc 1 165 0
+ 395 0206 104B     		ldr	r3, .L12
+ 396 0208 4FF00002 		mov	r2, #0
+ 397 020c 1A70     		strb	r2, [r3, #0]
+ 166:../src/RC5_IR_Emul_Receiver.c ****       
+ 167:../src/RC5_IR_Emul_Receiver.c ****       /* Set this flag software to inform the user that a RC5 frame is ready to be read */
+ 168:../src/RC5_IR_Emul_Receiver.c ****       RC5_FrameReceived = YES;
+ 398              		.loc 1 168 0
+ 399 020e 134B     		ldr	r3, .L12+20
+ 400 0210 4FF00102 		mov	r2, #1
+ 401 0214 1A70     		strb	r2, [r3, #0]
+ 169:../src/RC5_IR_Emul_Receiver.c ****       
+ 170:../src/RC5_IR_Emul_Receiver.c ****       /* Initialize  Bit4_HasBeen_Sampled variable for next reception */
+ 171:../src/RC5_IR_Emul_Receiver.c ****       Bit4_HasBeen_Sampled = NO;
+ 402              		.loc 1 171 0
+ 403 0216 0F4B     		ldr	r3, .L12+12
+ 404 0218 4FF00002 		mov	r2, #0
+ 405 021c 1A70     		strb	r2, [r3, #0]
+ 172:../src/RC5_IR_Emul_Receiver.c **** 
+ 173:../src/RC5_IR_Emul_Receiver.c ****       /* Disable RC5_TIM Update event Interrupt Request */
+ 174:../src/RC5_IR_Emul_Receiver.c ****       TIM_ITConfig(RC5_TIM, TIM_IT_Update, DISABLE);
+ 406              		.loc 1 174 0
+ 407 021e 4FF08040 		mov	r0, #1073741824
+ 408 0222 4FF00101 		mov	r1, #1
+ 409 0226 4FF00002 		mov	r2, #0
+ 410 022a FFF7FEFF 		bl	TIM_ITConfig
+ 175:../src/RC5_IR_Emul_Receiver.c ****       
+ 176:../src/RC5_IR_Emul_Receiver.c ****       /* Disable RC5_TIM counter */
+ 177:../src/RC5_IR_Emul_Receiver.c ****       TIM_Cmd(RC5_TIM, DISABLE); 
+ 411              		.loc 1 177 0
+ 412 022e 4FF08040 		mov	r0, #1073741824
+ 413 0232 4FF00001 		mov	r1, #0
+ 414 0236 FFF7FEFF 		bl	TIM_Cmd
+ 415              	.L11:
+ 178:../src/RC5_IR_Emul_Receiver.c ****     }
+ 179:../src/RC5_IR_Emul_Receiver.c **** 
+ 180:../src/RC5_IR_Emul_Receiver.c ****     /* Clear RC5_TIM Update event interrupt pending bit */
+ 181:../src/RC5_IR_Emul_Receiver.c ****     TIM_ClearITPendingBit(RC5_TIM, TIM_IT_Update);
+ 416              		.loc 1 181 0
+ 417 023a 4FF08040 		mov	r0, #1073741824
+ 418 023e 4FF00101 		mov	r1, #1
+ 419 0242 FFF7FEFF 		bl	TIM_ClearITPendingBit
+ 420              	.L8:
+ 182:../src/RC5_IR_Emul_Receiver.c ****   }
+ 183:../src/RC5_IR_Emul_Receiver.c **** }  
+ 421              		.loc 1 183 0
+ 422 0246 80BD     		pop	{r7, pc}
+ 423              	.L13:
+ 424              		.align	2
+ 425              	.L12:
+ 426 0248 00000000 		.word	RC5_Indexdata
+ 427 024c 000C0140 		.word	1073810432
+ 428 0250 00000000 		.word	RC5_data
+ 429 0254 00000000 		.word	Bit4_HasBeen_Sampled
+ 430 0258 00000000 		.word	NominalBitDurationCount
+ 431 025c 00000000 		.word	RC5_FrameReceived
+ 432              		.cfi_endproc
+ 433              	.LFE31:
+ 435              		.align	2
+ 436              		.global	RC5_MeasureFirstLowDuration
+ 437              		.thumb
+ 438              		.thumb_func
+ 440              	RC5_MeasureFirstLowDuration:
+ 441              	.LFB32:
+ 184:../src/RC5_IR_Emul_Receiver.c **** 
+ 185:../src/RC5_IR_Emul_Receiver.c **** /**
+ 186:../src/RC5_IR_Emul_Receiver.c ****   * @brief  Measure the first low duration of the RC5 frame.
+ 187:../src/RC5_IR_Emul_Receiver.c ****   * @param  None
+ 188:../src/RC5_IR_Emul_Receiver.c ****   * @retval None
+ 189:../src/RC5_IR_Emul_Receiver.c ****   */
+ 190:../src/RC5_IR_Emul_Receiver.c **** void RC5_MeasureFirstLowDuration(void)
+ 191:../src/RC5_IR_Emul_Receiver.c **** {
+ 442              		.loc 1 191 0
+ 443              		.cfi_startproc
+ 444              		@ args = 0, pretend = 0, frame = 0
+ 445              		@ frame_needed = 1, uses_anonymous_args = 0
+ 446 0260 80B5     		push	{r7, lr}
+ 447              	.LCFI7:
+ 448              		.cfi_def_cfa_offset 8
+ 449              		.cfi_offset 7, -8
+ 450              		.cfi_offset 14, -4
+ 451 0262 00AF     		add	r7, sp, #0
+ 452              	.LCFI8:
+ 453              		.cfi_def_cfa_register 7
+ 192:../src/RC5_IR_Emul_Receiver.c ****   /* If an edge is detected on RC5 input pin */
+ 193:../src/RC5_IR_Emul_Receiver.c ****   if(EXTI_GetITStatus(RC5_EXTI_LINE) != RESET) 
+ 454              		.loc 1 193 0
+ 455 0264 4FF00200 		mov	r0, #2
+ 456 0268 FFF7FEFF 		bl	EXTI_GetITStatus
+ 457 026c 0346     		mov	r3, r0
+ 458 026e 002B     		cmp	r3, #0
+ 459 0270 00F0B280 		beq	.L14
+ 194:../src/RC5_IR_Emul_Receiver.c ****   {
+ 195:../src/RC5_IR_Emul_Receiver.c ****     /* Increment the edges number */
+ 196:../src/RC5_IR_Emul_Receiver.c ****     EdgesNumber++;
+ 460              		.loc 1 196 0
+ 461 0274 594B     		ldr	r3, .L22
+ 462 0276 1B78     		ldrb	r3, [r3, #0]
+ 463 0278 DBB2     		uxtb	r3, r3
+ 464 027a 03F10103 		add	r3, r3, #1
+ 465 027e DAB2     		uxtb	r2, r3
+ 466 0280 564B     		ldr	r3, .L22
+ 467 0282 1A70     		strb	r2, [r3, #0]
+ 197:../src/RC5_IR_Emul_Receiver.c **** 
+ 198:../src/RC5_IR_Emul_Receiver.c ****     /* If it was the first edge */
+ 199:../src/RC5_IR_Emul_Receiver.c ****     if(EdgesNumber == 1)
+ 468              		.loc 1 199 0
+ 469 0284 554B     		ldr	r3, .L22
+ 470 0286 1B78     		ldrb	r3, [r3, #0]
+ 471 0288 DBB2     		uxtb	r3, r3
+ 472 028a 012B     		cmp	r3, #1
+ 473 028c 0BD1     		bne	.L16
+ 200:../src/RC5_IR_Emul_Receiver.c ****     {
+ 201:../src/RC5_IR_Emul_Receiver.c ****       /* Reset the RC5_TIM counter */
+ 202:../src/RC5_IR_Emul_Receiver.c ****       RC5_TIM->CNT = 0;
+ 474              		.loc 1 202 0
+ 475 028e 4FF08043 		mov	r3, #1073741824
+ 476 0292 4FF00002 		mov	r2, #0
+ 477 0296 9A84     		strh	r2, [r3, #36]	@ movhi
+ 203:../src/RC5_IR_Emul_Receiver.c ****       
+ 204:../src/RC5_IR_Emul_Receiver.c ****       /* Enable RC5_TIM counter */
+ 205:../src/RC5_IR_Emul_Receiver.c ****       TIM_Cmd(RC5_TIM, ENABLE); 
+ 478              		.loc 1 205 0
+ 479 0298 4FF08040 		mov	r0, #1073741824
+ 480 029c 4FF00101 		mov	r1, #1
+ 481 02a0 FFF7FEFF 		bl	TIM_Cmd
+ 482 02a4 94E0     		b	.L17
+ 483              	.L16:
+ 206:../src/RC5_IR_Emul_Receiver.c ****     }
+ 207:../src/RC5_IR_Emul_Receiver.c ****     /* If it was the 2nd edge */
+ 208:../src/RC5_IR_Emul_Receiver.c ****     else if(EdgesNumber == 2)
+ 484              		.loc 1 208 0
+ 485 02a6 4D4B     		ldr	r3, .L22
+ 486 02a8 1B78     		ldrb	r3, [r3, #0]
+ 487 02aa DBB2     		uxtb	r3, r3
+ 488 02ac 022B     		cmp	r3, #2
+ 489 02ae 65D1     		bne	.L18
+ 209:../src/RC5_IR_Emul_Receiver.c ****     {
+ 210:../src/RC5_IR_Emul_Receiver.c ****       /* Disable RC5_TIM counter */
+ 211:../src/RC5_IR_Emul_Receiver.c ****       TIM_Cmd(RC5_TIM, DISABLE);
+ 490              		.loc 1 211 0
+ 491 02b0 4FF08040 		mov	r0, #1073741824
+ 492 02b4 4FF00001 		mov	r1, #0
+ 493 02b8 FFF7FEFF 		bl	TIM_Cmd
+ 212:../src/RC5_IR_Emul_Receiver.c ****       
+ 213:../src/RC5_IR_Emul_Receiver.c ****       /* Read RC5_TIM counter to get the first low duration */
+ 214:../src/RC5_IR_Emul_Receiver.c ****       LowDuration = RC5_TIM->CNT;
+ 494              		.loc 1 214 0
+ 495 02bc 4FF08043 		mov	r3, #1073741824
+ 496 02c0 9B8C     		ldrh	r3, [r3, #36]	@ movhi
+ 497 02c2 9AB2     		uxth	r2, r3
+ 498 02c4 464B     		ldr	r3, .L22+4
+ 499 02c6 1A80     		strh	r2, [r3, #0]	@ movhi
+ 215:../src/RC5_IR_Emul_Receiver.c ****       
+ 216:../src/RC5_IR_Emul_Receiver.c ****       /* Reset RC5_TIM counter */
+ 217:../src/RC5_IR_Emul_Receiver.c ****       RC5_TIM->CNT = 0;
+ 500              		.loc 1 217 0
+ 501 02c8 4FF08043 		mov	r3, #1073741824
+ 502 02cc 4FF00002 		mov	r2, #0
+ 503 02d0 9A84     		strh	r2, [r3, #36]	@ movhi
+ 218:../src/RC5_IR_Emul_Receiver.c ****     
+ 219:../src/RC5_IR_Emul_Receiver.c ****       /* If low duration is between 640탎*TimClk and 1140탎*TimClk (min and max half bit time) */
+ 220:../src/RC5_IR_Emul_Receiver.c ****       if ((LowDuration >= HalfBitDurationCount_Min) && (LowDuration <= HalfBitDurationCount_Max)) 
+ 504              		.loc 1 220 0
+ 505 02d2 434B     		ldr	r3, .L22+4
+ 506 02d4 1B88     		ldrh	r3, [r3, #0]	@ movhi
+ 507 02d6 9AB2     		uxth	r2, r3
+ 508 02d8 424B     		ldr	r3, .L22+8
+ 509 02da 1B88     		ldrh	r3, [r3, #0]
+ 510 02dc 9A42     		cmp	r2, r3
+ 511 02de 0BD3     		bcc	.L19
+ 512              		.loc 1 220 0 is_stmt 0 discriminator 1
+ 513 02e0 3F4B     		ldr	r3, .L22+4
+ 514 02e2 1B88     		ldrh	r3, [r3, #0]	@ movhi
+ 515 02e4 9AB2     		uxth	r2, r3
+ 516 02e6 404B     		ldr	r3, .L22+12
+ 517 02e8 1B88     		ldrh	r3, [r3, #0]
+ 518 02ea 9A42     		cmp	r2, r3
+ 519 02ec 04D8     		bhi	.L19
+ 221:../src/RC5_IR_Emul_Receiver.c ****       {
+ 222:../src/RC5_IR_Emul_Receiver.c ****         /* Validate the frame, by setting this variable to OK */
+ 223:../src/RC5_IR_Emul_Receiver.c ****         BitTimeStatus = OK; 
+ 520              		.loc 1 223 0 is_stmt 1
+ 521 02ee 3F4B     		ldr	r3, .L22+16
+ 522 02f0 4FF00102 		mov	r2, #1
+ 523 02f4 1A70     		strb	r2, [r3, #0]
+ 524 02f6 6BE0     		b	.L17
+ 525              	.L19:
+ 224:../src/RC5_IR_Emul_Receiver.c ****       }
+ 225:../src/RC5_IR_Emul_Receiver.c ****       /* If low duration is between 1340탎*TimClk and 2220탎*TimClk (min and max full bit time)*/
+ 226:../src/RC5_IR_Emul_Receiver.c ****       else if ((LowDuration >= FullBitDurationCount_Min) && (LowDuration <= FullBitDurationCount_Ma
+ 526              		.loc 1 226 0
+ 527 02f8 394B     		ldr	r3, .L22+4
+ 528 02fa 1B88     		ldrh	r3, [r3, #0]	@ movhi
+ 529 02fc 9AB2     		uxth	r2, r3
+ 530 02fe 3C4B     		ldr	r3, .L22+20
+ 531 0300 1B88     		ldrh	r3, [r3, #0]
+ 532 0302 9A42     		cmp	r2, r3
+ 533 0304 2CD3     		bcc	.L21
+ 534              		.loc 1 226 0 is_stmt 0 discriminator 1
+ 535 0306 364B     		ldr	r3, .L22+4
+ 536 0308 1B88     		ldrh	r3, [r3, #0]	@ movhi
+ 537 030a 9AB2     		uxth	r2, r3
+ 538 030c 394B     		ldr	r3, .L22+24
+ 539 030e 1B88     		ldrh	r3, [r3, #0]
+ 540 0310 9A42     		cmp	r2, r3
+ 541 0312 25D8     		bhi	.L21
+ 227:../src/RC5_IR_Emul_Receiver.c ****       {
+ 228:../src/RC5_IR_Emul_Receiver.c ****         /* Disable EXTI line x to avoid jumping to this interrupt while receiving
+ 229:../src/RC5_IR_Emul_Receiver.c ****         the RC5 data bits (it will be reenabled in the next RC5 data reception */
+ 230:../src/RC5_IR_Emul_Receiver.c ****         EXTI->IMR &= ((uint32_t)~RC5_EXTI_LINE);
+ 542              		.loc 1 230 0 is_stmt 1
+ 543 0314 384B     		ldr	r3, .L22+28
+ 544 0316 384A     		ldr	r2, .L22+28
+ 545 0318 1268     		ldr	r2, [r2, #0]
+ 546 031a 22F00202 		bic	r2, r2, #2
+ 547 031e 1A60     		str	r2, [r3, #0]
+ 231:../src/RC5_IR_Emul_Receiver.c **** 
+ 232:../src/RC5_IR_Emul_Receiver.c ****         /* Enable RC5_TIM counter */
+ 233:../src/RC5_IR_Emul_Receiver.c ****         TIM_Cmd(RC5_TIM, ENABLE);
+ 548              		.loc 1 233 0
+ 549 0320 4FF08040 		mov	r0, #1073741824
+ 550 0324 4FF00101 		mov	r1, #1
+ 551 0328 FFF7FEFF 		bl	TIM_Cmd
+ 234:../src/RC5_IR_Emul_Receiver.c ****        
+ 235:../src/RC5_IR_Emul_Receiver.c ****         /* Enable RC5_TIM Update Event Interrupt Request */
+ 236:../src/RC5_IR_Emul_Receiver.c ****         TIM_ITConfig(RC5_TIM, TIM_IT_Update, ENABLE);
+ 552              		.loc 1 236 0
+ 553 032c 4FF08040 		mov	r0, #1073741824
+ 554 0330 4FF00101 		mov	r1, #1
+ 555 0334 4FF00102 		mov	r2, #1
+ 556 0338 FFF7FEFF 		bl	TIM_ITConfig
+ 237:../src/RC5_IR_Emul_Receiver.c ****        
+ 238:../src/RC5_IR_Emul_Receiver.c ****         /* Validate the frame, by setting this variable to OK */
+ 239:../src/RC5_IR_Emul_Receiver.c ****         BitTimeStatus = OK;
+ 557              		.loc 1 239 0
+ 558 033c 2B4B     		ldr	r3, .L22+16
+ 559 033e 4FF00102 		mov	r2, #1
+ 560 0342 1A70     		strb	r2, [r3, #0]
+ 240:../src/RC5_IR_Emul_Receiver.c **** 
+ 241:../src/RC5_IR_Emul_Receiver.c ****         /* Set the RC5_TIM auto-reload register to allow the next sampling at 3/4 bit time */
+ 242:../src/RC5_IR_Emul_Receiver.c ****         RC5_TIM->ARR = NominalBitDurationCount_3div4; 
+ 561              		.loc 1 242 0
+ 562 0344 4FF08043 		mov	r3, #1073741824
+ 563 0348 2C4A     		ldr	r2, .L22+32
+ 564 034a 1288     		ldrh	r2, [r2, #0]
+ 565 034c 9A85     		strh	r2, [r3, #44]	@ movhi
+ 243:../src/RC5_IR_Emul_Receiver.c ****        
+ 244:../src/RC5_IR_Emul_Receiver.c ****         /* The bit field value is equal to 0 */
+ 245:../src/RC5_IR_Emul_Receiver.c ****         FieldBit = 0;
+ 566              		.loc 1 245 0
+ 567 034e 2C4B     		ldr	r3, .L22+36
+ 568 0350 4FF00002 		mov	r2, #0
+ 569 0354 1A70     		strb	r2, [r3, #0]
+ 246:../src/RC5_IR_Emul_Receiver.c ****        
+ 247:../src/RC5_IR_Emul_Receiver.c ****         /* Initialize edges detected number */
+ 248:../src/RC5_IR_Emul_Receiver.c ****         EdgesNumber = 0;
+ 570              		.loc 1 248 0
+ 571 0356 214B     		ldr	r3, .L22
+ 572 0358 4FF00002 		mov	r2, #0
+ 573 035c 1A70     		strb	r2, [r3, #0]
+ 574 035e 37E0     		b	.L17
+ 575              	.L21:
+ 249:../src/RC5_IR_Emul_Receiver.c **** 
+ 250:../src/RC5_IR_Emul_Receiver.c ****       }
+ 251:../src/RC5_IR_Emul_Receiver.c ****       else /* If the first low duration is not in the right timing range */
+ 252:../src/RC5_IR_Emul_Receiver.c ****       {  
+ 253:../src/RC5_IR_Emul_Receiver.c ****         /* Set the Bit timing to NOTOK */
+ 254:../src/RC5_IR_Emul_Receiver.c ****         BitTimeStatus = NOTOK;
+ 576              		.loc 1 254 0
+ 577 0360 224B     		ldr	r3, .L22+16
+ 578 0362 4FF00002 		mov	r2, #0
+ 579 0366 1A70     		strb	r2, [r3, #0]
+ 255:../src/RC5_IR_Emul_Receiver.c **** 
+ 256:../src/RC5_IR_Emul_Receiver.c ****         /* Reset RC5_TIM counter */
+ 257:../src/RC5_IR_Emul_Receiver.c ****         RC5_TIM->CNT = 0;
+ 580              		.loc 1 257 0
+ 581 0368 4FF08043 		mov	r3, #1073741824
+ 582 036c 4FF00002 		mov	r2, #0
+ 583 0370 9A84     		strh	r2, [r3, #36]	@ movhi
+ 258:../src/RC5_IR_Emul_Receiver.c ****          
+ 259:../src/RC5_IR_Emul_Receiver.c ****         /* Initialize the number of glitches detected */
+ 260:../src/RC5_IR_Emul_Receiver.c ****         EdgesNumber = 0;
+ 584              		.loc 1 260 0
+ 585 0372 1A4B     		ldr	r3, .L22
+ 586 0374 4FF00002 		mov	r2, #0
+ 587 0378 1A70     		strb	r2, [r3, #0]
+ 588 037a 29E0     		b	.L17
+ 589              	.L18:
+ 261:../src/RC5_IR_Emul_Receiver.c ****       }
+ 262:../src/RC5_IR_Emul_Receiver.c ****     }
+ 263:../src/RC5_IR_Emul_Receiver.c ****     else if(EdgesNumber == 3) /* If the number of edges is equal to 3 */
+ 590              		.loc 1 263 0
+ 591 037c 174B     		ldr	r3, .L22
+ 592 037e 1B78     		ldrb	r3, [r3, #0]
+ 593 0380 DBB2     		uxtb	r3, r3
+ 594 0382 032B     		cmp	r3, #3
+ 595 0384 24D1     		bne	.L17
+ 264:../src/RC5_IR_Emul_Receiver.c ****     {
+ 265:../src/RC5_IR_Emul_Receiver.c ****       /* Disable EXTI line x to avoid jumping to this interrupt while receiving
+ 266:../src/RC5_IR_Emul_Receiver.c ****       the RC5 data bits (it will be reenabled in the next RC5 data reception */
+ 267:../src/RC5_IR_Emul_Receiver.c ****       EXTI->IMR &= ((uint32_t)~RC5_EXTI_LINE);
+ 596              		.loc 1 267 0
+ 597 0386 1C4B     		ldr	r3, .L22+28
+ 598 0388 1B4A     		ldr	r2, .L22+28
+ 599 038a 1268     		ldr	r2, [r2, #0]
+ 600 038c 22F00202 		bic	r2, r2, #2
+ 601 0390 1A60     		str	r2, [r3, #0]
+ 268:../src/RC5_IR_Emul_Receiver.c ****        
+ 269:../src/RC5_IR_Emul_Receiver.c ****       /* Enable RC5_TIM counter */
+ 270:../src/RC5_IR_Emul_Receiver.c ****       TIM_Cmd(RC5_TIM, ENABLE);
+ 602              		.loc 1 270 0
+ 603 0392 4FF08040 		mov	r0, #1073741824
+ 604 0396 4FF00101 		mov	r1, #1
+ 605 039a FFF7FEFF 		bl	TIM_Cmd
+ 271:../src/RC5_IR_Emul_Receiver.c ****       
+ 272:../src/RC5_IR_Emul_Receiver.c ****       /* Enable RC5_TIM Update Event Interrupt Request */
+ 273:../src/RC5_IR_Emul_Receiver.c ****       TIM_ITConfig(RC5_TIM, TIM_IT_Update, ENABLE);
+ 606              		.loc 1 273 0
+ 607 039e 4FF08040 		mov	r0, #1073741824
+ 608 03a2 4FF00101 		mov	r1, #1
+ 609 03a6 4FF00102 		mov	r2, #1
+ 610 03aa FFF7FEFF 		bl	TIM_ITConfig
+ 274:../src/RC5_IR_Emul_Receiver.c ****        
+ 275:../src/RC5_IR_Emul_Receiver.c ****       /* Validate the frame, by setting this variable to OK */
+ 276:../src/RC5_IR_Emul_Receiver.c ****       BitTimeStatus = OK;
+ 611              		.loc 1 276 0
+ 612 03ae 0F4B     		ldr	r3, .L22+16
+ 613 03b0 4FF00102 		mov	r2, #1
+ 614 03b4 1A70     		strb	r2, [r3, #0]
+ 277:../src/RC5_IR_Emul_Receiver.c ****        
+ 278:../src/RC5_IR_Emul_Receiver.c ****       /* Set the RC5_TIM auto-reload register to allow the next sampling at 3/4 bit time */
+ 279:../src/RC5_IR_Emul_Receiver.c ****       RC5_TIM->ARR = NominalBitDurationCount_3div4;  
+ 615              		.loc 1 279 0
+ 616 03b6 4FF08043 		mov	r3, #1073741824
+ 617 03ba 104A     		ldr	r2, .L22+32
+ 618 03bc 1288     		ldrh	r2, [r2, #0]
+ 619 03be 9A85     		strh	r2, [r3, #44]	@ movhi
+ 280:../src/RC5_IR_Emul_Receiver.c ****        
+ 281:../src/RC5_IR_Emul_Receiver.c ****       /* The bit field value is equal to 1 */
+ 282:../src/RC5_IR_Emul_Receiver.c ****       FieldBit = 1;
+ 620              		.loc 1 282 0
+ 621 03c0 0F4B     		ldr	r3, .L22+36
+ 622 03c2 4FF00102 		mov	r2, #1
+ 623 03c6 1A70     		strb	r2, [r3, #0]
+ 283:../src/RC5_IR_Emul_Receiver.c **** 
+ 284:../src/RC5_IR_Emul_Receiver.c ****       /* Initialize the number of glitches detected */
+ 285:../src/RC5_IR_Emul_Receiver.c ****       EdgesNumber = 0;
+ 624              		.loc 1 285 0
+ 625 03c8 044B     		ldr	r3, .L22
+ 626 03ca 4FF00002 		mov	r2, #0
+ 627 03ce 1A70     		strb	r2, [r3, #0]
+ 628              	.L17:
+ 286:../src/RC5_IR_Emul_Receiver.c ****     }
+ 287:../src/RC5_IR_Emul_Receiver.c ****    
+ 288:../src/RC5_IR_Emul_Receiver.c ****     /* Clear the RC5 EXTI line pending bit */
+ 289:../src/RC5_IR_Emul_Receiver.c ****     EXTI_ClearITPendingBit(RC5_EXTI_LINE);
+ 629              		.loc 1 289 0
+ 630 03d0 4FF00200 		mov	r0, #2
+ 631 03d4 FFF7FEFF 		bl	EXTI_ClearITPendingBit
+ 632              	.L14:
+ 290:../src/RC5_IR_Emul_Receiver.c ****   }
+ 291:../src/RC5_IR_Emul_Receiver.c **** }
+ 633              		.loc 1 291 0
+ 634 03d8 80BD     		pop	{r7, pc}
+ 635              	.L23:
+ 636 03da 00BF     		.align	2
+ 637              	.L22:
+ 638 03dc 00000000 		.word	EdgesNumber
+ 639 03e0 00000000 		.word	LowDuration
+ 640 03e4 00000000 		.word	HalfBitDurationCount_Min
+ 641 03e8 00000000 		.word	HalfBitDurationCount_Max
+ 642 03ec 00000000 		.word	BitTimeStatus
+ 643 03f0 00000000 		.word	FullBitDurationCount_Min
+ 644 03f4 00000000 		.word	FullBitDurationCount_Max
+ 645 03f8 00040140 		.word	1073808384
+ 646 03fc 00000000 		.word	NominalBitDurationCount_3div4
+ 647 0400 00000000 		.word	FieldBit
+ 648              		.cfi_endproc
+ 649              	.LFE32:
+ 651              		.align	2
+ 652              		.global	RC5_Decode
+ 653              		.thumb
+ 654              		.thumb_func
+ 656              	RC5_Decode:
+ 657              	.LFB33:
+ 292:../src/RC5_IR_Emul_Receiver.c **** 
+ 293:../src/RC5_IR_Emul_Receiver.c **** /**
+ 294:../src/RC5_IR_Emul_Receiver.c ****   * @brief  Decode the RC5 frame.
+ 295:../src/RC5_IR_Emul_Receiver.c ****   * @param  None
+ 296:../src/RC5_IR_Emul_Receiver.c ****   * @retval RC5 structure
+ 297:../src/RC5_IR_Emul_Receiver.c ****   */
+ 298:../src/RC5_IR_Emul_Receiver.c **** RC5Frame_TypeDef RC5_Decode(void)
+ 299:../src/RC5_IR_Emul_Receiver.c **** {
+ 658              		.loc 1 299 0
+ 659              		.cfi_startproc
+ 660              		@ args = 0, pretend = 0, frame = 16
+ 661              		@ frame_needed = 1, uses_anonymous_args = 0
+ 662 0404 80B5     		push	{r7, lr}
+ 663              	.LCFI9:
+ 664              		.cfi_def_cfa_offset 8
+ 665              		.cfi_offset 7, -8
+ 666              		.cfi_offset 14, -4
+ 667 0406 84B0     		sub	sp, sp, #16
+ 668              	.LCFI10:
+ 669              		.cfi_def_cfa_offset 24
+ 670 0408 00AF     		add	r7, sp, #0
+ 671              	.LCFI11:
+ 672              		.cfi_def_cfa_register 7
+ 300:../src/RC5_IR_Emul_Receiver.c ****    RC5Frame_TypeDef RC5_frame_struct;
+ 301:../src/RC5_IR_Emul_Receiver.c ****    uint32_t RC5_dataIndex = 0;
+ 673              		.loc 1 301 0
+ 674 040a 4FF00003 		mov	r3, #0
+ 675 040e FB60     		str	r3, [r7, #12]
+ 302:../src/RC5_IR_Emul_Receiver.c ****    
+ 303:../src/RC5_IR_Emul_Receiver.c ****    /* Initialize the different fields of the RC5 structure */
+ 304:../src/RC5_IR_Emul_Receiver.c ****    RC5_frame_struct.ToggleBit = 0;
+ 676              		.loc 1 304 0
+ 677 0410 4FF00003 		mov	r3, #0
+ 678 0414 3B71     		strb	r3, [r7, #4]
+ 305:../src/RC5_IR_Emul_Receiver.c ****    RC5_frame_struct.Address = 0; 
+ 679              		.loc 1 305 0
+ 680 0416 4FF00003 		mov	r3, #0
+ 681 041a 7B71     		strb	r3, [r7, #5]
+ 306:../src/RC5_IR_Emul_Receiver.c ****    RC5_frame_struct.Command = 0;
+ 682              		.loc 1 306 0
+ 683 041c 4FF00003 		mov	r3, #0
+ 684 0420 BB71     		strb	r3, [r7, #6]
+ 307:../src/RC5_IR_Emul_Receiver.c ****   
+ 308:../src/RC5_IR_Emul_Receiver.c ****    /* Get the Toggle bit value */
+ 309:../src/RC5_IR_Emul_Receiver.c ****    if(RC5_data[0] & RC5_GPIO_PIN)
+ 685              		.loc 1 309 0
+ 686 0422 3D4B     		ldr	r3, .L35
+ 687 0424 1B88     		ldrh	r3, [r3, #0]	@ movhi
+ 688 0426 9BB2     		uxth	r3, r3
+ 689 0428 03F00203 		and	r3, r3, #2
+ 690 042c 002B     		cmp	r3, #0
+ 691 042e 03D0     		beq	.L25
+ 310:../src/RC5_IR_Emul_Receiver.c ****    {
+ 311:../src/RC5_IR_Emul_Receiver.c ****      RC5_frame_struct.ToggleBit = 1;
+ 692              		.loc 1 311 0
+ 693 0430 4FF00103 		mov	r3, #1
+ 694 0434 3B71     		strb	r3, [r7, #4]
+ 695 0436 02E0     		b	.L26
+ 696              	.L25:
+ 312:../src/RC5_IR_Emul_Receiver.c ****    }
+ 313:../src/RC5_IR_Emul_Receiver.c ****    else
+ 314:../src/RC5_IR_Emul_Receiver.c ****    {
+ 315:../src/RC5_IR_Emul_Receiver.c ****      RC5_frame_struct.ToggleBit = 0;
+ 697              		.loc 1 315 0
+ 698 0438 4FF00003 		mov	r3, #0
+ 699 043c 3B71     		strb	r3, [r7, #4]
+ 700              	.L26:
+ 316:../src/RC5_IR_Emul_Receiver.c ****    }
+ 317:../src/RC5_IR_Emul_Receiver.c ****   
+ 318:../src/RC5_IR_Emul_Receiver.c ****    /* Get RC5 Address value */
+ 319:../src/RC5_IR_Emul_Receiver.c ****    for(RC5_dataIndex=1; RC5_dataIndex<6; RC5_dataIndex++)
+ 701              		.loc 1 319 0
+ 702 043e 4FF00103 		mov	r3, #1
+ 703 0442 FB60     		str	r3, [r7, #12]
+ 704 0444 18E0     		b	.L27
+ 705              	.L29:
+ 320:../src/RC5_IR_Emul_Receiver.c ****    {
+ 321:../src/RC5_IR_Emul_Receiver.c ****      RC5_frame_struct.Address <<= 1 ;
+ 706              		.loc 1 321 0
+ 707 0446 7B79     		ldrb	r3, [r7, #5]
+ 708 0448 DBB2     		uxtb	r3, r3
+ 709 044a 4FEA4303 		lsl	r3, r3, #1
+ 710 044e DBB2     		uxtb	r3, r3
+ 711 0450 7B71     		strb	r3, [r7, #5]
+ 322:../src/RC5_IR_Emul_Receiver.c ****      if(RC5_data[RC5_dataIndex] & RC5_GPIO_PIN)
+ 712              		.loc 1 322 0
+ 713 0452 314B     		ldr	r3, .L35
+ 714 0454 FA68     		ldr	r2, [r7, #12]
+ 715 0456 33F81230 		ldrh	r3, [r3, r2, lsl #1]	@ movhi
+ 716 045a 9BB2     		uxth	r3, r3
+ 717 045c 03F00203 		and	r3, r3, #2
+ 718 0460 002B     		cmp	r3, #0
+ 719 0462 05D0     		beq	.L28
+ 323:../src/RC5_IR_Emul_Receiver.c ****      {
+ 324:../src/RC5_IR_Emul_Receiver.c ****        RC5_frame_struct.Address |= 1;
+ 720              		.loc 1 324 0
+ 721 0464 7B79     		ldrb	r3, [r7, #5]
+ 722 0466 DBB2     		uxtb	r3, r3
+ 723 0468 43F00103 		orr	r3, r3, #1
+ 724 046c DBB2     		uxtb	r3, r3
+ 725 046e 7B71     		strb	r3, [r7, #5]
+ 726              	.L28:
+ 319:../src/RC5_IR_Emul_Receiver.c ****    for(RC5_dataIndex=1; RC5_dataIndex<6; RC5_dataIndex++)
+ 727              		.loc 1 319 0
+ 728 0470 FB68     		ldr	r3, [r7, #12]
+ 729 0472 03F10103 		add	r3, r3, #1
+ 730 0476 FB60     		str	r3, [r7, #12]
+ 731              	.L27:
+ 319:../src/RC5_IR_Emul_Receiver.c ****    for(RC5_dataIndex=1; RC5_dataIndex<6; RC5_dataIndex++)
+ 732              		.loc 1 319 0 is_stmt 0 discriminator 1
+ 733 0478 FB68     		ldr	r3, [r7, #12]
+ 734 047a 052B     		cmp	r3, #5
+ 735 047c E3D9     		bls	.L29
+ 325:../src/RC5_IR_Emul_Receiver.c ****      }
+ 326:../src/RC5_IR_Emul_Receiver.c ****    }
+ 327:../src/RC5_IR_Emul_Receiver.c ****      
+ 328:../src/RC5_IR_Emul_Receiver.c ****   /* Get RC5 Command value */
+ 329:../src/RC5_IR_Emul_Receiver.c ****   for(RC5_dataIndex=6; RC5_dataIndex<12; RC5_dataIndex++)
+ 736              		.loc 1 329 0 is_stmt 1
+ 737 047e 4FF00603 		mov	r3, #6
+ 738 0482 FB60     		str	r3, [r7, #12]
+ 739 0484 18E0     		b	.L30
+ 740              	.L32:
+ 330:../src/RC5_IR_Emul_Receiver.c ****    {
+ 331:../src/RC5_IR_Emul_Receiver.c ****      RC5_frame_struct.Command <<= 1 ;
+ 741              		.loc 1 331 0
+ 742 0486 BB79     		ldrb	r3, [r7, #6]
+ 743 0488 DBB2     		uxtb	r3, r3
+ 744 048a 4FEA4303 		lsl	r3, r3, #1
+ 745 048e DBB2     		uxtb	r3, r3
+ 746 0490 BB71     		strb	r3, [r7, #6]
+ 332:../src/RC5_IR_Emul_Receiver.c ****      if(RC5_data[RC5_dataIndex] & RC5_GPIO_PIN)
+ 747              		.loc 1 332 0
+ 748 0492 214B     		ldr	r3, .L35
+ 749 0494 FA68     		ldr	r2, [r7, #12]
+ 750 0496 33F81230 		ldrh	r3, [r3, r2, lsl #1]	@ movhi
+ 751 049a 9BB2     		uxth	r3, r3
+ 752 049c 03F00203 		and	r3, r3, #2
+ 753 04a0 002B     		cmp	r3, #0
+ 754 04a2 05D0     		beq	.L31
+ 333:../src/RC5_IR_Emul_Receiver.c ****      {
+ 334:../src/RC5_IR_Emul_Receiver.c ****        RC5_frame_struct.Command |= 1;
+ 755              		.loc 1 334 0
+ 756 04a4 BB79     		ldrb	r3, [r7, #6]
+ 757 04a6 DBB2     		uxtb	r3, r3
+ 758 04a8 43F00103 		orr	r3, r3, #1
+ 759 04ac DBB2     		uxtb	r3, r3
+ 760 04ae BB71     		strb	r3, [r7, #6]
+ 761              	.L31:
+ 329:../src/RC5_IR_Emul_Receiver.c ****   for(RC5_dataIndex=6; RC5_dataIndex<12; RC5_dataIndex++)
+ 762              		.loc 1 329 0
+ 763 04b0 FB68     		ldr	r3, [r7, #12]
+ 764 04b2 03F10103 		add	r3, r3, #1
+ 765 04b6 FB60     		str	r3, [r7, #12]
+ 766              	.L30:
+ 329:../src/RC5_IR_Emul_Receiver.c ****   for(RC5_dataIndex=6; RC5_dataIndex<12; RC5_dataIndex++)
+ 767              		.loc 1 329 0 is_stmt 0 discriminator 1
+ 768 04b8 FB68     		ldr	r3, [r7, #12]
+ 769 04ba 0B2B     		cmp	r3, #11
+ 770 04bc E3D9     		bls	.L32
+ 335:../src/RC5_IR_Emul_Receiver.c ****      }
+ 336:../src/RC5_IR_Emul_Receiver.c ****    }
+ 337:../src/RC5_IR_Emul_Receiver.c ****   
+ 338:../src/RC5_IR_Emul_Receiver.c ****    /* Set the 6th bit of the command regarding of the filed bit value */
+ 339:../src/RC5_IR_Emul_Receiver.c ****    if(FieldBit == 0) /* logic 0 = command from 64 to 127 */
+ 771              		.loc 1 339 0 is_stmt 1
+ 772 04be 174B     		ldr	r3, .L35+4
+ 773 04c0 1B78     		ldrb	r3, [r3, #0]
+ 774 04c2 DBB2     		uxtb	r3, r3
+ 775 04c4 002B     		cmp	r3, #0
+ 776 04c6 05D1     		bne	.L33
+ 340:../src/RC5_IR_Emul_Receiver.c ****    {
+ 341:../src/RC5_IR_Emul_Receiver.c ****      RC5_frame_struct.Command |= 0x40;
+ 777              		.loc 1 341 0
+ 778 04c8 BB79     		ldrb	r3, [r7, #6]
+ 779 04ca DBB2     		uxtb	r3, r3
+ 780 04cc 43F04003 		orr	r3, r3, #64
+ 781 04d0 DBB2     		uxtb	r3, r3
+ 782 04d2 BB71     		strb	r3, [r7, #6]
+ 783              	.L33:
+ 342:../src/RC5_IR_Emul_Receiver.c ****    }
+ 343:../src/RC5_IR_Emul_Receiver.c ****    
+ 344:../src/RC5_IR_Emul_Receiver.c ****    /* Initialize RC5_FrameReceived for next RC5 reception */
+ 345:../src/RC5_IR_Emul_Receiver.c ****    RC5_FrameReceived = NO;  
+ 784              		.loc 1 345 0
+ 785 04d4 124B     		ldr	r3, .L35+8
+ 786 04d6 4FF00002 		mov	r2, #0
+ 787 04da 1A70     		strb	r2, [r3, #0]
+ 346:../src/RC5_IR_Emul_Receiver.c ****   
+ 347:../src/RC5_IR_Emul_Receiver.c ****    /* Wait for next falling edge of RC5 frame*/
+ 348:../src/RC5_IR_Emul_Receiver.c ****    RC5_WaitForNextFallingEdge();
+ 788              		.loc 1 348 0
+ 789 04dc FFF73AFE 		bl	RC5_WaitForNextFallingEdge
+ 349:../src/RC5_IR_Emul_Receiver.c ****   
+ 350:../src/RC5_IR_Emul_Receiver.c ****    /* Return the RC5 struct */ 
+ 351:../src/RC5_IR_Emul_Receiver.c ****    return RC5_frame_struct;
+ 790              		.loc 1 351 0
+ 791 04e0 07F10803 		add	r3, r7, #8
+ 792 04e4 07F10402 		add	r2, r7, #4
+ 793 04e8 1268     		ldr	r2, [r2, #0]
+ 794 04ea 1146     		mov	r1, r2	@ movhi
+ 795 04ec 1980     		strh	r1, [r3, #0]	@ movhi
+ 796 04ee 03F10203 		add	r3, r3, #2
+ 797 04f2 4FEA1242 		lsr	r2, r2, #16
+ 798 04f6 1A70     		strb	r2, [r3, #0]
+ 799 04f8 4FF00003 		mov	r3, #0
+ 800 04fc 3A7A     		ldrb	r2, [r7, #8]	@ zero_extendqisi2
+ 801 04fe 62F30703 		bfi	r3, r2, #0, #8
+ 802 0502 7A7A     		ldrb	r2, [r7, #9]	@ zero_extendqisi2
+ 803 0504 62F30F23 		bfi	r3, r2, #8, #8
+ 804 0508 BA7A     		ldrb	r2, [r7, #10]	@ zero_extendqisi2
+ 805 050a 62F31743 		bfi	r3, r2, #16, #8
+ 352:../src/RC5_IR_Emul_Receiver.c **** }
+ 806              		.loc 1 352 0
+ 807 050e 1846     		mov	r0, r3
+ 808 0510 07F11007 		add	r7, r7, #16
+ 809 0514 BD46     		mov	sp, r7
+ 810 0516 80BD     		pop	{r7, pc}
+ 811              	.L36:
+ 812              		.align	2
+ 813              	.L35:
+ 814 0518 00000000 		.word	RC5_data
+ 815 051c 00000000 		.word	FieldBit
+ 816 0520 00000000 		.word	RC5_FrameReceived
+ 817              		.cfi_endproc
+ 818              	.LFE33:
+ 820              		.align	2
+ 821              		.thumb
+ 822              		.thumb_func
+ 824              	RC5_RCC_Configuration:
+ 825              	.LFB34:
+ 353:../src/RC5_IR_Emul_Receiver.c ****   
+ 354:../src/RC5_IR_Emul_Receiver.c ****   
+ 355:../src/RC5_IR_Emul_Receiver.c **** /**
+ 356:../src/RC5_IR_Emul_Receiver.c ****   * @brief  Configures the different system clocks for RC5 reception.
+ 357:../src/RC5_IR_Emul_Receiver.c ****   * @param  None
+ 358:../src/RC5_IR_Emul_Receiver.c ****   * @retval None
+ 359:../src/RC5_IR_Emul_Receiver.c ****   */
+ 360:../src/RC5_IR_Emul_Receiver.c **** static void RC5_RCC_Configuration(void)
+ 361:../src/RC5_IR_Emul_Receiver.c **** {
+ 826              		.loc 1 361 0
+ 827              		.cfi_startproc
+ 828              		@ args = 0, pretend = 0, frame = 0
+ 829              		@ frame_needed = 1, uses_anonymous_args = 0
+ 830 0524 80B5     		push	{r7, lr}
+ 831              	.LCFI12:
+ 832              		.cfi_def_cfa_offset 8
+ 833              		.cfi_offset 7, -8
+ 834              		.cfi_offset 14, -4
+ 835 0526 00AF     		add	r7, sp, #0
+ 836              	.LCFI13:
+ 837              		.cfi_def_cfa_register 7
+ 362:../src/RC5_IR_Emul_Receiver.c ****  
+ 363:../src/RC5_IR_Emul_Receiver.c ****  if((RC5_TIM == TIM1) || (RC5_TIM == TIM8) || (RC5_TIM == TIM15) ||
+ 364:../src/RC5_IR_Emul_Receiver.c ****    (RC5_TIM == TIM16) || (RC5_TIM == TIM17)
+ 365:../src/RC5_IR_Emul_Receiver.c ****     /* || (RC5_TIM == TIM9) || (RC5_TIM == TIM10) || (RC5_TIM == TIM11)*/)
+ 366:../src/RC5_IR_Emul_Receiver.c ****   {    
+ 367:../src/RC5_IR_Emul_Receiver.c ****     /* RC5_TIM clock enable (APB2) */
+ 368:../src/RC5_IR_Emul_Receiver.c ****     RCC_APB2PeriphClockCmd(RC5_TIM_CLK, ENABLE);
+ 369:../src/RC5_IR_Emul_Receiver.c ****   }
+ 370:../src/RC5_IR_Emul_Receiver.c ****   else if((RC5_TIM == TIM2) || (RC5_TIM == TIM3) || (RC5_TIM == TIM4) ||
+ 371:../src/RC5_IR_Emul_Receiver.c ****           (RC5_TIM == TIM5) || (RC5_TIM == TIM6) || (RC5_TIM == TIM7) 
+ 372:../src/RC5_IR_Emul_Receiver.c ****       /* || (RC5_TIM == TIM12) || (RC5_TIM == TIM13)|| (RC5_TIM == TIM14)*/ )
+ 373:../src/RC5_IR_Emul_Receiver.c ****   {
+ 374:../src/RC5_IR_Emul_Receiver.c ****     /* RC5_TIM clock enable (APB1) */
+ 375:../src/RC5_IR_Emul_Receiver.c ****     RCC_APB1PeriphClockCmd(RC5_TIM_CLK, ENABLE);
+ 838              		.loc 1 375 0
+ 839 0528 4FF00100 		mov	r0, #1
+ 840 052c 4FF00101 		mov	r1, #1
+ 841 0530 FFF7FEFF 		bl	RCC_APB1PeriphClockCmd
+ 376:../src/RC5_IR_Emul_Receiver.c ****   }
+ 377:../src/RC5_IR_Emul_Receiver.c **** 
+ 378:../src/RC5_IR_Emul_Receiver.c **** 
+ 379:../src/RC5_IR_Emul_Receiver.c ****   /* GPIOx clock enable for RC5 input pin */
+ 380:../src/RC5_IR_Emul_Receiver.c ****   RCC_APB2PeriphClockCmd(RC5_GPIO_CLK | RCC_APB2Periph_AFIO , ENABLE);
+ 842              		.loc 1 380 0
+ 843 0534 4FF00900 		mov	r0, #9
+ 844 0538 4FF00101 		mov	r1, #1
+ 845 053c FFF7FEFF 		bl	RCC_APB2PeriphClockCmd
+ 381:../src/RC5_IR_Emul_Receiver.c **** }
+ 846              		.loc 1 381 0
+ 847 0540 80BD     		pop	{r7, pc}
+ 848              		.cfi_endproc
+ 849              	.LFE34:
+ 851 0542 00BF     		.align	2
+ 852              		.thumb
+ 853              		.thumb_func
+ 855              	RC5_GPIO_Configuration:
+ 856              	.LFB35:
+ 382:../src/RC5_IR_Emul_Receiver.c **** 
+ 383:../src/RC5_IR_Emul_Receiver.c **** /**
+ 384:../src/RC5_IR_Emul_Receiver.c ****   * @brief  Configure the RC5 input pin.
+ 385:../src/RC5_IR_Emul_Receiver.c ****   * @param  None
+ 386:../src/RC5_IR_Emul_Receiver.c ****   * @retval None
+ 387:../src/RC5_IR_Emul_Receiver.c ****   */
+ 388:../src/RC5_IR_Emul_Receiver.c **** static void RC5_GPIO_Configuration(void)
+ 389:../src/RC5_IR_Emul_Receiver.c **** {
+ 857              		.loc 1 389 0
+ 858              		.cfi_startproc
+ 859              		@ args = 0, pretend = 0, frame = 8
+ 860              		@ frame_needed = 1, uses_anonymous_args = 0
+ 861 0544 80B5     		push	{r7, lr}
+ 862              	.LCFI14:
+ 863              		.cfi_def_cfa_offset 8
+ 864              		.cfi_offset 7, -8
+ 865              		.cfi_offset 14, -4
+ 866 0546 82B0     		sub	sp, sp, #8
+ 867              	.LCFI15:
+ 868              		.cfi_def_cfa_offset 16
+ 869 0548 00AF     		add	r7, sp, #0
+ 870              	.LCFI16:
+ 871              		.cfi_def_cfa_register 7
+ 390:../src/RC5_IR_Emul_Receiver.c ****   GPIO_InitTypeDef GPIO_InitStructure;
+ 391:../src/RC5_IR_Emul_Receiver.c **** 
+ 392:../src/RC5_IR_Emul_Receiver.c ****   /* RC5 pin configuration: input floating */
+ 393:../src/RC5_IR_Emul_Receiver.c ****   GPIO_InitStructure.GPIO_Pin = RC5_GPIO_PIN;
+ 872              		.loc 1 393 0
+ 873 054a 4FF00203 		mov	r3, #2
+ 874 054e BB80     		strh	r3, [r7, #4]	@ movhi
+ 394:../src/RC5_IR_Emul_Receiver.c ****   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+ 875              		.loc 1 394 0
+ 876 0550 4FF00403 		mov	r3, #4
+ 877 0554 FB71     		strb	r3, [r7, #7]
+ 395:../src/RC5_IR_Emul_Receiver.c ****   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+ 878              		.loc 1 395 0
+ 879 0556 4FF00303 		mov	r3, #3
+ 880 055a BB71     		strb	r3, [r7, #6]
+ 396:../src/RC5_IR_Emul_Receiver.c ****   GPIO_Init(RC5_GPIO_PORT, &GPIO_InitStructure);
+ 881              		.loc 1 396 0
+ 882 055c 07F10403 		add	r3, r7, #4
+ 883 0560 0648     		ldr	r0, .L39
+ 884 0562 1946     		mov	r1, r3
+ 885 0564 FFF7FEFF 		bl	GPIO_Init
+ 397:../src/RC5_IR_Emul_Receiver.c ****   
+ 398:../src/RC5_IR_Emul_Receiver.c ****   /* Connect EXTI Line x to RC5 pin */
+ 399:../src/RC5_IR_Emul_Receiver.c ****   GPIO_EXTILineConfig(RC5_EXTI_PORT_SOURCE, RC5_EXTI_PIN_SOURCE);
+ 886              		.loc 1 399 0
+ 887 0568 4FF00100 		mov	r0, #1
+ 888 056c 4FF00101 		mov	r1, #1
+ 889 0570 FFF7FEFF 		bl	GPIO_EXTILineConfig
+ 400:../src/RC5_IR_Emul_Receiver.c **** }
+ 890              		.loc 1 400 0
+ 891 0574 07F10807 		add	r7, r7, #8
+ 892 0578 BD46     		mov	sp, r7
+ 893 057a 80BD     		pop	{r7, pc}
+ 894              	.L40:
+ 895              		.align	2
+ 896              	.L39:
+ 897 057c 000C0140 		.word	1073810432
+ 898              		.cfi_endproc
+ 899              	.LFE35:
+ 901              		.align	2
+ 902              		.thumb
+ 903              		.thumb_func
+ 905              	RC5_NVIC_Configuration:
+ 906              	.LFB36:
+ 401:../src/RC5_IR_Emul_Receiver.c **** 
+ 402:../src/RC5_IR_Emul_Receiver.c **** /**
+ 403:../src/RC5_IR_Emul_Receiver.c ****   * @brief  Configure the nested vectored interrupt controller for RC5 reception.
+ 404:../src/RC5_IR_Emul_Receiver.c ****   * @param  None
+ 405:../src/RC5_IR_Emul_Receiver.c ****   * @retval None
+ 406:../src/RC5_IR_Emul_Receiver.c ****   */
+ 407:../src/RC5_IR_Emul_Receiver.c **** static void RC5_NVIC_Configuration(void)
+ 408:../src/RC5_IR_Emul_Receiver.c **** {
+ 907              		.loc 1 408 0
+ 908              		.cfi_startproc
+ 909              		@ args = 0, pretend = 0, frame = 8
+ 910              		@ frame_needed = 1, uses_anonymous_args = 0
+ 911 0580 80B5     		push	{r7, lr}
+ 912              	.LCFI17:
+ 913              		.cfi_def_cfa_offset 8
+ 914              		.cfi_offset 7, -8
+ 915              		.cfi_offset 14, -4
+ 916 0582 82B0     		sub	sp, sp, #8
+ 917              	.LCFI18:
+ 918              		.cfi_def_cfa_offset 16
+ 919 0584 00AF     		add	r7, sp, #0
+ 920              	.LCFI19:
+ 921              		.cfi_def_cfa_register 7
+ 409:../src/RC5_IR_Emul_Receiver.c ****   NVIC_InitTypeDef NVIC_InitStructure;
+ 410:../src/RC5_IR_Emul_Receiver.c ****   
+ 411:../src/RC5_IR_Emul_Receiver.c ****   /* Enable the EXTIx global Interrupt */
+ 412:../src/RC5_IR_Emul_Receiver.c ****   NVIC_InitStructure.NVIC_IRQChannel = RC5_EXTI_IRQn;
+ 922              		.loc 1 412 0
+ 923 0586 4FF00703 		mov	r3, #7
+ 924 058a 3B71     		strb	r3, [r7, #4]
+ 413:../src/RC5_IR_Emul_Receiver.c ****   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+ 925              		.loc 1 413 0
+ 926 058c 4FF00003 		mov	r3, #0
+ 927 0590 7B71     		strb	r3, [r7, #5]
+ 414:../src/RC5_IR_Emul_Receiver.c ****   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+ 928              		.loc 1 414 0
+ 929 0592 4FF00103 		mov	r3, #1
+ 930 0596 BB71     		strb	r3, [r7, #6]
+ 415:../src/RC5_IR_Emul_Receiver.c ****   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+ 931              		.loc 1 415 0
+ 932 0598 4FF00103 		mov	r3, #1
+ 933 059c FB71     		strb	r3, [r7, #7]
+ 416:../src/RC5_IR_Emul_Receiver.c ****   NVIC_Init(&NVIC_InitStructure);  
+ 934              		.loc 1 416 0
+ 935 059e 07F10403 		add	r3, r7, #4
+ 936 05a2 1846     		mov	r0, r3
+ 937 05a4 FFF7FEFF 		bl	NVIC_Init
+ 417:../src/RC5_IR_Emul_Receiver.c ****   
+ 418:../src/RC5_IR_Emul_Receiver.c ****   /* Enable the RC5_TIM global Interrupt */
+ 419:../src/RC5_IR_Emul_Receiver.c ****   NVIC_InitStructure.NVIC_IRQChannel = RC5_TIM_IRQn;
+ 938              		.loc 1 419 0
+ 939 05a8 4FF01C03 		mov	r3, #28
+ 940 05ac 3B71     		strb	r3, [r7, #4]
+ 420:../src/RC5_IR_Emul_Receiver.c ****   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+ 941              		.loc 1 420 0
+ 942 05ae 4FF00003 		mov	r3, #0
+ 943 05b2 7B71     		strb	r3, [r7, #5]
+ 421:../src/RC5_IR_Emul_Receiver.c ****   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+ 944              		.loc 1 421 0
+ 945 05b4 4FF00203 		mov	r3, #2
+ 946 05b8 BB71     		strb	r3, [r7, #6]
+ 422:../src/RC5_IR_Emul_Receiver.c ****   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+ 947              		.loc 1 422 0
+ 948 05ba 4FF00103 		mov	r3, #1
+ 949 05be FB71     		strb	r3, [r7, #7]
+ 423:../src/RC5_IR_Emul_Receiver.c ****   NVIC_Init(&NVIC_InitStructure);  
+ 950              		.loc 1 423 0
+ 951 05c0 07F10403 		add	r3, r7, #4
+ 952 05c4 1846     		mov	r0, r3
+ 953 05c6 FFF7FEFF 		bl	NVIC_Init
+ 424:../src/RC5_IR_Emul_Receiver.c **** }
+ 954              		.loc 1 424 0
+ 955 05ca 07F10807 		add	r7, r7, #8
+ 956 05ce BD46     		mov	sp, r7
+ 957 05d0 80BD     		pop	{r7, pc}
+ 958              		.cfi_endproc
+ 959              	.LFE36:
+ 961 05d2 00BF     		.align	2
+ 962              		.thumb
+ 963              		.thumb_func
+ 965              	RC5_TIM_GetCounterCLKValue:
+ 966              	.LFB37:
+ 425:../src/RC5_IR_Emul_Receiver.c **** 
+ 426:../src/RC5_IR_Emul_Receiver.c **** /**
+ 427:../src/RC5_IR_Emul_Receiver.c ****   * @brief  Compute the RC5_TIM frequency input in Hz.
+ 428:../src/RC5_IR_Emul_Receiver.c ****   * @param  None
+ 429:../src/RC5_IR_Emul_Receiver.c ****   * @retval RC5_TIM Frequency value in Hz
+ 430:../src/RC5_IR_Emul_Receiver.c ****   */
+ 431:../src/RC5_IR_Emul_Receiver.c **** static uint32_t RC5_TIM_GetCounterCLKValue(void)
+ 432:../src/RC5_IR_Emul_Receiver.c **** {
+ 967              		.loc 1 432 0
+ 968              		.cfi_startproc
+ 969              		@ args = 0, pretend = 0, frame = 32
+ 970              		@ frame_needed = 1, uses_anonymous_args = 0
+ 971 05d4 80B5     		push	{r7, lr}
+ 972              	.LCFI20:
+ 973              		.cfi_def_cfa_offset 8
+ 974              		.cfi_offset 7, -8
+ 975              		.cfi_offset 14, -4
+ 976 05d6 88B0     		sub	sp, sp, #32
+ 977              	.LCFI21:
+ 978              		.cfi_def_cfa_offset 40
+ 979 05d8 00AF     		add	r7, sp, #0
+ 980              	.LCFI22:
+ 981              		.cfi_def_cfa_register 7
+ 433:../src/RC5_IR_Emul_Receiver.c ****   uint32_t apbprescaler = 0, apbfrequency = 0;
+ 982              		.loc 1 433 0
+ 983 05da 4FF00003 		mov	r3, #0
+ 984 05de FB61     		str	r3, [r7, #28]
+ 985 05e0 4FF00003 		mov	r3, #0
+ 986 05e4 BB61     		str	r3, [r7, #24]
+ 434:../src/RC5_IR_Emul_Receiver.c ****   
+ 435:../src/RC5_IR_Emul_Receiver.c ****   RCC_ClocksTypeDef RCC_ClockFreq;
+ 436:../src/RC5_IR_Emul_Receiver.c ****   
+ 437:../src/RC5_IR_Emul_Receiver.c ****   /* This function fills the RCC_ClockFreq structure with the current
+ 438:../src/RC5_IR_Emul_Receiver.c ****      frequencies of different on chip clocks */
+ 439:../src/RC5_IR_Emul_Receiver.c ****   RCC_GetClocksFreq(&RCC_ClockFreq);
+ 987              		.loc 1 439 0
+ 988 05e6 07F10403 		add	r3, r7, #4
+ 989 05ea 1846     		mov	r0, r3
+ 990 05ec FFF7FEFF 		bl	RCC_GetClocksFreq
+ 440:../src/RC5_IR_Emul_Receiver.c ****   
+ 441:../src/RC5_IR_Emul_Receiver.c ****   if((RC5_TIM == TIM1) || (RC5_TIM == TIM8) || (RC5_TIM == TIM15) ||
+ 442:../src/RC5_IR_Emul_Receiver.c ****      (RC5_TIM == TIM16) || (RC5_TIM == TIM17)
+ 443:../src/RC5_IR_Emul_Receiver.c ****       /* || (RC5_TIM == TIM9) || (RC5_TIM == TIM10) || (RC5_TIM == TIM11)*/)
+ 444:../src/RC5_IR_Emul_Receiver.c ****   {    
+ 445:../src/RC5_IR_Emul_Receiver.c ****     /* Get the clock prescaler of APB2 */
+ 446:../src/RC5_IR_Emul_Receiver.c ****     apbprescaler = ((RCC->CFGR >> 11) & 0x7);
+ 447:../src/RC5_IR_Emul_Receiver.c ****     apbfrequency = RCC_ClockFreq.PCLK2_Frequency;
+ 448:../src/RC5_IR_Emul_Receiver.c ****   }
+ 449:../src/RC5_IR_Emul_Receiver.c ****   else if((RC5_TIM == TIM2) || (RC5_TIM == TIM3) || (RC5_TIM == TIM4) ||
+ 450:../src/RC5_IR_Emul_Receiver.c ****           (RC5_TIM == TIM5) || (RC5_TIM == TIM6) || (RC5_TIM == TIM7) 
+ 451:../src/RC5_IR_Emul_Receiver.c ****       /* || (RC5_TIM == TIM12) || (RC5_TIM == TIM13)|| (RC5_TIM == TIM14)*/ )
+ 452:../src/RC5_IR_Emul_Receiver.c ****   {
+ 453:../src/RC5_IR_Emul_Receiver.c ****     /* Get the clock prescaler of APB1 */
+ 454:../src/RC5_IR_Emul_Receiver.c ****     apbprescaler = ((RCC->CFGR >> 8) & 0x7);
+ 991              		.loc 1 454 0
+ 992 05f0 0F4B     		ldr	r3, .L46
+ 993 05f2 5B68     		ldr	r3, [r3, #4]
+ 994 05f4 4FEA1323 		lsr	r3, r3, #8
+ 995 05f8 03F00703 		and	r3, r3, #7
+ 996 05fc FB61     		str	r3, [r7, #28]
+ 455:../src/RC5_IR_Emul_Receiver.c ****     apbfrequency = RCC_ClockFreq.PCLK1_Frequency;  
+ 997              		.loc 1 455 0
+ 998 05fe FB68     		ldr	r3, [r7, #12]
+ 999 0600 BB61     		str	r3, [r7, #24]
+ 456:../src/RC5_IR_Emul_Receiver.c ****   }
+ 457:../src/RC5_IR_Emul_Receiver.c ****   
+ 458:../src/RC5_IR_Emul_Receiver.c ****   /* If APBx clock div >= 4 */
+ 459:../src/RC5_IR_Emul_Receiver.c ****   if (apbprescaler >= 4)
+ 1000              		.loc 1 459 0
+ 1001 0602 FB69     		ldr	r3, [r7, #28]
+ 1002 0604 032B     		cmp	r3, #3
+ 1003 0606 08D9     		bls	.L43
+ 460:../src/RC5_IR_Emul_Receiver.c ****   {
+ 461:../src/RC5_IR_Emul_Receiver.c ****     return ((apbfrequency * 2)/(RC5_TIM_PRESCALER + 1));
+ 1004              		.loc 1 461 0
+ 1005 0608 BB69     		ldr	r3, [r7, #24]
+ 1006 060a 4FEA4302 		lsl	r2, r3, #1
+ 1007 060e 094B     		ldr	r3, .L46+4
+ 1008 0610 A3FB0213 		umull	r1, r3, r3, r2
+ 1009 0614 4FEA5303 		lsr	r3, r3, #1
+ 1010 0618 05E0     		b	.L45
+ 1011              	.L43:
+ 462:../src/RC5_IR_Emul_Receiver.c ****   }
+ 463:../src/RC5_IR_Emul_Receiver.c ****   else
+ 464:../src/RC5_IR_Emul_Receiver.c ****   {
+ 465:../src/RC5_IR_Emul_Receiver.c ****     return (apbfrequency/(RC5_TIM_PRESCALER + 1));
+ 1012              		.loc 1 465 0
+ 1013 061a BA69     		ldr	r2, [r7, #24]
+ 1014 061c 054B     		ldr	r3, .L46+4
+ 1015 061e A3FB0213 		umull	r1, r3, r3, r2
+ 1016 0622 4FEA5303 		lsr	r3, r3, #1
+ 1017              	.L45:
+ 466:../src/RC5_IR_Emul_Receiver.c ****   }
+ 467:../src/RC5_IR_Emul_Receiver.c **** }
+ 1018              		.loc 1 467 0
+ 1019 0626 1846     		mov	r0, r3
+ 1020 0628 07F12007 		add	r7, r7, #32
+ 1021 062c BD46     		mov	sp, r7
+ 1022 062e 80BD     		pop	{r7, pc}
+ 1023              	.L47:
+ 1024              		.align	2
+ 1025              	.L46:
+ 1026 0630 00100240 		.word	1073876992
+ 1027 0634 ABAAAAAA 		.word	-1431655765
+ 1028              		.cfi_endproc
+ 1029              	.LFE37:
+ 1031              	.Letext0:
+ 1032              		.file 2 "c:\\program files (x86)\\codesourcery\\sourcery_codebench_lite_for_arm_eabi\\bin\\../lib/
+ 1033              		.file 3 "C:\\Users\\PC108\\Export_project\\stm32_ld_vl\\CMSIS/stm32f10x.h"
+ 1034              		.file 4 "C:\\Users\\PC108\\Export_project\\stm32_ld_vl\\SPL\\inc/stm32f10x_exti.h"
+ 1035              		.file 5 "C:\\Users\\PC108\\Export_project\\stm32_ld_vl\\SPL\\inc/stm32f10x_gpio.h"
+ 1036              		.file 6 "C:\\Users\\PC108\\Export_project\\stm32_ld_vl\\SPL\\inc/stm32f10x_rcc.h"
+ 1037              		.file 7 "C:\\Users\\PC108\\Export_project\\stm32_ld_vl\\SPL\\inc/stm32f10x_tim.h"
+ 1038              		.file 8 "C:\\Users\\PC108\\Export_project\\stm32_ld_vl\\SPL\\inc/misc.h"
+ 1039              		.file 9 "C:\\Users\\PC108\\Export_project\\stm32_ld_vl\\inc/RC5_IR_Emul_Receiver.h"
+ 1040              		.file 10 "C:\\Users\\PC108\\Export_project\\stm32_ld_vl\\CMSIS/core_cm3.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 RC5_IR_Emul_Receiver.c
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:22     .bss:00000000 EdgesNumber
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:23     .bss:00000000 $d
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:27     .bss:00000001 Bit4_HasBeen_Sampled
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:32     .bss:00000002 RC5_FrameReceived
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:38     .data:00000000 BitTimeStatus
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:44     .bss:00000003 FieldBit
+                            *COM*:0000001a RC5_data
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:50     .bss:00000004 RC5_Indexdata
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:56     .bss:00000006 LowDuration
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:62     .bss:00000008 RC5_TIM_CLKValuekHz
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:68     .bss:0000000c HalfBitDurationCount_Min
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:74     .bss:0000000e HalfBitDurationCount_Max
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:80     .bss:00000010 NominalHalfBitDurationCount
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:86     .bss:00000012 FullBitDurationCount_Min
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:92     .bss:00000014 FullBitDurationCount_Max
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:98     .bss:00000016 NominalBitDurationCount
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:104    .bss:00000018 NominalBitDurationCount_3div4
+                            *COM*:0000000a TIM_TimeBaseStructure
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:108    .text:00000000 $t
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:113    .text:00000000 RC5_Receiver_Init
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:824    .text:00000524 RC5_RCC_Configuration
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:905    .text:00000580 RC5_NVIC_Configuration
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:855    .text:00000544 RC5_GPIO_Configuration
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:965    .text:000005d4 RC5_TIM_GetCounterCLKValue
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:276    .text:00000154 RC5_WaitForNextFallingEdge
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:260    .text:00000130 $d
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:272    .text:00000154 $t
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:328    .text:000001a4 $d
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:333    .text:000001ac $t
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:338    .text:000001ac RC5_Sample_Data
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:426    .text:00000248 $d
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:435    .text:00000260 $t
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:440    .text:00000260 RC5_MeasureFirstLowDuration
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:638    .text:000003dc $d
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:651    .text:00000404 $t
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:656    .text:00000404 RC5_Decode
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:814    .text:00000518 $d
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:820    .text:00000524 $t
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:897    .text:0000057c $d
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:901    .text:00000580 $t
+C:\Users\PC108\AppData\Local\Temp\cc1igZJJ.s:1026   .text:00000630 $d
+                     .debug_frame:00000010 $d
+                           .group:00000000 wm4.1.9001f459856fa07d79ce9793bb17c6cd
+                           .group:00000000 wm4.stm32f10x.h.51.b859cb68ed44ee02c916b41cb8c68f1c
+                           .group:00000000 wm4.core_cm3.h.25.d35e9a9b04ec4aaebae9bf79fff061f9
+                           .group:00000000 wm4.stdint.h.10.90b695f550ca6cc3fb08fa83baf01e05
+                           .group:00000000 wm4.core_cm3.h.113.b286929a54d33b4c8909a7132437b244
+                           .group:00000000 wm4.stm32f10x.h.522.115ebb8291fa96f8c9e0b9a9b670f703
+                           .group:00000000 wm4.stm32f10x_exti.h.56.8b2f216f9ded9d03a9eb42ed6973fc04
+                           .group:00000000 wm4.stm32f10x_gpio.h.25.80c981af0e637567395034c576cfb3ce
+                           .group:00000000 wm4.stm32f10x_rcc.h.25.fe8897e7491f2eb0cff54551d08eb765
+                           .group:00000000 wm4.stm32f10x_tim.h.25.21c6ec062f1e74898cb96a57da276fec
+                           .group:00000000 wm4.stm32f10x_usart.h.25.29629c699b65db3f3efd3561f66b0bf6
+                           .group:00000000 wm4.misc.h.25.068e106f368fa5369a681ef57c106f4b
+                           .group:00000000 wm4.stm32f10x.h.8304.f7d8ad90959e99679b3257267c3aadfe
+                           .group:00000000 wm4.RC5_IR_Emul_Receiver.h.23.514b849e0fcde80a7fd70e659ba7c460
+
+UNDEFINED SYMBOLS
+EXTI_ClearITPendingBit
+EXTI_Init
+TIM_DeInit
+TIM_TimeBaseInit
+TIM_ClearITPendingBit
+TIM_GetITStatus
+TIM_ITConfig
+TIM_Cmd
+EXTI_GetITStatus
+RCC_APB1PeriphClockCmd
+RCC_APB2PeriphClockCmd
+GPIO_Init
+GPIO_EXTILineConfig
+NVIC_Init
+RCC_GetClocksFreq

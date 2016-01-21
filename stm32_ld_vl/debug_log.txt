@@ -1,0 +1,2 @@
+[0.049]  STM32_InitDevice():  Device connect error
+[0.050]  init_server_context():  Error in Initializing ST-Link device

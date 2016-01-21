@@ -1,0 +1,1098 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"stm32f10x_exti.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	EXTI_DeInit
+  20              		.thumb
+  21              		.thumb_func
+  23              	EXTI_DeInit:
+  24              	.LFB29:
+  25              		.file 1 "../SPL/src/stm32f10x_exti.c"
+   1:../SPL/src/stm32f10x_exti.c **** /**
+   2:../SPL/src/stm32f10x_exti.c ****   ******************************************************************************
+   3:../SPL/src/stm32f10x_exti.c ****   * @file    stm32f10x_exti.c
+   4:../SPL/src/stm32f10x_exti.c ****   * @author  MCD Application Team
+   5:../SPL/src/stm32f10x_exti.c ****   * @version V3.5.0
+   6:../SPL/src/stm32f10x_exti.c ****   * @date    11-March-2011
+   7:../SPL/src/stm32f10x_exti.c ****   * @brief   This file provides all the EXTI firmware functions.
+   8:../SPL/src/stm32f10x_exti.c ****   ******************************************************************************
+   9:../SPL/src/stm32f10x_exti.c ****   * @attention
+  10:../SPL/src/stm32f10x_exti.c ****   *
+  11:../SPL/src/stm32f10x_exti.c ****   * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+  12:../SPL/src/stm32f10x_exti.c ****   * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+  13:../SPL/src/stm32f10x_exti.c ****   * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+  14:../SPL/src/stm32f10x_exti.c ****   * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+  15:../SPL/src/stm32f10x_exti.c ****   * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+  16:../SPL/src/stm32f10x_exti.c ****   * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+  17:../SPL/src/stm32f10x_exti.c ****   *
+  18:../SPL/src/stm32f10x_exti.c ****   * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  19:../SPL/src/stm32f10x_exti.c ****   ******************************************************************************
+  20:../SPL/src/stm32f10x_exti.c ****   */
+  21:../SPL/src/stm32f10x_exti.c **** 
+  22:../SPL/src/stm32f10x_exti.c **** /* Includes ------------------------------------------------------------------*/
+  23:../SPL/src/stm32f10x_exti.c **** #include "stm32f10x_exti.h"
+  24:../SPL/src/stm32f10x_exti.c **** 
+  25:../SPL/src/stm32f10x_exti.c **** /** @addtogroup STM32F10x_StdPeriph_Driver
+  26:../SPL/src/stm32f10x_exti.c ****   * @{
+  27:../SPL/src/stm32f10x_exti.c ****   */
+  28:../SPL/src/stm32f10x_exti.c **** 
+  29:../SPL/src/stm32f10x_exti.c **** /** @defgroup EXTI 
+  30:../SPL/src/stm32f10x_exti.c ****   * @brief EXTI driver modules
+  31:../SPL/src/stm32f10x_exti.c ****   * @{
+  32:../SPL/src/stm32f10x_exti.c ****   */
+  33:../SPL/src/stm32f10x_exti.c **** 
+  34:../SPL/src/stm32f10x_exti.c **** /** @defgroup EXTI_Private_TypesDefinitions
+  35:../SPL/src/stm32f10x_exti.c ****   * @{
+  36:../SPL/src/stm32f10x_exti.c ****   */
+  37:../SPL/src/stm32f10x_exti.c **** 
+  38:../SPL/src/stm32f10x_exti.c **** /**
+  39:../SPL/src/stm32f10x_exti.c ****   * @}
+  40:../SPL/src/stm32f10x_exti.c ****   */
+  41:../SPL/src/stm32f10x_exti.c **** 
+  42:../SPL/src/stm32f10x_exti.c **** /** @defgroup EXTI_Private_Defines
+  43:../SPL/src/stm32f10x_exti.c ****   * @{
+  44:../SPL/src/stm32f10x_exti.c ****   */
+  45:../SPL/src/stm32f10x_exti.c **** 
+  46:../SPL/src/stm32f10x_exti.c **** #define EXTI_LINENONE    ((uint32_t)0x00000)  /* No interrupt selected */
+  47:../SPL/src/stm32f10x_exti.c **** 
+  48:../SPL/src/stm32f10x_exti.c **** /**
+  49:../SPL/src/stm32f10x_exti.c ****   * @}
+  50:../SPL/src/stm32f10x_exti.c ****   */
+  51:../SPL/src/stm32f10x_exti.c **** 
+  52:../SPL/src/stm32f10x_exti.c **** /** @defgroup EXTI_Private_Macros
+  53:../SPL/src/stm32f10x_exti.c ****   * @{
+  54:../SPL/src/stm32f10x_exti.c ****   */
+  55:../SPL/src/stm32f10x_exti.c **** 
+  56:../SPL/src/stm32f10x_exti.c **** /**
+  57:../SPL/src/stm32f10x_exti.c ****   * @}
+  58:../SPL/src/stm32f10x_exti.c ****   */
+  59:../SPL/src/stm32f10x_exti.c **** 
+  60:../SPL/src/stm32f10x_exti.c **** /** @defgroup EXTI_Private_Variables
+  61:../SPL/src/stm32f10x_exti.c ****   * @{
+  62:../SPL/src/stm32f10x_exti.c ****   */
+  63:../SPL/src/stm32f10x_exti.c **** 
+  64:../SPL/src/stm32f10x_exti.c **** /**
+  65:../SPL/src/stm32f10x_exti.c ****   * @}
+  66:../SPL/src/stm32f10x_exti.c ****   */
+  67:../SPL/src/stm32f10x_exti.c **** 
+  68:../SPL/src/stm32f10x_exti.c **** /** @defgroup EXTI_Private_FunctionPrototypes
+  69:../SPL/src/stm32f10x_exti.c ****   * @{
+  70:../SPL/src/stm32f10x_exti.c ****   */
+  71:../SPL/src/stm32f10x_exti.c **** 
+  72:../SPL/src/stm32f10x_exti.c **** /**
+  73:../SPL/src/stm32f10x_exti.c ****   * @}
+  74:../SPL/src/stm32f10x_exti.c ****   */
+  75:../SPL/src/stm32f10x_exti.c **** 
+  76:../SPL/src/stm32f10x_exti.c **** /** @defgroup EXTI_Private_Functions
+  77:../SPL/src/stm32f10x_exti.c ****   * @{
+  78:../SPL/src/stm32f10x_exti.c ****   */
+  79:../SPL/src/stm32f10x_exti.c **** 
+  80:../SPL/src/stm32f10x_exti.c **** /**
+  81:../SPL/src/stm32f10x_exti.c ****   * @brief  Deinitializes the EXTI peripheral registers to their default reset values.
+  82:../SPL/src/stm32f10x_exti.c ****   * @param  None
+  83:../SPL/src/stm32f10x_exti.c ****   * @retval None
+  84:../SPL/src/stm32f10x_exti.c ****   */
+  85:../SPL/src/stm32f10x_exti.c **** void EXTI_DeInit(void)
+  86:../SPL/src/stm32f10x_exti.c **** {
+  26              		.loc 1 86 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 0
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30              		@ link register save eliminated.
+  31 0000 80B4     		push	{r7}
+  32              	.LCFI0:
+  33              		.cfi_def_cfa_offset 4
+  34              		.cfi_offset 7, -4
+  35 0002 00AF     		add	r7, sp, #0
+  36              	.LCFI1:
+  37              		.cfi_def_cfa_register 7
+  87:../SPL/src/stm32f10x_exti.c ****   EXTI->IMR = 0x00000000;
+  38              		.loc 1 87 0
+  39 0004 0A4B     		ldr	r3, .L2
+  40 0006 4FF00002 		mov	r2, #0
+  41 000a 1A60     		str	r2, [r3, #0]
+  88:../SPL/src/stm32f10x_exti.c ****   EXTI->EMR = 0x00000000;
+  42              		.loc 1 88 0
+  43 000c 084B     		ldr	r3, .L2
+  44 000e 4FF00002 		mov	r2, #0
+  45 0012 5A60     		str	r2, [r3, #4]
+  89:../SPL/src/stm32f10x_exti.c ****   EXTI->RTSR = 0x00000000; 
+  46              		.loc 1 89 0
+  47 0014 064B     		ldr	r3, .L2
+  48 0016 4FF00002 		mov	r2, #0
+  49 001a 9A60     		str	r2, [r3, #8]
+  90:../SPL/src/stm32f10x_exti.c ****   EXTI->FTSR = 0x00000000; 
+  50              		.loc 1 90 0
+  51 001c 044B     		ldr	r3, .L2
+  52 001e 4FF00002 		mov	r2, #0
+  53 0022 DA60     		str	r2, [r3, #12]
+  91:../SPL/src/stm32f10x_exti.c ****   EXTI->PR = 0x000FFFFF;
+  54              		.loc 1 91 0
+  55 0024 024B     		ldr	r3, .L2
+  56 0026 034A     		ldr	r2, .L2+4
+  57 0028 5A61     		str	r2, [r3, #20]
+  92:../SPL/src/stm32f10x_exti.c **** }
+  58              		.loc 1 92 0
+  59 002a BD46     		mov	sp, r7
+  60 002c 80BC     		pop	{r7}
+  61 002e 7047     		bx	lr
+  62              	.L3:
+  63              		.align	2
+  64              	.L2:
+  65 0030 00040140 		.word	1073808384
+  66 0034 FFFF0F00 		.word	1048575
+  67              		.cfi_endproc
+  68              	.LFE29:
+  70              		.section	.rodata
+  71              		.align	2
+  72              	.LC0:
+  73 0000 2E2E2F53 		.ascii	"../SPL/src/stm32f10x_exti.c\000"
+  73      504C2F73 
+  73      72632F73 
+  73      746D3332 
+  73      66313078 
+  74              		.text
+  75              		.align	2
+  76              		.global	EXTI_Init
+  77              		.thumb
+  78              		.thumb_func
+  80              	EXTI_Init:
+  81              	.LFB30:
+  93:../SPL/src/stm32f10x_exti.c **** 
+  94:../SPL/src/stm32f10x_exti.c **** /**
+  95:../SPL/src/stm32f10x_exti.c ****   * @brief  Initializes the EXTI peripheral according to the specified
+  96:../SPL/src/stm32f10x_exti.c ****   *         parameters in the EXTI_InitStruct.
+  97:../SPL/src/stm32f10x_exti.c ****   * @param  EXTI_InitStruct: pointer to a EXTI_InitTypeDef structure
+  98:../SPL/src/stm32f10x_exti.c ****   *         that contains the configuration information for the EXTI peripheral.
+  99:../SPL/src/stm32f10x_exti.c ****   * @retval None
+ 100:../SPL/src/stm32f10x_exti.c ****   */
+ 101:../SPL/src/stm32f10x_exti.c **** void EXTI_Init(EXTI_InitTypeDef* EXTI_InitStruct)
+ 102:../SPL/src/stm32f10x_exti.c **** {
+  82              		.loc 1 102 0
+  83              		.cfi_startproc
+  84              		@ args = 0, pretend = 0, frame = 16
+  85              		@ frame_needed = 1, uses_anonymous_args = 0
+  86 0038 80B5     		push	{r7, lr}
+  87              	.LCFI2:
+  88              		.cfi_def_cfa_offset 8
+  89              		.cfi_offset 7, -8
+  90              		.cfi_offset 14, -4
+  91 003a 84B0     		sub	sp, sp, #16
+  92              	.LCFI3:
+  93              		.cfi_def_cfa_offset 24
+  94 003c 00AF     		add	r7, sp, #0
+  95              	.LCFI4:
+  96              		.cfi_def_cfa_register 7
+  97 003e 7860     		str	r0, [r7, #4]
+ 103:../SPL/src/stm32f10x_exti.c ****   uint32_t tmp = 0;
+  98              		.loc 1 103 0
+  99 0040 4FF00003 		mov	r3, #0
+ 100 0044 FB60     		str	r3, [r7, #12]
+ 104:../SPL/src/stm32f10x_exti.c **** 
+ 105:../SPL/src/stm32f10x_exti.c ****   /* Check the parameters */
+ 106:../SPL/src/stm32f10x_exti.c ****   assert_param(IS_EXTI_MODE(EXTI_InitStruct->EXTI_Mode));
+ 101              		.loc 1 106 0
+ 102 0046 7B68     		ldr	r3, [r7, #4]
+ 103 0048 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 104 004a 002B     		cmp	r3, #0
+ 105 004c 08D0     		beq	.L5
+ 106              		.loc 1 106 0 is_stmt 0 discriminator 1
+ 107 004e 7B68     		ldr	r3, [r7, #4]
+ 108 0050 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 109 0052 042B     		cmp	r3, #4
+ 110 0054 04D0     		beq	.L5
+ 111              		.loc 1 106 0 discriminator 2
+ 112 0056 4F48     		ldr	r0, .L13
+ 113 0058 4FF06A01 		mov	r1, #106
+ 114 005c FFF7FEFF 		bl	assert_failed
+ 115              	.L5:
+ 107:../SPL/src/stm32f10x_exti.c ****   assert_param(IS_EXTI_TRIGGER(EXTI_InitStruct->EXTI_Trigger));
+ 116              		.loc 1 107 0 is_stmt 1
+ 117 0060 7B68     		ldr	r3, [r7, #4]
+ 118 0062 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 119 0064 082B     		cmp	r3, #8
+ 120 0066 0CD0     		beq	.L6
+ 121              		.loc 1 107 0 is_stmt 0 discriminator 1
+ 122 0068 7B68     		ldr	r3, [r7, #4]
+ 123 006a 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 124 006c 0C2B     		cmp	r3, #12
+ 125 006e 08D0     		beq	.L6
+ 126              		.loc 1 107 0 discriminator 2
+ 127 0070 7B68     		ldr	r3, [r7, #4]
+ 128 0072 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 129 0074 102B     		cmp	r3, #16
+ 130 0076 04D0     		beq	.L6
+ 131              		.loc 1 107 0 discriminator 3
+ 132 0078 4648     		ldr	r0, .L13
+ 133 007a 4FF06B01 		mov	r1, #107
+ 134 007e FFF7FEFF 		bl	assert_failed
+ 135              	.L6:
+ 108:../SPL/src/stm32f10x_exti.c ****   assert_param(IS_EXTI_LINE(EXTI_InitStruct->EXTI_Line));  
+ 136              		.loc 1 108 0 is_stmt 1
+ 137 0082 7B68     		ldr	r3, [r7, #4]
+ 138 0084 1B68     		ldr	r3, [r3, #0]
+ 139 0086 4FEA1353 		lsr	r3, r3, #20
+ 140 008a 4FEA0353 		lsl	r3, r3, #20
+ 141 008e 002B     		cmp	r3, #0
+ 142 0090 03D1     		bne	.L7
+ 143              		.loc 1 108 0 is_stmt 0 discriminator 2
+ 144 0092 7B68     		ldr	r3, [r7, #4]
+ 145 0094 1B68     		ldr	r3, [r3, #0]
+ 146 0096 002B     		cmp	r3, #0
+ 147 0098 04D1     		bne	.L8
+ 148              	.L7:
+ 149              		.loc 1 108 0 discriminator 1
+ 150 009a 3E48     		ldr	r0, .L13
+ 151 009c 4FF06C01 		mov	r1, #108
+ 152 00a0 FFF7FEFF 		bl	assert_failed
+ 153              	.L8:
+ 109:../SPL/src/stm32f10x_exti.c ****   assert_param(IS_FUNCTIONAL_STATE(EXTI_InitStruct->EXTI_LineCmd));
+ 154              		.loc 1 109 0 is_stmt 1
+ 155 00a4 7B68     		ldr	r3, [r7, #4]
+ 156 00a6 9B79     		ldrb	r3, [r3, #6]	@ zero_extendqisi2
+ 157 00a8 002B     		cmp	r3, #0
+ 158 00aa 08D0     		beq	.L9
+ 159              		.loc 1 109 0 is_stmt 0 discriminator 1
+ 160 00ac 7B68     		ldr	r3, [r7, #4]
+ 161 00ae 9B79     		ldrb	r3, [r3, #6]	@ zero_extendqisi2
+ 162 00b0 012B     		cmp	r3, #1
+ 163 00b2 04D0     		beq	.L9
+ 164              		.loc 1 109 0 discriminator 2
+ 165 00b4 3748     		ldr	r0, .L13
+ 166 00b6 4FF06D01 		mov	r1, #109
+ 167 00ba FFF7FEFF 		bl	assert_failed
+ 168              	.L9:
+ 110:../SPL/src/stm32f10x_exti.c **** 
+ 111:../SPL/src/stm32f10x_exti.c ****   tmp = (uint32_t)EXTI_BASE;
+ 169              		.loc 1 111 0 is_stmt 1
+ 170 00be 364B     		ldr	r3, .L13+4
+ 171 00c0 FB60     		str	r3, [r7, #12]
+ 112:../SPL/src/stm32f10x_exti.c ****      
+ 113:../SPL/src/stm32f10x_exti.c ****   if (EXTI_InitStruct->EXTI_LineCmd != DISABLE)
+ 172              		.loc 1 113 0
+ 173 00c2 7B68     		ldr	r3, [r7, #4]
+ 174 00c4 9B79     		ldrb	r3, [r3, #6]	@ zero_extendqisi2
+ 175 00c6 002B     		cmp	r3, #0
+ 176 00c8 51D0     		beq	.L10
+ 114:../SPL/src/stm32f10x_exti.c ****   {
+ 115:../SPL/src/stm32f10x_exti.c ****     /* Clear EXTI line configuration */
+ 116:../SPL/src/stm32f10x_exti.c ****     EXTI->IMR &= ~EXTI_InitStruct->EXTI_Line;
+ 177              		.loc 1 116 0
+ 178 00ca 334B     		ldr	r3, .L13+4
+ 179 00cc 324A     		ldr	r2, .L13+4
+ 180 00ce 1168     		ldr	r1, [r2, #0]
+ 181 00d0 7A68     		ldr	r2, [r7, #4]
+ 182 00d2 1268     		ldr	r2, [r2, #0]
+ 183 00d4 6FEA0202 		mvn	r2, r2
+ 184 00d8 0A40     		ands	r2, r2, r1
+ 185 00da 1A60     		str	r2, [r3, #0]
+ 117:../SPL/src/stm32f10x_exti.c ****     EXTI->EMR &= ~EXTI_InitStruct->EXTI_Line;
+ 186              		.loc 1 117 0
+ 187 00dc 2E4B     		ldr	r3, .L13+4
+ 188 00de 2E4A     		ldr	r2, .L13+4
+ 189 00e0 5168     		ldr	r1, [r2, #4]
+ 190 00e2 7A68     		ldr	r2, [r7, #4]
+ 191 00e4 1268     		ldr	r2, [r2, #0]
+ 192 00e6 6FEA0202 		mvn	r2, r2
+ 193 00ea 0A40     		ands	r2, r2, r1
+ 194 00ec 5A60     		str	r2, [r3, #4]
+ 118:../SPL/src/stm32f10x_exti.c ****     
+ 119:../SPL/src/stm32f10x_exti.c ****     tmp += EXTI_InitStruct->EXTI_Mode;
+ 195              		.loc 1 119 0
+ 196 00ee 7B68     		ldr	r3, [r7, #4]
+ 197 00f0 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 198 00f2 FA68     		ldr	r2, [r7, #12]
+ 199 00f4 D318     		adds	r3, r2, r3
+ 200 00f6 FB60     		str	r3, [r7, #12]
+ 120:../SPL/src/stm32f10x_exti.c **** 
+ 121:../SPL/src/stm32f10x_exti.c ****     *(__IO uint32_t *) tmp |= EXTI_InitStruct->EXTI_Line;
+ 201              		.loc 1 121 0
+ 202 00f8 FB68     		ldr	r3, [r7, #12]
+ 203 00fa FA68     		ldr	r2, [r7, #12]
+ 204 00fc 1168     		ldr	r1, [r2, #0]
+ 205 00fe 7A68     		ldr	r2, [r7, #4]
+ 206 0100 1268     		ldr	r2, [r2, #0]
+ 207 0102 0A43     		orrs	r2, r2, r1
+ 208 0104 1A60     		str	r2, [r3, #0]
+ 122:../SPL/src/stm32f10x_exti.c **** 
+ 123:../SPL/src/stm32f10x_exti.c ****     /* Clear Rising Falling edge configuration */
+ 124:../SPL/src/stm32f10x_exti.c ****     EXTI->RTSR &= ~EXTI_InitStruct->EXTI_Line;
+ 209              		.loc 1 124 0
+ 210 0106 244B     		ldr	r3, .L13+4
+ 211 0108 234A     		ldr	r2, .L13+4
+ 212 010a 9168     		ldr	r1, [r2, #8]
+ 213 010c 7A68     		ldr	r2, [r7, #4]
+ 214 010e 1268     		ldr	r2, [r2, #0]
+ 215 0110 6FEA0202 		mvn	r2, r2
+ 216 0114 0A40     		ands	r2, r2, r1
+ 217 0116 9A60     		str	r2, [r3, #8]
+ 125:../SPL/src/stm32f10x_exti.c ****     EXTI->FTSR &= ~EXTI_InitStruct->EXTI_Line;
+ 218              		.loc 1 125 0
+ 219 0118 1F4B     		ldr	r3, .L13+4
+ 220 011a 1F4A     		ldr	r2, .L13+4
+ 221 011c D168     		ldr	r1, [r2, #12]
+ 222 011e 7A68     		ldr	r2, [r7, #4]
+ 223 0120 1268     		ldr	r2, [r2, #0]
+ 224 0122 6FEA0202 		mvn	r2, r2
+ 225 0126 0A40     		ands	r2, r2, r1
+ 226 0128 DA60     		str	r2, [r3, #12]
+ 126:../SPL/src/stm32f10x_exti.c ****     
+ 127:../SPL/src/stm32f10x_exti.c ****     /* Select the trigger for the selected external interrupts */
+ 128:../SPL/src/stm32f10x_exti.c ****     if (EXTI_InitStruct->EXTI_Trigger == EXTI_Trigger_Rising_Falling)
+ 227              		.loc 1 128 0
+ 228 012a 7B68     		ldr	r3, [r7, #4]
+ 229 012c 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 230 012e 102B     		cmp	r3, #16
+ 231 0130 0ED1     		bne	.L11
+ 129:../SPL/src/stm32f10x_exti.c ****     {
+ 130:../SPL/src/stm32f10x_exti.c ****       /* Rising Falling edge */
+ 131:../SPL/src/stm32f10x_exti.c ****       EXTI->RTSR |= EXTI_InitStruct->EXTI_Line;
+ 232              		.loc 1 131 0
+ 233 0132 194B     		ldr	r3, .L13+4
+ 234 0134 184A     		ldr	r2, .L13+4
+ 235 0136 9168     		ldr	r1, [r2, #8]
+ 236 0138 7A68     		ldr	r2, [r7, #4]
+ 237 013a 1268     		ldr	r2, [r2, #0]
+ 238 013c 0A43     		orrs	r2, r2, r1
+ 239 013e 9A60     		str	r2, [r3, #8]
+ 132:../SPL/src/stm32f10x_exti.c ****       EXTI->FTSR |= EXTI_InitStruct->EXTI_Line;
+ 240              		.loc 1 132 0
+ 241 0140 154B     		ldr	r3, .L13+4
+ 242 0142 154A     		ldr	r2, .L13+4
+ 243 0144 D168     		ldr	r1, [r2, #12]
+ 244 0146 7A68     		ldr	r2, [r7, #4]
+ 245 0148 1268     		ldr	r2, [r2, #0]
+ 246 014a 0A43     		orrs	r2, r2, r1
+ 247 014c DA60     		str	r2, [r3, #12]
+ 248 014e 1CE0     		b	.L4
+ 249              	.L11:
+ 133:../SPL/src/stm32f10x_exti.c ****     }
+ 134:../SPL/src/stm32f10x_exti.c ****     else
+ 135:../SPL/src/stm32f10x_exti.c ****     {
+ 136:../SPL/src/stm32f10x_exti.c ****       tmp = (uint32_t)EXTI_BASE;
+ 250              		.loc 1 136 0
+ 251 0150 114B     		ldr	r3, .L13+4
+ 252 0152 FB60     		str	r3, [r7, #12]
+ 137:../SPL/src/stm32f10x_exti.c ****       tmp += EXTI_InitStruct->EXTI_Trigger;
+ 253              		.loc 1 137 0
+ 254 0154 7B68     		ldr	r3, [r7, #4]
+ 255 0156 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 256 0158 FA68     		ldr	r2, [r7, #12]
+ 257 015a D318     		adds	r3, r2, r3
+ 258 015c FB60     		str	r3, [r7, #12]
+ 138:../SPL/src/stm32f10x_exti.c **** 
+ 139:../SPL/src/stm32f10x_exti.c ****       *(__IO uint32_t *) tmp |= EXTI_InitStruct->EXTI_Line;
+ 259              		.loc 1 139 0
+ 260 015e FB68     		ldr	r3, [r7, #12]
+ 261 0160 FA68     		ldr	r2, [r7, #12]
+ 262 0162 1168     		ldr	r1, [r2, #0]
+ 263 0164 7A68     		ldr	r2, [r7, #4]
+ 264 0166 1268     		ldr	r2, [r2, #0]
+ 265 0168 0A43     		orrs	r2, r2, r1
+ 266 016a 1A60     		str	r2, [r3, #0]
+ 267 016c 0DE0     		b	.L4
+ 268              	.L10:
+ 140:../SPL/src/stm32f10x_exti.c ****     }
+ 141:../SPL/src/stm32f10x_exti.c ****   }
+ 142:../SPL/src/stm32f10x_exti.c ****   else
+ 143:../SPL/src/stm32f10x_exti.c ****   {
+ 144:../SPL/src/stm32f10x_exti.c ****     tmp += EXTI_InitStruct->EXTI_Mode;
+ 269              		.loc 1 144 0
+ 270 016e 7B68     		ldr	r3, [r7, #4]
+ 271 0170 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 272 0172 FA68     		ldr	r2, [r7, #12]
+ 273 0174 D318     		adds	r3, r2, r3
+ 274 0176 FB60     		str	r3, [r7, #12]
+ 145:../SPL/src/stm32f10x_exti.c **** 
+ 146:../SPL/src/stm32f10x_exti.c ****     /* Disable the selected external lines */
+ 147:../SPL/src/stm32f10x_exti.c ****     *(__IO uint32_t *) tmp &= ~EXTI_InitStruct->EXTI_Line;
+ 275              		.loc 1 147 0
+ 276 0178 FB68     		ldr	r3, [r7, #12]
+ 277 017a FA68     		ldr	r2, [r7, #12]
+ 278 017c 1168     		ldr	r1, [r2, #0]
+ 279 017e 7A68     		ldr	r2, [r7, #4]
+ 280 0180 1268     		ldr	r2, [r2, #0]
+ 281 0182 6FEA0202 		mvn	r2, r2
+ 282 0186 0A40     		ands	r2, r2, r1
+ 283 0188 1A60     		str	r2, [r3, #0]
+ 284              	.L4:
+ 148:../SPL/src/stm32f10x_exti.c ****   }
+ 149:../SPL/src/stm32f10x_exti.c **** }
+ 285              		.loc 1 149 0
+ 286 018a 07F11007 		add	r7, r7, #16
+ 287 018e BD46     		mov	sp, r7
+ 288 0190 80BD     		pop	{r7, pc}
+ 289              	.L14:
+ 290 0192 00BF     		.align	2
+ 291              	.L13:
+ 292 0194 00000000 		.word	.LC0
+ 293 0198 00040140 		.word	1073808384
+ 294              		.cfi_endproc
+ 295              	.LFE30:
+ 297              		.align	2
+ 298              		.global	EXTI_StructInit
+ 299              		.thumb
+ 300              		.thumb_func
+ 302              	EXTI_StructInit:
+ 303              	.LFB31:
+ 150:../SPL/src/stm32f10x_exti.c **** 
+ 151:../SPL/src/stm32f10x_exti.c **** /**
+ 152:../SPL/src/stm32f10x_exti.c ****   * @brief  Fills each EXTI_InitStruct member with its reset value.
+ 153:../SPL/src/stm32f10x_exti.c ****   * @param  EXTI_InitStruct: pointer to a EXTI_InitTypeDef structure which will
+ 154:../SPL/src/stm32f10x_exti.c ****   *         be initialized.
+ 155:../SPL/src/stm32f10x_exti.c ****   * @retval None
+ 156:../SPL/src/stm32f10x_exti.c ****   */
+ 157:../SPL/src/stm32f10x_exti.c **** void EXTI_StructInit(EXTI_InitTypeDef* EXTI_InitStruct)
+ 158:../SPL/src/stm32f10x_exti.c **** {
+ 304              		.loc 1 158 0
+ 305              		.cfi_startproc
+ 306              		@ args = 0, pretend = 0, frame = 8
+ 307              		@ frame_needed = 1, uses_anonymous_args = 0
+ 308              		@ link register save eliminated.
+ 309 019c 80B4     		push	{r7}
+ 310              	.LCFI5:
+ 311              		.cfi_def_cfa_offset 4
+ 312              		.cfi_offset 7, -4
+ 313 019e 83B0     		sub	sp, sp, #12
+ 314              	.LCFI6:
+ 315              		.cfi_def_cfa_offset 16
+ 316 01a0 00AF     		add	r7, sp, #0
+ 317              	.LCFI7:
+ 318              		.cfi_def_cfa_register 7
+ 319 01a2 7860     		str	r0, [r7, #4]
+ 159:../SPL/src/stm32f10x_exti.c ****   EXTI_InitStruct->EXTI_Line = EXTI_LINENONE;
+ 320              		.loc 1 159 0
+ 321 01a4 7B68     		ldr	r3, [r7, #4]
+ 322 01a6 4FF00002 		mov	r2, #0
+ 323 01aa 1A60     		str	r2, [r3, #0]
+ 160:../SPL/src/stm32f10x_exti.c ****   EXTI_InitStruct->EXTI_Mode = EXTI_Mode_Interrupt;
+ 324              		.loc 1 160 0
+ 325 01ac 7B68     		ldr	r3, [r7, #4]
+ 326 01ae 4FF00002 		mov	r2, #0
+ 327 01b2 1A71     		strb	r2, [r3, #4]
+ 161:../SPL/src/stm32f10x_exti.c ****   EXTI_InitStruct->EXTI_Trigger = EXTI_Trigger_Falling;
+ 328              		.loc 1 161 0
+ 329 01b4 7B68     		ldr	r3, [r7, #4]
+ 330 01b6 4FF00C02 		mov	r2, #12
+ 331 01ba 5A71     		strb	r2, [r3, #5]
+ 162:../SPL/src/stm32f10x_exti.c ****   EXTI_InitStruct->EXTI_LineCmd = DISABLE;
+ 332              		.loc 1 162 0
+ 333 01bc 7B68     		ldr	r3, [r7, #4]
+ 334 01be 4FF00002 		mov	r2, #0
+ 335 01c2 9A71     		strb	r2, [r3, #6]
+ 163:../SPL/src/stm32f10x_exti.c **** }
+ 336              		.loc 1 163 0
+ 337 01c4 07F10C07 		add	r7, r7, #12
+ 338 01c8 BD46     		mov	sp, r7
+ 339 01ca 80BC     		pop	{r7}
+ 340 01cc 7047     		bx	lr
+ 341              		.cfi_endproc
+ 342              	.LFE31:
+ 344 01ce 00BF     		.align	2
+ 345              		.global	EXTI_GenerateSWInterrupt
+ 346              		.thumb
+ 347              		.thumb_func
+ 349              	EXTI_GenerateSWInterrupt:
+ 350              	.LFB32:
+ 164:../SPL/src/stm32f10x_exti.c **** 
+ 165:../SPL/src/stm32f10x_exti.c **** /**
+ 166:../SPL/src/stm32f10x_exti.c ****   * @brief  Generates a Software interrupt.
+ 167:../SPL/src/stm32f10x_exti.c ****   * @param  EXTI_Line: specifies the EXTI lines to be enabled or disabled.
+ 168:../SPL/src/stm32f10x_exti.c ****   *   This parameter can be any combination of EXTI_Linex where x can be (0..19).
+ 169:../SPL/src/stm32f10x_exti.c ****   * @retval None
+ 170:../SPL/src/stm32f10x_exti.c ****   */
+ 171:../SPL/src/stm32f10x_exti.c **** void EXTI_GenerateSWInterrupt(uint32_t EXTI_Line)
+ 172:../SPL/src/stm32f10x_exti.c **** {
+ 351              		.loc 1 172 0
+ 352              		.cfi_startproc
+ 353              		@ args = 0, pretend = 0, frame = 8
+ 354              		@ frame_needed = 1, uses_anonymous_args = 0
+ 355 01d0 80B5     		push	{r7, lr}
+ 356              	.LCFI8:
+ 357              		.cfi_def_cfa_offset 8
+ 358              		.cfi_offset 7, -8
+ 359              		.cfi_offset 14, -4
+ 360 01d2 82B0     		sub	sp, sp, #8
+ 361              	.LCFI9:
+ 362              		.cfi_def_cfa_offset 16
+ 363 01d4 00AF     		add	r7, sp, #0
+ 364              	.LCFI10:
+ 365              		.cfi_def_cfa_register 7
+ 366 01d6 7860     		str	r0, [r7, #4]
+ 173:../SPL/src/stm32f10x_exti.c ****   /* Check the parameters */
+ 174:../SPL/src/stm32f10x_exti.c ****   assert_param(IS_EXTI_LINE(EXTI_Line));
+ 367              		.loc 1 174 0
+ 368 01d8 7B68     		ldr	r3, [r7, #4]
+ 369 01da 4FEA1353 		lsr	r3, r3, #20
+ 370 01de 4FEA0353 		lsl	r3, r3, #20
+ 371 01e2 002B     		cmp	r3, #0
+ 372 01e4 02D1     		bne	.L17
+ 373              		.loc 1 174 0 is_stmt 0 discriminator 2
+ 374 01e6 7B68     		ldr	r3, [r7, #4]
+ 375 01e8 002B     		cmp	r3, #0
+ 376 01ea 04D1     		bne	.L18
+ 377              	.L17:
+ 378              		.loc 1 174 0 discriminator 1
+ 379 01ec 0748     		ldr	r0, .L19
+ 380 01ee 4FF0AE01 		mov	r1, #174
+ 381 01f2 FFF7FEFF 		bl	assert_failed
+ 382              	.L18:
+ 175:../SPL/src/stm32f10x_exti.c ****   
+ 176:../SPL/src/stm32f10x_exti.c ****   EXTI->SWIER |= EXTI_Line;
+ 383              		.loc 1 176 0 is_stmt 1
+ 384 01f6 064B     		ldr	r3, .L19+4
+ 385 01f8 054A     		ldr	r2, .L19+4
+ 386 01fa 1169     		ldr	r1, [r2, #16]
+ 387 01fc 7A68     		ldr	r2, [r7, #4]
+ 388 01fe 0A43     		orrs	r2, r2, r1
+ 389 0200 1A61     		str	r2, [r3, #16]
+ 177:../SPL/src/stm32f10x_exti.c **** }
+ 390              		.loc 1 177 0
+ 391 0202 07F10807 		add	r7, r7, #8
+ 392 0206 BD46     		mov	sp, r7
+ 393 0208 80BD     		pop	{r7, pc}
+ 394              	.L20:
+ 395 020a 00BF     		.align	2
+ 396              	.L19:
+ 397 020c 00000000 		.word	.LC0
+ 398 0210 00040140 		.word	1073808384
+ 399              		.cfi_endproc
+ 400              	.LFE32:
+ 402              		.align	2
+ 403              		.global	EXTI_GetFlagStatus
+ 404              		.thumb
+ 405              		.thumb_func
+ 407              	EXTI_GetFlagStatus:
+ 408              	.LFB33:
+ 178:../SPL/src/stm32f10x_exti.c **** 
+ 179:../SPL/src/stm32f10x_exti.c **** /**
+ 180:../SPL/src/stm32f10x_exti.c ****   * @brief  Checks whether the specified EXTI line flag is set or not.
+ 181:../SPL/src/stm32f10x_exti.c ****   * @param  EXTI_Line: specifies the EXTI line flag to check.
+ 182:../SPL/src/stm32f10x_exti.c ****   *   This parameter can be:
+ 183:../SPL/src/stm32f10x_exti.c ****   *     @arg EXTI_Linex: External interrupt line x where x(0..19)
+ 184:../SPL/src/stm32f10x_exti.c ****   * @retval The new state of EXTI_Line (SET or RESET).
+ 185:../SPL/src/stm32f10x_exti.c ****   */
+ 186:../SPL/src/stm32f10x_exti.c **** FlagStatus EXTI_GetFlagStatus(uint32_t EXTI_Line)
+ 187:../SPL/src/stm32f10x_exti.c **** {
+ 409              		.loc 1 187 0
+ 410              		.cfi_startproc
+ 411              		@ args = 0, pretend = 0, frame = 16
+ 412              		@ frame_needed = 1, uses_anonymous_args = 0
+ 413 0214 80B5     		push	{r7, lr}
+ 414              	.LCFI11:
+ 415              		.cfi_def_cfa_offset 8
+ 416              		.cfi_offset 7, -8
+ 417              		.cfi_offset 14, -4
+ 418 0216 84B0     		sub	sp, sp, #16
+ 419              	.LCFI12:
+ 420              		.cfi_def_cfa_offset 24
+ 421 0218 00AF     		add	r7, sp, #0
+ 422              	.LCFI13:
+ 423              		.cfi_def_cfa_register 7
+ 424 021a 7860     		str	r0, [r7, #4]
+ 188:../SPL/src/stm32f10x_exti.c ****   FlagStatus bitstatus = RESET;
+ 425              		.loc 1 188 0
+ 426 021c 4FF00003 		mov	r3, #0
+ 427 0220 FB73     		strb	r3, [r7, #15]
+ 189:../SPL/src/stm32f10x_exti.c ****   /* Check the parameters */
+ 190:../SPL/src/stm32f10x_exti.c ****   assert_param(IS_GET_EXTI_LINE(EXTI_Line));
+ 428              		.loc 1 190 0
+ 429 0222 7B68     		ldr	r3, [r7, #4]
+ 430 0224 012B     		cmp	r3, #1
+ 431 0226 49D0     		beq	.L22
+ 432              		.loc 1 190 0 is_stmt 0 discriminator 1
+ 433 0228 7B68     		ldr	r3, [r7, #4]
+ 434 022a 022B     		cmp	r3, #2
+ 435 022c 46D0     		beq	.L22
+ 436              		.loc 1 190 0 discriminator 2
+ 437 022e 7B68     		ldr	r3, [r7, #4]
+ 438 0230 042B     		cmp	r3, #4
+ 439 0232 43D0     		beq	.L22
+ 440              		.loc 1 190 0 discriminator 3
+ 441 0234 7B68     		ldr	r3, [r7, #4]
+ 442 0236 082B     		cmp	r3, #8
+ 443 0238 40D0     		beq	.L22
+ 444              		.loc 1 190 0 discriminator 4
+ 445 023a 7B68     		ldr	r3, [r7, #4]
+ 446 023c 102B     		cmp	r3, #16
+ 447 023e 3DD0     		beq	.L22
+ 448              		.loc 1 190 0 discriminator 5
+ 449 0240 7B68     		ldr	r3, [r7, #4]
+ 450 0242 202B     		cmp	r3, #32
+ 451 0244 3AD0     		beq	.L22
+ 452              		.loc 1 190 0 discriminator 6
+ 453 0246 7B68     		ldr	r3, [r7, #4]
+ 454 0248 402B     		cmp	r3, #64
+ 455 024a 37D0     		beq	.L22
+ 456              		.loc 1 190 0 discriminator 7
+ 457 024c 7B68     		ldr	r3, [r7, #4]
+ 458 024e 802B     		cmp	r3, #128
+ 459 0250 34D0     		beq	.L22
+ 460              		.loc 1 190 0 discriminator 8
+ 461 0252 7B68     		ldr	r3, [r7, #4]
+ 462 0254 B3F5807F 		cmp	r3, #256
+ 463 0258 30D0     		beq	.L22
+ 464              		.loc 1 190 0 discriminator 9
+ 465 025a 7B68     		ldr	r3, [r7, #4]
+ 466 025c B3F5007F 		cmp	r3, #512
+ 467 0260 2CD0     		beq	.L22
+ 468              		.loc 1 190 0 discriminator 10
+ 469 0262 7B68     		ldr	r3, [r7, #4]
+ 470 0264 B3F5806F 		cmp	r3, #1024
+ 471 0268 28D0     		beq	.L22
+ 472              		.loc 1 190 0 discriminator 11
+ 473 026a 7B68     		ldr	r3, [r7, #4]
+ 474 026c B3F5006F 		cmp	r3, #2048
+ 475 0270 24D0     		beq	.L22
+ 476              		.loc 1 190 0 discriminator 12
+ 477 0272 7B68     		ldr	r3, [r7, #4]
+ 478 0274 B3F5805F 		cmp	r3, #4096
+ 479 0278 20D0     		beq	.L22
+ 480              		.loc 1 190 0 discriminator 13
+ 481 027a 7B68     		ldr	r3, [r7, #4]
+ 482 027c B3F5005F 		cmp	r3, #8192
+ 483 0280 1CD0     		beq	.L22
+ 484              		.loc 1 190 0 discriminator 14
+ 485 0282 7B68     		ldr	r3, [r7, #4]
+ 486 0284 B3F5804F 		cmp	r3, #16384
+ 487 0288 18D0     		beq	.L22
+ 488              		.loc 1 190 0 discriminator 15
+ 489 028a 7B68     		ldr	r3, [r7, #4]
+ 490 028c B3F5004F 		cmp	r3, #32768
+ 491 0290 14D0     		beq	.L22
+ 492              		.loc 1 190 0 discriminator 16
+ 493 0292 7B68     		ldr	r3, [r7, #4]
+ 494 0294 B3F5803F 		cmp	r3, #65536
+ 495 0298 10D0     		beq	.L22
+ 496              		.loc 1 190 0 discriminator 17
+ 497 029a 7B68     		ldr	r3, [r7, #4]
+ 498 029c B3F5003F 		cmp	r3, #131072
+ 499 02a0 0CD0     		beq	.L22
+ 500              		.loc 1 190 0 discriminator 18
+ 501 02a2 7B68     		ldr	r3, [r7, #4]
+ 502 02a4 B3F5802F 		cmp	r3, #262144
+ 503 02a8 08D0     		beq	.L22
+ 504              		.loc 1 190 0 discriminator 19
+ 505 02aa 7B68     		ldr	r3, [r7, #4]
+ 506 02ac B3F5002F 		cmp	r3, #524288
+ 507 02b0 04D0     		beq	.L22
+ 508              		.loc 1 190 0 discriminator 20
+ 509 02b2 0C48     		ldr	r0, .L26
+ 510 02b4 4FF0BE01 		mov	r1, #190
+ 511 02b8 FFF7FEFF 		bl	assert_failed
+ 512              	.L22:
+ 191:../SPL/src/stm32f10x_exti.c ****   
+ 192:../SPL/src/stm32f10x_exti.c ****   if ((EXTI->PR & EXTI_Line) != (uint32_t)RESET)
+ 513              		.loc 1 192 0 is_stmt 1
+ 514 02bc 0A4B     		ldr	r3, .L26+4
+ 515 02be 5A69     		ldr	r2, [r3, #20]
+ 516 02c0 7B68     		ldr	r3, [r7, #4]
+ 517 02c2 1340     		ands	r3, r3, r2
+ 518 02c4 002B     		cmp	r3, #0
+ 519 02c6 03D0     		beq	.L23
+ 193:../SPL/src/stm32f10x_exti.c ****   {
+ 194:../SPL/src/stm32f10x_exti.c ****     bitstatus = SET;
+ 520              		.loc 1 194 0
+ 521 02c8 4FF00103 		mov	r3, #1
+ 522 02cc FB73     		strb	r3, [r7, #15]
+ 523 02ce 02E0     		b	.L24
+ 524              	.L23:
+ 195:../SPL/src/stm32f10x_exti.c ****   }
+ 196:../SPL/src/stm32f10x_exti.c ****   else
+ 197:../SPL/src/stm32f10x_exti.c ****   {
+ 198:../SPL/src/stm32f10x_exti.c ****     bitstatus = RESET;
+ 525              		.loc 1 198 0
+ 526 02d0 4FF00003 		mov	r3, #0
+ 527 02d4 FB73     		strb	r3, [r7, #15]
+ 528              	.L24:
+ 199:../SPL/src/stm32f10x_exti.c ****   }
+ 200:../SPL/src/stm32f10x_exti.c ****   return bitstatus;
+ 529              		.loc 1 200 0
+ 530 02d6 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 201:../SPL/src/stm32f10x_exti.c **** }
+ 531              		.loc 1 201 0
+ 532 02d8 1846     		mov	r0, r3
+ 533 02da 07F11007 		add	r7, r7, #16
+ 534 02de BD46     		mov	sp, r7
+ 535 02e0 80BD     		pop	{r7, pc}
+ 536              	.L27:
+ 537 02e2 00BF     		.align	2
+ 538              	.L26:
+ 539 02e4 00000000 		.word	.LC0
+ 540 02e8 00040140 		.word	1073808384
+ 541              		.cfi_endproc
+ 542              	.LFE33:
+ 544              		.align	2
+ 545              		.global	EXTI_ClearFlag
+ 546              		.thumb
+ 547              		.thumb_func
+ 549              	EXTI_ClearFlag:
+ 550              	.LFB34:
+ 202:../SPL/src/stm32f10x_exti.c **** 
+ 203:../SPL/src/stm32f10x_exti.c **** /**
+ 204:../SPL/src/stm32f10x_exti.c ****   * @brief  Clears the EXTI's line pending flags.
+ 205:../SPL/src/stm32f10x_exti.c ****   * @param  EXTI_Line: specifies the EXTI lines flags to clear.
+ 206:../SPL/src/stm32f10x_exti.c ****   *   This parameter can be any combination of EXTI_Linex where x can be (0..19).
+ 207:../SPL/src/stm32f10x_exti.c ****   * @retval None
+ 208:../SPL/src/stm32f10x_exti.c ****   */
+ 209:../SPL/src/stm32f10x_exti.c **** void EXTI_ClearFlag(uint32_t EXTI_Line)
+ 210:../SPL/src/stm32f10x_exti.c **** {
+ 551              		.loc 1 210 0
+ 552              		.cfi_startproc
+ 553              		@ args = 0, pretend = 0, frame = 8
+ 554              		@ frame_needed = 1, uses_anonymous_args = 0
+ 555 02ec 80B5     		push	{r7, lr}
+ 556              	.LCFI14:
+ 557              		.cfi_def_cfa_offset 8
+ 558              		.cfi_offset 7, -8
+ 559              		.cfi_offset 14, -4
+ 560 02ee 82B0     		sub	sp, sp, #8
+ 561              	.LCFI15:
+ 562              		.cfi_def_cfa_offset 16
+ 563 02f0 00AF     		add	r7, sp, #0
+ 564              	.LCFI16:
+ 565              		.cfi_def_cfa_register 7
+ 566 02f2 7860     		str	r0, [r7, #4]
+ 211:../SPL/src/stm32f10x_exti.c ****   /* Check the parameters */
+ 212:../SPL/src/stm32f10x_exti.c ****   assert_param(IS_EXTI_LINE(EXTI_Line));
+ 567              		.loc 1 212 0
+ 568 02f4 7B68     		ldr	r3, [r7, #4]
+ 569 02f6 4FEA1353 		lsr	r3, r3, #20
+ 570 02fa 4FEA0353 		lsl	r3, r3, #20
+ 571 02fe 002B     		cmp	r3, #0
+ 572 0300 02D1     		bne	.L29
+ 573              		.loc 1 212 0 is_stmt 0 discriminator 2
+ 574 0302 7B68     		ldr	r3, [r7, #4]
+ 575 0304 002B     		cmp	r3, #0
+ 576 0306 04D1     		bne	.L30
+ 577              	.L29:
+ 578              		.loc 1 212 0 discriminator 1
+ 579 0308 0548     		ldr	r0, .L31
+ 580 030a 4FF0D401 		mov	r1, #212
+ 581 030e FFF7FEFF 		bl	assert_failed
+ 582              	.L30:
+ 213:../SPL/src/stm32f10x_exti.c ****   
+ 214:../SPL/src/stm32f10x_exti.c ****   EXTI->PR = EXTI_Line;
+ 583              		.loc 1 214 0 is_stmt 1
+ 584 0312 044B     		ldr	r3, .L31+4
+ 585 0314 7A68     		ldr	r2, [r7, #4]
+ 586 0316 5A61     		str	r2, [r3, #20]
+ 215:../SPL/src/stm32f10x_exti.c **** }
+ 587              		.loc 1 215 0
+ 588 0318 07F10807 		add	r7, r7, #8
+ 589 031c BD46     		mov	sp, r7
+ 590 031e 80BD     		pop	{r7, pc}
+ 591              	.L32:
+ 592              		.align	2
+ 593              	.L31:
+ 594 0320 00000000 		.word	.LC0
+ 595 0324 00040140 		.word	1073808384
+ 596              		.cfi_endproc
+ 597              	.LFE34:
+ 599              		.align	2
+ 600              		.global	EXTI_GetITStatus
+ 601              		.thumb
+ 602              		.thumb_func
+ 604              	EXTI_GetITStatus:
+ 605              	.LFB35:
+ 216:../SPL/src/stm32f10x_exti.c **** 
+ 217:../SPL/src/stm32f10x_exti.c **** /**
+ 218:../SPL/src/stm32f10x_exti.c ****   * @brief  Checks whether the specified EXTI line is asserted or not.
+ 219:../SPL/src/stm32f10x_exti.c ****   * @param  EXTI_Line: specifies the EXTI line to check.
+ 220:../SPL/src/stm32f10x_exti.c ****   *   This parameter can be:
+ 221:../SPL/src/stm32f10x_exti.c ****   *     @arg EXTI_Linex: External interrupt line x where x(0..19)
+ 222:../SPL/src/stm32f10x_exti.c ****   * @retval The new state of EXTI_Line (SET or RESET).
+ 223:../SPL/src/stm32f10x_exti.c ****   */
+ 224:../SPL/src/stm32f10x_exti.c **** ITStatus EXTI_GetITStatus(uint32_t EXTI_Line)
+ 225:../SPL/src/stm32f10x_exti.c **** {
+ 606              		.loc 1 225 0
+ 607              		.cfi_startproc
+ 608              		@ args = 0, pretend = 0, frame = 16
+ 609              		@ frame_needed = 1, uses_anonymous_args = 0
+ 610 0328 80B5     		push	{r7, lr}
+ 611              	.LCFI17:
+ 612              		.cfi_def_cfa_offset 8
+ 613              		.cfi_offset 7, -8
+ 614              		.cfi_offset 14, -4
+ 615 032a 84B0     		sub	sp, sp, #16
+ 616              	.LCFI18:
+ 617              		.cfi_def_cfa_offset 24
+ 618 032c 00AF     		add	r7, sp, #0
+ 619              	.LCFI19:
+ 620              		.cfi_def_cfa_register 7
+ 621 032e 7860     		str	r0, [r7, #4]
+ 226:../SPL/src/stm32f10x_exti.c ****   ITStatus bitstatus = RESET;
+ 622              		.loc 1 226 0
+ 623 0330 4FF00003 		mov	r3, #0
+ 624 0334 FB73     		strb	r3, [r7, #15]
+ 227:../SPL/src/stm32f10x_exti.c ****   uint32_t enablestatus = 0;
+ 625              		.loc 1 227 0
+ 626 0336 4FF00003 		mov	r3, #0
+ 627 033a BB60     		str	r3, [r7, #8]
+ 228:../SPL/src/stm32f10x_exti.c ****   /* Check the parameters */
+ 229:../SPL/src/stm32f10x_exti.c ****   assert_param(IS_GET_EXTI_LINE(EXTI_Line));
+ 628              		.loc 1 229 0
+ 629 033c 7B68     		ldr	r3, [r7, #4]
+ 630 033e 012B     		cmp	r3, #1
+ 631 0340 49D0     		beq	.L34
+ 632              		.loc 1 229 0 is_stmt 0 discriminator 1
+ 633 0342 7B68     		ldr	r3, [r7, #4]
+ 634 0344 022B     		cmp	r3, #2
+ 635 0346 46D0     		beq	.L34
+ 636              		.loc 1 229 0 discriminator 2
+ 637 0348 7B68     		ldr	r3, [r7, #4]
+ 638 034a 042B     		cmp	r3, #4
+ 639 034c 43D0     		beq	.L34
+ 640              		.loc 1 229 0 discriminator 3
+ 641 034e 7B68     		ldr	r3, [r7, #4]
+ 642 0350 082B     		cmp	r3, #8
+ 643 0352 40D0     		beq	.L34
+ 644              		.loc 1 229 0 discriminator 4
+ 645 0354 7B68     		ldr	r3, [r7, #4]
+ 646 0356 102B     		cmp	r3, #16
+ 647 0358 3DD0     		beq	.L34
+ 648              		.loc 1 229 0 discriminator 5
+ 649 035a 7B68     		ldr	r3, [r7, #4]
+ 650 035c 202B     		cmp	r3, #32
+ 651 035e 3AD0     		beq	.L34
+ 652              		.loc 1 229 0 discriminator 6
+ 653 0360 7B68     		ldr	r3, [r7, #4]
+ 654 0362 402B     		cmp	r3, #64
+ 655 0364 37D0     		beq	.L34
+ 656              		.loc 1 229 0 discriminator 7
+ 657 0366 7B68     		ldr	r3, [r7, #4]
+ 658 0368 802B     		cmp	r3, #128
+ 659 036a 34D0     		beq	.L34
+ 660              		.loc 1 229 0 discriminator 8
+ 661 036c 7B68     		ldr	r3, [r7, #4]
+ 662 036e B3F5807F 		cmp	r3, #256
+ 663 0372 30D0     		beq	.L34
+ 664              		.loc 1 229 0 discriminator 9
+ 665 0374 7B68     		ldr	r3, [r7, #4]
+ 666 0376 B3F5007F 		cmp	r3, #512
+ 667 037a 2CD0     		beq	.L34
+ 668              		.loc 1 229 0 discriminator 10
+ 669 037c 7B68     		ldr	r3, [r7, #4]
+ 670 037e B3F5806F 		cmp	r3, #1024
+ 671 0382 28D0     		beq	.L34
+ 672              		.loc 1 229 0 discriminator 11
+ 673 0384 7B68     		ldr	r3, [r7, #4]
+ 674 0386 B3F5006F 		cmp	r3, #2048
+ 675 038a 24D0     		beq	.L34
+ 676              		.loc 1 229 0 discriminator 12
+ 677 038c 7B68     		ldr	r3, [r7, #4]
+ 678 038e B3F5805F 		cmp	r3, #4096
+ 679 0392 20D0     		beq	.L34
+ 680              		.loc 1 229 0 discriminator 13
+ 681 0394 7B68     		ldr	r3, [r7, #4]
+ 682 0396 B3F5005F 		cmp	r3, #8192
+ 683 039a 1CD0     		beq	.L34
+ 684              		.loc 1 229 0 discriminator 14
+ 685 039c 7B68     		ldr	r3, [r7, #4]
+ 686 039e B3F5804F 		cmp	r3, #16384
+ 687 03a2 18D0     		beq	.L34
+ 688              		.loc 1 229 0 discriminator 15
+ 689 03a4 7B68     		ldr	r3, [r7, #4]
+ 690 03a6 B3F5004F 		cmp	r3, #32768
+ 691 03aa 14D0     		beq	.L34
+ 692              		.loc 1 229 0 discriminator 16
+ 693 03ac 7B68     		ldr	r3, [r7, #4]
+ 694 03ae B3F5803F 		cmp	r3, #65536
+ 695 03b2 10D0     		beq	.L34
+ 696              		.loc 1 229 0 discriminator 17
+ 697 03b4 7B68     		ldr	r3, [r7, #4]
+ 698 03b6 B3F5003F 		cmp	r3, #131072
+ 699 03ba 0CD0     		beq	.L34
+ 700              		.loc 1 229 0 discriminator 18
+ 701 03bc 7B68     		ldr	r3, [r7, #4]
+ 702 03be B3F5802F 		cmp	r3, #262144
+ 703 03c2 08D0     		beq	.L34
+ 704              		.loc 1 229 0 discriminator 19
+ 705 03c4 7B68     		ldr	r3, [r7, #4]
+ 706 03c6 B3F5002F 		cmp	r3, #524288
+ 707 03ca 04D0     		beq	.L34
+ 708              		.loc 1 229 0 discriminator 20
+ 709 03cc 0F48     		ldr	r0, .L38
+ 710 03ce 4FF0E501 		mov	r1, #229
+ 711 03d2 FFF7FEFF 		bl	assert_failed
+ 712              	.L34:
+ 230:../SPL/src/stm32f10x_exti.c ****   
+ 231:../SPL/src/stm32f10x_exti.c ****   enablestatus =  EXTI->IMR & EXTI_Line;
+ 713              		.loc 1 231 0 is_stmt 1
+ 714 03d6 0E4B     		ldr	r3, .L38+4
+ 715 03d8 1A68     		ldr	r2, [r3, #0]
+ 716 03da 7B68     		ldr	r3, [r7, #4]
+ 717 03dc 1340     		ands	r3, r3, r2
+ 718 03de BB60     		str	r3, [r7, #8]
+ 232:../SPL/src/stm32f10x_exti.c ****   if (((EXTI->PR & EXTI_Line) != (uint32_t)RESET) && (enablestatus != (uint32_t)RESET))
+ 719              		.loc 1 232 0
+ 720 03e0 0B4B     		ldr	r3, .L38+4
+ 721 03e2 5A69     		ldr	r2, [r3, #20]
+ 722 03e4 7B68     		ldr	r3, [r7, #4]
+ 723 03e6 1340     		ands	r3, r3, r2
+ 724 03e8 002B     		cmp	r3, #0
+ 725 03ea 06D0     		beq	.L35
+ 726              		.loc 1 232 0 is_stmt 0 discriminator 1
+ 727 03ec BB68     		ldr	r3, [r7, #8]
+ 728 03ee 002B     		cmp	r3, #0
+ 729 03f0 03D0     		beq	.L35
+ 233:../SPL/src/stm32f10x_exti.c ****   {
+ 234:../SPL/src/stm32f10x_exti.c ****     bitstatus = SET;
+ 730              		.loc 1 234 0 is_stmt 1
+ 731 03f2 4FF00103 		mov	r3, #1
+ 732 03f6 FB73     		strb	r3, [r7, #15]
+ 733 03f8 02E0     		b	.L36
+ 734              	.L35:
+ 235:../SPL/src/stm32f10x_exti.c ****   }
+ 236:../SPL/src/stm32f10x_exti.c ****   else
+ 237:../SPL/src/stm32f10x_exti.c ****   {
+ 238:../SPL/src/stm32f10x_exti.c ****     bitstatus = RESET;
+ 735              		.loc 1 238 0
+ 736 03fa 4FF00003 		mov	r3, #0
+ 737 03fe FB73     		strb	r3, [r7, #15]
+ 738              	.L36:
+ 239:../SPL/src/stm32f10x_exti.c ****   }
+ 240:../SPL/src/stm32f10x_exti.c ****   return bitstatus;
+ 739              		.loc 1 240 0
+ 740 0400 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 241:../SPL/src/stm32f10x_exti.c **** }
+ 741              		.loc 1 241 0
+ 742 0402 1846     		mov	r0, r3
+ 743 0404 07F11007 		add	r7, r7, #16
+ 744 0408 BD46     		mov	sp, r7
+ 745 040a 80BD     		pop	{r7, pc}
+ 746              	.L39:
+ 747              		.align	2
+ 748              	.L38:
+ 749 040c 00000000 		.word	.LC0
+ 750 0410 00040140 		.word	1073808384
+ 751              		.cfi_endproc
+ 752              	.LFE35:
+ 754              		.align	2
+ 755              		.global	EXTI_ClearITPendingBit
+ 756              		.thumb
+ 757              		.thumb_func
+ 759              	EXTI_ClearITPendingBit:
+ 760              	.LFB36:
+ 242:../SPL/src/stm32f10x_exti.c **** 
+ 243:../SPL/src/stm32f10x_exti.c **** /**
+ 244:../SPL/src/stm32f10x_exti.c ****   * @brief  Clears the EXTI's line pending bits.
+ 245:../SPL/src/stm32f10x_exti.c ****   * @param  EXTI_Line: specifies the EXTI lines to clear.
+ 246:../SPL/src/stm32f10x_exti.c ****   *   This parameter can be any combination of EXTI_Linex where x can be (0..19).
+ 247:../SPL/src/stm32f10x_exti.c ****   * @retval None
+ 248:../SPL/src/stm32f10x_exti.c ****   */
+ 249:../SPL/src/stm32f10x_exti.c **** void EXTI_ClearITPendingBit(uint32_t EXTI_Line)
+ 250:../SPL/src/stm32f10x_exti.c **** {
+ 761              		.loc 1 250 0
+ 762              		.cfi_startproc
+ 763              		@ args = 0, pretend = 0, frame = 8
+ 764              		@ frame_needed = 1, uses_anonymous_args = 0
+ 765 0414 80B5     		push	{r7, lr}
+ 766              	.LCFI20:
+ 767              		.cfi_def_cfa_offset 8
+ 768              		.cfi_offset 7, -8
+ 769              		.cfi_offset 14, -4
+ 770 0416 82B0     		sub	sp, sp, #8
+ 771              	.LCFI21:
+ 772              		.cfi_def_cfa_offset 16
+ 773 0418 00AF     		add	r7, sp, #0
+ 774              	.LCFI22:
+ 775              		.cfi_def_cfa_register 7
+ 776 041a 7860     		str	r0, [r7, #4]
+ 251:../SPL/src/stm32f10x_exti.c ****   /* Check the parameters */
+ 252:../SPL/src/stm32f10x_exti.c ****   assert_param(IS_EXTI_LINE(EXTI_Line));
+ 777              		.loc 1 252 0
+ 778 041c 7B68     		ldr	r3, [r7, #4]
+ 779 041e 4FEA1353 		lsr	r3, r3, #20
+ 780 0422 4FEA0353 		lsl	r3, r3, #20
+ 781 0426 002B     		cmp	r3, #0
+ 782 0428 02D1     		bne	.L41
+ 783              		.loc 1 252 0 is_stmt 0 discriminator 2
+ 784 042a 7B68     		ldr	r3, [r7, #4]
+ 785 042c 002B     		cmp	r3, #0
+ 786 042e 04D1     		bne	.L42
+ 787              	.L41:
+ 788              		.loc 1 252 0 discriminator 1
+ 789 0430 0548     		ldr	r0, .L43
+ 790 0432 4FF0FC01 		mov	r1, #252
+ 791 0436 FFF7FEFF 		bl	assert_failed
+ 792              	.L42:
+ 253:../SPL/src/stm32f10x_exti.c ****   
+ 254:../SPL/src/stm32f10x_exti.c ****   EXTI->PR = EXTI_Line;
+ 793              		.loc 1 254 0 is_stmt 1
+ 794 043a 044B     		ldr	r3, .L43+4
+ 795 043c 7A68     		ldr	r2, [r7, #4]
+ 796 043e 5A61     		str	r2, [r3, #20]
+ 255:../SPL/src/stm32f10x_exti.c **** }
+ 797              		.loc 1 255 0
+ 798 0440 07F10807 		add	r7, r7, #8
+ 799 0444 BD46     		mov	sp, r7
+ 800 0446 80BD     		pop	{r7, pc}
+ 801              	.L44:
+ 802              		.align	2
+ 803              	.L43:
+ 804 0448 00000000 		.word	.LC0
+ 805 044c 00040140 		.word	1073808384
+ 806              		.cfi_endproc
+ 807              	.LFE36:
+ 809              	.Letext0:
+ 810              		.file 2 "c:\\program files (x86)\\codesourcery\\sourcery_codebench_lite_for_arm_eabi\\bin\\../lib/
+ 811              		.file 3 "C:\\Users\\PC108\\Export_project\\stm32_ld_vl\\CMSIS/stm32f10x.h"
+ 812              		.file 4 "C:\\Users\\PC108\\Export_project\\stm32_ld_vl\\SPL\\inc/stm32f10x_exti.h"
+ 813              		.file 5 "C:\\Users\\PC108\\Export_project\\stm32_ld_vl\\CMSIS/core_cm3.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 stm32f10x_exti.c
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:18     .text:00000000 $t
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:23     .text:00000000 EXTI_DeInit
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:65     .text:00000030 $d
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:71     .rodata:00000000 $d
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:75     .text:00000038 $t
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:80     .text:00000038 EXTI_Init
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:292    .text:00000194 $d
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:297    .text:0000019c $t
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:302    .text:0000019c EXTI_StructInit
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:349    .text:000001d0 EXTI_GenerateSWInterrupt
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:397    .text:0000020c $d
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:402    .text:00000214 $t
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:407    .text:00000214 EXTI_GetFlagStatus
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:539    .text:000002e4 $d
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:544    .text:000002ec $t
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:549    .text:000002ec EXTI_ClearFlag
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:594    .text:00000320 $d
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:599    .text:00000328 $t
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:604    .text:00000328 EXTI_GetITStatus
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:749    .text:0000040c $d
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:754    .text:00000414 $t
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:759    .text:00000414 EXTI_ClearITPendingBit
+C:\Users\PC108\AppData\Local\Temp\ccS6dwN5.s:804    .text:00000448 $d
+                     .debug_frame:00000010 $d
+                           .group:00000000 wm4.1.9001f459856fa07d79ce9793bb17c6cd
+                           .group:00000000 wm4.stm32f10x.h.51.b859cb68ed44ee02c916b41cb8c68f1c
+                           .group:00000000 wm4.core_cm3.h.25.d35e9a9b04ec4aaebae9bf79fff061f9
+                           .group:00000000 wm4.stdint.h.10.90b695f550ca6cc3fb08fa83baf01e05
+                           .group:00000000 wm4.core_cm3.h.113.b286929a54d33b4c8909a7132437b244
+                           .group:00000000 wm4.stm32f10x.h.522.115ebb8291fa96f8c9e0b9a9b670f703
+                           .group:00000000 wm4.stm32f10x_gpio.h.46.4096b03458401eca76553253bd40f29d
+                           .group:00000000 wm4.stm32f10x_rcc.h.25.fe8897e7491f2eb0cff54551d08eb765
+                           .group:00000000 wm4.stm32f10x_tim.h.25.21c6ec062f1e74898cb96a57da276fec
+                           .group:00000000 wm4.stm32f10x_usart.h.25.29629c699b65db3f3efd3561f66b0bf6
+                           .group:00000000 wm4.misc.h.25.068e106f368fa5369a681ef57c106f4b
+                           .group:00000000 wm4.stm32f10x.h.8304.f7d8ad90959e99679b3257267c3aadfe
+                           .group:00000000 wm4.stm32f10x_exti.h.56.8b2f216f9ded9d03a9eb42ed6973fc04
+
+UNDEFINED SYMBOLS
+assert_failed

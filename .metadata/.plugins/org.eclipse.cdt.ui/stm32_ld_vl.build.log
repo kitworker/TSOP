@@ -1,0 +1,8 @@
+
+**** Clean-only build of configuration Debug for project stm32_ld_vl ****
+
+cs-make clean 
+cs-rm -rf  stm32_ld_vl.siz  ./src/RC5_IR_Emul_Receiver.o ./src/main.o ./src/stm3210b_eval.o ./src/stm32f10x_it.o  ./SPL/src/misc.o ./SPL/src/stm32f10x_adc.o ./SPL/src/stm32f10x_bkp.o ./SPL/src/stm32f10x_can.o ./SPL/src/stm32f10x_cec.o ./SPL/src/stm32f10x_crc.o ./SPL/src/stm32f10x_dac.o ./SPL/src/stm32f10x_dbgmcu.o ./SPL/src/stm32f10x_dma.o ./SPL/src/stm32f10x_exti.o ./SPL/src/stm32f10x_flash.o ./SPL/src/stm32f10x_fsmc.o ./SPL/src/stm32f10x_gpio.o ./SPL/src/stm32f10x_i2c.o ./SPL/src/stm32f10x_iwdg.o ./SPL/src/stm32f10x_pwr.o ./SPL/src/stm32f10x_rcc.o ./SPL/src/stm32f10x_rtc.o ./SPL/src/stm32f10x_sdio.o ./SPL/src/stm32f10x_spi.o ./SPL/src/stm32f10x_tim.o ./SPL/src/stm32f10x_usart.o ./SPL/src/stm32f10x_wwdg.o  ./CMSIS/core_cm3.o ./CMSIS/startup_stm32f10x_ld_vl.o ./CMSIS/system_stm32f10x.o  ./src/RC5_IR_Emul_Receiver.d ./src/main.d ./src/stm3210b_eval.d ./src/stm32f10x_it.d  ./SPL/src/misc.d ./SPL/src/stm32f10x_adc.d ./SPL/src/stm32f10x_bkp.d ./SPL/src/stm32f10x_can.d ./SPL/src/stm32f10x_cec.d ./SPL/src/stm32f10x_crc.d ./SPL/src/stm32f10x_dac.d ./SPL/src/stm32f10x_dbgmcu.d ./SPL/src/stm32f10x_dma.d ./SPL/src/stm32f10x_exti.d ./SPL/src/stm32f10x_flash.d ./SPL/src/stm32f10x_fsmc.d ./SPL/src/stm32f10x_gpio.d ./SPL/src/stm32f10x_i2c.d ./SPL/src/stm32f10x_iwdg.d ./SPL/src/stm32f10x_pwr.d ./SPL/src/stm32f10x_rcc.d ./SPL/src/stm32f10x_rtc.d ./SPL/src/stm32f10x_sdio.d ./SPL/src/stm32f10x_spi.d ./SPL/src/stm32f10x_tim.d ./SPL/src/stm32f10x_usart.d ./SPL/src/stm32f10x_wwdg.d  ./CMSIS/core_cm3.d ./CMSIS/system_stm32f10x.d  stm32_ld_vl.hex  stm32_ld_vl.lst  ./CMSIS/startup_stm32f10x_ld_vl.d  stm32_ld_vl.elf
+ 
+
+**** Build Finished ****

@@ -1,0 +1,4 @@
+
+<Project Header="Project 'RC5_IR_Receiver" Path=".\RC5_IR_Receiver.rprj" Project="Yes" OutputFile="" sate="96" ActiveApp="RC5_IR_Receiver" >
+	<ApplicationBuild Header="RC5_IR_Receiver" Extern=".\RC5_IR_Receiver.rapp" Path=".\RC5_IR_Receiver.rapp" OutputFile=".\STM32100B-EVAL\RC5_IR_Receiver.elf" sate="98" Config="STM32100B-EVAL" />
+</Project>

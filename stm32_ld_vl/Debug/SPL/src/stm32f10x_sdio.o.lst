@@ -1,0 +1,2996 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"stm32f10x_sdio.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	SDIO_DeInit
+  20              		.thumb
+  21              		.thumb_func
+  23              	SDIO_DeInit:
+  24              	.LFB29:
+  25              		.file 1 "../SPL/src/stm32f10x_sdio.c"
+   1:../SPL/src/stm32f10x_sdio.c **** /**
+   2:../SPL/src/stm32f10x_sdio.c ****   ******************************************************************************
+   3:../SPL/src/stm32f10x_sdio.c ****   * @file    stm32f10x_sdio.c
+   4:../SPL/src/stm32f10x_sdio.c ****   * @author  MCD Application Team
+   5:../SPL/src/stm32f10x_sdio.c ****   * @version V3.5.0
+   6:../SPL/src/stm32f10x_sdio.c ****   * @date    11-March-2011
+   7:../SPL/src/stm32f10x_sdio.c ****   * @brief   This file provides all the SDIO firmware functions.
+   8:../SPL/src/stm32f10x_sdio.c ****   ******************************************************************************
+   9:../SPL/src/stm32f10x_sdio.c ****   * @attention
+  10:../SPL/src/stm32f10x_sdio.c ****   *
+  11:../SPL/src/stm32f10x_sdio.c ****   * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+  12:../SPL/src/stm32f10x_sdio.c ****   * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+  13:../SPL/src/stm32f10x_sdio.c ****   * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+  14:../SPL/src/stm32f10x_sdio.c ****   * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+  15:../SPL/src/stm32f10x_sdio.c ****   * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+  16:../SPL/src/stm32f10x_sdio.c ****   * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+  17:../SPL/src/stm32f10x_sdio.c ****   *
+  18:../SPL/src/stm32f10x_sdio.c ****   * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  19:../SPL/src/stm32f10x_sdio.c ****   ******************************************************************************
+  20:../SPL/src/stm32f10x_sdio.c ****   */
+  21:../SPL/src/stm32f10x_sdio.c **** 
+  22:../SPL/src/stm32f10x_sdio.c **** /* Includes ------------------------------------------------------------------*/
+  23:../SPL/src/stm32f10x_sdio.c **** #include "stm32f10x_sdio.h"
+  24:../SPL/src/stm32f10x_sdio.c **** #include "stm32f10x_rcc.h"
+  25:../SPL/src/stm32f10x_sdio.c **** 
+  26:../SPL/src/stm32f10x_sdio.c **** /** @addtogroup STM32F10x_StdPeriph_Driver
+  27:../SPL/src/stm32f10x_sdio.c ****   * @{
+  28:../SPL/src/stm32f10x_sdio.c ****   */
+  29:../SPL/src/stm32f10x_sdio.c **** 
+  30:../SPL/src/stm32f10x_sdio.c **** /** @defgroup SDIO 
+  31:../SPL/src/stm32f10x_sdio.c ****   * @brief SDIO driver modules
+  32:../SPL/src/stm32f10x_sdio.c ****   * @{
+  33:../SPL/src/stm32f10x_sdio.c ****   */ 
+  34:../SPL/src/stm32f10x_sdio.c **** 
+  35:../SPL/src/stm32f10x_sdio.c **** /** @defgroup SDIO_Private_TypesDefinitions
+  36:../SPL/src/stm32f10x_sdio.c ****   * @{
+  37:../SPL/src/stm32f10x_sdio.c ****   */ 
+  38:../SPL/src/stm32f10x_sdio.c **** 
+  39:../SPL/src/stm32f10x_sdio.c **** /* ------------ SDIO registers bit address in the alias region ----------- */
+  40:../SPL/src/stm32f10x_sdio.c **** #define SDIO_OFFSET                (SDIO_BASE - PERIPH_BASE)
+  41:../SPL/src/stm32f10x_sdio.c **** 
+  42:../SPL/src/stm32f10x_sdio.c **** /* --- CLKCR Register ---*/
+  43:../SPL/src/stm32f10x_sdio.c **** 
+  44:../SPL/src/stm32f10x_sdio.c **** /* Alias word address of CLKEN bit */
+  45:../SPL/src/stm32f10x_sdio.c **** #define CLKCR_OFFSET              (SDIO_OFFSET + 0x04)
+  46:../SPL/src/stm32f10x_sdio.c **** #define CLKEN_BitNumber           0x08
+  47:../SPL/src/stm32f10x_sdio.c **** #define CLKCR_CLKEN_BB            (PERIPH_BB_BASE + (CLKCR_OFFSET * 32) + (CLKEN_BitNumber * 4))
+  48:../SPL/src/stm32f10x_sdio.c **** 
+  49:../SPL/src/stm32f10x_sdio.c **** /* --- CMD Register ---*/
+  50:../SPL/src/stm32f10x_sdio.c **** 
+  51:../SPL/src/stm32f10x_sdio.c **** /* Alias word address of SDIOSUSPEND bit */
+  52:../SPL/src/stm32f10x_sdio.c **** #define CMD_OFFSET                (SDIO_OFFSET + 0x0C)
+  53:../SPL/src/stm32f10x_sdio.c **** #define SDIOSUSPEND_BitNumber     0x0B
+  54:../SPL/src/stm32f10x_sdio.c **** #define CMD_SDIOSUSPEND_BB        (PERIPH_BB_BASE + (CMD_OFFSET * 32) + (SDIOSUSPEND_BitNumber * 4)
+  55:../SPL/src/stm32f10x_sdio.c **** 
+  56:../SPL/src/stm32f10x_sdio.c **** /* Alias word address of ENCMDCOMPL bit */
+  57:../SPL/src/stm32f10x_sdio.c **** #define ENCMDCOMPL_BitNumber      0x0C
+  58:../SPL/src/stm32f10x_sdio.c **** #define CMD_ENCMDCOMPL_BB         (PERIPH_BB_BASE + (CMD_OFFSET * 32) + (ENCMDCOMPL_BitNumber * 4))
+  59:../SPL/src/stm32f10x_sdio.c **** 
+  60:../SPL/src/stm32f10x_sdio.c **** /* Alias word address of NIEN bit */
+  61:../SPL/src/stm32f10x_sdio.c **** #define NIEN_BitNumber            0x0D
+  62:../SPL/src/stm32f10x_sdio.c **** #define CMD_NIEN_BB               (PERIPH_BB_BASE + (CMD_OFFSET * 32) + (NIEN_BitNumber * 4))
+  63:../SPL/src/stm32f10x_sdio.c **** 
+  64:../SPL/src/stm32f10x_sdio.c **** /* Alias word address of ATACMD bit */
+  65:../SPL/src/stm32f10x_sdio.c **** #define ATACMD_BitNumber          0x0E
+  66:../SPL/src/stm32f10x_sdio.c **** #define CMD_ATACMD_BB             (PERIPH_BB_BASE + (CMD_OFFSET * 32) + (ATACMD_BitNumber * 4))
+  67:../SPL/src/stm32f10x_sdio.c **** 
+  68:../SPL/src/stm32f10x_sdio.c **** /* --- DCTRL Register ---*/
+  69:../SPL/src/stm32f10x_sdio.c **** 
+  70:../SPL/src/stm32f10x_sdio.c **** /* Alias word address of DMAEN bit */
+  71:../SPL/src/stm32f10x_sdio.c **** #define DCTRL_OFFSET              (SDIO_OFFSET + 0x2C)
+  72:../SPL/src/stm32f10x_sdio.c **** #define DMAEN_BitNumber           0x03
+  73:../SPL/src/stm32f10x_sdio.c **** #define DCTRL_DMAEN_BB            (PERIPH_BB_BASE + (DCTRL_OFFSET * 32) + (DMAEN_BitNumber * 4))
+  74:../SPL/src/stm32f10x_sdio.c **** 
+  75:../SPL/src/stm32f10x_sdio.c **** /* Alias word address of RWSTART bit */
+  76:../SPL/src/stm32f10x_sdio.c **** #define RWSTART_BitNumber         0x08
+  77:../SPL/src/stm32f10x_sdio.c **** #define DCTRL_RWSTART_BB          (PERIPH_BB_BASE + (DCTRL_OFFSET * 32) + (RWSTART_BitNumber * 4))
+  78:../SPL/src/stm32f10x_sdio.c **** 
+  79:../SPL/src/stm32f10x_sdio.c **** /* Alias word address of RWSTOP bit */
+  80:../SPL/src/stm32f10x_sdio.c **** #define RWSTOP_BitNumber          0x09
+  81:../SPL/src/stm32f10x_sdio.c **** #define DCTRL_RWSTOP_BB           (PERIPH_BB_BASE + (DCTRL_OFFSET * 32) + (RWSTOP_BitNumber * 4))
+  82:../SPL/src/stm32f10x_sdio.c **** 
+  83:../SPL/src/stm32f10x_sdio.c **** /* Alias word address of RWMOD bit */
+  84:../SPL/src/stm32f10x_sdio.c **** #define RWMOD_BitNumber           0x0A
+  85:../SPL/src/stm32f10x_sdio.c **** #define DCTRL_RWMOD_BB            (PERIPH_BB_BASE + (DCTRL_OFFSET * 32) + (RWMOD_BitNumber * 4))
+  86:../SPL/src/stm32f10x_sdio.c **** 
+  87:../SPL/src/stm32f10x_sdio.c **** /* Alias word address of SDIOEN bit */
+  88:../SPL/src/stm32f10x_sdio.c **** #define SDIOEN_BitNumber          0x0B
+  89:../SPL/src/stm32f10x_sdio.c **** #define DCTRL_SDIOEN_BB           (PERIPH_BB_BASE + (DCTRL_OFFSET * 32) + (SDIOEN_BitNumber * 4))
+  90:../SPL/src/stm32f10x_sdio.c **** 
+  91:../SPL/src/stm32f10x_sdio.c **** /* ---------------------- SDIO registers bit mask ------------------------ */
+  92:../SPL/src/stm32f10x_sdio.c **** 
+  93:../SPL/src/stm32f10x_sdio.c **** /* --- CLKCR Register ---*/
+  94:../SPL/src/stm32f10x_sdio.c **** 
+  95:../SPL/src/stm32f10x_sdio.c **** /* CLKCR register clear mask */
+  96:../SPL/src/stm32f10x_sdio.c **** #define CLKCR_CLEAR_MASK         ((uint32_t)0xFFFF8100) 
+  97:../SPL/src/stm32f10x_sdio.c **** 
+  98:../SPL/src/stm32f10x_sdio.c **** /* --- PWRCTRL Register ---*/
+  99:../SPL/src/stm32f10x_sdio.c **** 
+ 100:../SPL/src/stm32f10x_sdio.c **** /* SDIO PWRCTRL Mask */
+ 101:../SPL/src/stm32f10x_sdio.c **** #define PWR_PWRCTRL_MASK         ((uint32_t)0xFFFFFFFC)
+ 102:../SPL/src/stm32f10x_sdio.c **** 
+ 103:../SPL/src/stm32f10x_sdio.c **** /* --- DCTRL Register ---*/
+ 104:../SPL/src/stm32f10x_sdio.c **** 
+ 105:../SPL/src/stm32f10x_sdio.c **** /* SDIO DCTRL Clear Mask */
+ 106:../SPL/src/stm32f10x_sdio.c **** #define DCTRL_CLEAR_MASK         ((uint32_t)0xFFFFFF08)
+ 107:../SPL/src/stm32f10x_sdio.c **** 
+ 108:../SPL/src/stm32f10x_sdio.c **** /* --- CMD Register ---*/
+ 109:../SPL/src/stm32f10x_sdio.c **** 
+ 110:../SPL/src/stm32f10x_sdio.c **** /* CMD Register clear mask */
+ 111:../SPL/src/stm32f10x_sdio.c **** #define CMD_CLEAR_MASK           ((uint32_t)0xFFFFF800)
+ 112:../SPL/src/stm32f10x_sdio.c **** 
+ 113:../SPL/src/stm32f10x_sdio.c **** /* SDIO RESP Registers Address */
+ 114:../SPL/src/stm32f10x_sdio.c **** #define SDIO_RESP_ADDR           ((uint32_t)(SDIO_BASE + 0x14))
+ 115:../SPL/src/stm32f10x_sdio.c **** 
+ 116:../SPL/src/stm32f10x_sdio.c **** /**
+ 117:../SPL/src/stm32f10x_sdio.c ****   * @}
+ 118:../SPL/src/stm32f10x_sdio.c ****   */
+ 119:../SPL/src/stm32f10x_sdio.c **** 
+ 120:../SPL/src/stm32f10x_sdio.c **** /** @defgroup SDIO_Private_Defines
+ 121:../SPL/src/stm32f10x_sdio.c ****   * @{
+ 122:../SPL/src/stm32f10x_sdio.c ****   */
+ 123:../SPL/src/stm32f10x_sdio.c **** 
+ 124:../SPL/src/stm32f10x_sdio.c **** /**
+ 125:../SPL/src/stm32f10x_sdio.c ****   * @}
+ 126:../SPL/src/stm32f10x_sdio.c ****   */
+ 127:../SPL/src/stm32f10x_sdio.c **** 
+ 128:../SPL/src/stm32f10x_sdio.c **** /** @defgroup SDIO_Private_Macros
+ 129:../SPL/src/stm32f10x_sdio.c ****   * @{
+ 130:../SPL/src/stm32f10x_sdio.c ****   */
+ 131:../SPL/src/stm32f10x_sdio.c **** 
+ 132:../SPL/src/stm32f10x_sdio.c **** /**
+ 133:../SPL/src/stm32f10x_sdio.c ****   * @}
+ 134:../SPL/src/stm32f10x_sdio.c ****   */
+ 135:../SPL/src/stm32f10x_sdio.c **** 
+ 136:../SPL/src/stm32f10x_sdio.c **** /** @defgroup SDIO_Private_Variables
+ 137:../SPL/src/stm32f10x_sdio.c ****   * @{
+ 138:../SPL/src/stm32f10x_sdio.c ****   */
+ 139:../SPL/src/stm32f10x_sdio.c **** 
+ 140:../SPL/src/stm32f10x_sdio.c **** /**
+ 141:../SPL/src/stm32f10x_sdio.c ****   * @}
+ 142:../SPL/src/stm32f10x_sdio.c ****   */
+ 143:../SPL/src/stm32f10x_sdio.c **** 
+ 144:../SPL/src/stm32f10x_sdio.c **** /** @defgroup SDIO_Private_FunctionPrototypes
+ 145:../SPL/src/stm32f10x_sdio.c ****   * @{
+ 146:../SPL/src/stm32f10x_sdio.c ****   */
+ 147:../SPL/src/stm32f10x_sdio.c **** 
+ 148:../SPL/src/stm32f10x_sdio.c **** /**
+ 149:../SPL/src/stm32f10x_sdio.c ****   * @}
+ 150:../SPL/src/stm32f10x_sdio.c ****   */
+ 151:../SPL/src/stm32f10x_sdio.c **** 
+ 152:../SPL/src/stm32f10x_sdio.c **** /** @defgroup SDIO_Private_Functions
+ 153:../SPL/src/stm32f10x_sdio.c ****   * @{
+ 154:../SPL/src/stm32f10x_sdio.c ****   */
+ 155:../SPL/src/stm32f10x_sdio.c **** 
+ 156:../SPL/src/stm32f10x_sdio.c **** /**
+ 157:../SPL/src/stm32f10x_sdio.c ****   * @brief  Deinitializes the SDIO peripheral registers to their default reset values.
+ 158:../SPL/src/stm32f10x_sdio.c ****   * @param  None
+ 159:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 160:../SPL/src/stm32f10x_sdio.c ****   */
+ 161:../SPL/src/stm32f10x_sdio.c **** void SDIO_DeInit(void)
+ 162:../SPL/src/stm32f10x_sdio.c **** {
+  26              		.loc 1 162 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 0
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30              		@ link register save eliminated.
+  31 0000 80B4     		push	{r7}
+  32              	.LCFI0:
+  33              		.cfi_def_cfa_offset 4
+  34              		.cfi_offset 7, -4
+  35 0002 00AF     		add	r7, sp, #0
+  36              	.LCFI1:
+  37              		.cfi_def_cfa_register 7
+ 163:../SPL/src/stm32f10x_sdio.c ****   SDIO->POWER = 0x00000000;
+  38              		.loc 1 163 0
+  39 0004 124B     		ldr	r3, .L2
+  40 0006 4FF00002 		mov	r2, #0
+  41 000a 1A60     		str	r2, [r3, #0]
+ 164:../SPL/src/stm32f10x_sdio.c ****   SDIO->CLKCR = 0x00000000;
+  42              		.loc 1 164 0
+  43 000c 104B     		ldr	r3, .L2
+  44 000e 4FF00002 		mov	r2, #0
+  45 0012 5A60     		str	r2, [r3, #4]
+ 165:../SPL/src/stm32f10x_sdio.c ****   SDIO->ARG = 0x00000000;
+  46              		.loc 1 165 0
+  47 0014 0E4B     		ldr	r3, .L2
+  48 0016 4FF00002 		mov	r2, #0
+  49 001a 9A60     		str	r2, [r3, #8]
+ 166:../SPL/src/stm32f10x_sdio.c ****   SDIO->CMD = 0x00000000;
+  50              		.loc 1 166 0
+  51 001c 0C4B     		ldr	r3, .L2
+  52 001e 4FF00002 		mov	r2, #0
+  53 0022 DA60     		str	r2, [r3, #12]
+ 167:../SPL/src/stm32f10x_sdio.c ****   SDIO->DTIMER = 0x00000000;
+  54              		.loc 1 167 0
+  55 0024 0A4B     		ldr	r3, .L2
+  56 0026 4FF00002 		mov	r2, #0
+  57 002a 5A62     		str	r2, [r3, #36]
+ 168:../SPL/src/stm32f10x_sdio.c ****   SDIO->DLEN = 0x00000000;
+  58              		.loc 1 168 0
+  59 002c 084B     		ldr	r3, .L2
+  60 002e 4FF00002 		mov	r2, #0
+  61 0032 9A62     		str	r2, [r3, #40]
+ 169:../SPL/src/stm32f10x_sdio.c ****   SDIO->DCTRL = 0x00000000;
+  62              		.loc 1 169 0
+  63 0034 064B     		ldr	r3, .L2
+  64 0036 4FF00002 		mov	r2, #0
+  65 003a DA62     		str	r2, [r3, #44]
+ 170:../SPL/src/stm32f10x_sdio.c ****   SDIO->ICR = 0x00C007FF;
+  66              		.loc 1 170 0
+  67 003c 044B     		ldr	r3, .L2
+  68 003e 054A     		ldr	r2, .L2+4
+  69 0040 9A63     		str	r2, [r3, #56]
+ 171:../SPL/src/stm32f10x_sdio.c ****   SDIO->MASK = 0x00000000;
+  70              		.loc 1 171 0
+  71 0042 034B     		ldr	r3, .L2
+  72 0044 4FF00002 		mov	r2, #0
+  73 0048 DA63     		str	r2, [r3, #60]
+ 172:../SPL/src/stm32f10x_sdio.c **** }
+  74              		.loc 1 172 0
+  75 004a BD46     		mov	sp, r7
+  76 004c 80BC     		pop	{r7}
+  77 004e 7047     		bx	lr
+  78              	.L3:
+  79              		.align	2
+  80              	.L2:
+  81 0050 00800140 		.word	1073840128
+  82 0054 FF07C000 		.word	12584959
+  83              		.cfi_endproc
+  84              	.LFE29:
+  86              		.section	.rodata
+  87              		.align	2
+  88              	.LC0:
+  89 0000 2E2E2F53 		.ascii	"../SPL/src/stm32f10x_sdio.c\000"
+  89      504C2F73 
+  89      72632F73 
+  89      746D3332 
+  89      66313078 
+  90              		.text
+  91              		.align	2
+  92              		.global	SDIO_Init
+  93              		.thumb
+  94              		.thumb_func
+  96              	SDIO_Init:
+  97              	.LFB30:
+ 173:../SPL/src/stm32f10x_sdio.c **** 
+ 174:../SPL/src/stm32f10x_sdio.c **** /**
+ 175:../SPL/src/stm32f10x_sdio.c ****   * @brief  Initializes the SDIO peripheral according to the specified 
+ 176:../SPL/src/stm32f10x_sdio.c ****   *         parameters in the SDIO_InitStruct.
+ 177:../SPL/src/stm32f10x_sdio.c ****   * @param  SDIO_InitStruct : pointer to a SDIO_InitTypeDef structure 
+ 178:../SPL/src/stm32f10x_sdio.c ****   *         that contains the configuration information for the SDIO peripheral.
+ 179:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 180:../SPL/src/stm32f10x_sdio.c ****   */
+ 181:../SPL/src/stm32f10x_sdio.c **** void SDIO_Init(SDIO_InitTypeDef* SDIO_InitStruct)
+ 182:../SPL/src/stm32f10x_sdio.c **** {
+  98              		.loc 1 182 0
+  99              		.cfi_startproc
+ 100              		@ args = 0, pretend = 0, frame = 16
+ 101              		@ frame_needed = 1, uses_anonymous_args = 0
+ 102 0058 80B5     		push	{r7, lr}
+ 103              	.LCFI2:
+ 104              		.cfi_def_cfa_offset 8
+ 105              		.cfi_offset 7, -8
+ 106              		.cfi_offset 14, -4
+ 107 005a 84B0     		sub	sp, sp, #16
+ 108              	.LCFI3:
+ 109              		.cfi_def_cfa_offset 24
+ 110 005c 00AF     		add	r7, sp, #0
+ 111              	.LCFI4:
+ 112              		.cfi_def_cfa_register 7
+ 113 005e 7860     		str	r0, [r7, #4]
+ 183:../SPL/src/stm32f10x_sdio.c ****   uint32_t tmpreg = 0;
+ 114              		.loc 1 183 0
+ 115 0060 4FF00003 		mov	r3, #0
+ 116 0064 FB60     		str	r3, [r7, #12]
+ 184:../SPL/src/stm32f10x_sdio.c ****     
+ 185:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 186:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_CLOCK_EDGE(SDIO_InitStruct->SDIO_ClockEdge));
+ 117              		.loc 1 186 0
+ 118 0066 7B68     		ldr	r3, [r7, #4]
+ 119 0068 1B68     		ldr	r3, [r3, #0]
+ 120 006a 002B     		cmp	r3, #0
+ 121 006c 09D0     		beq	.L5
+ 122              		.loc 1 186 0 is_stmt 0 discriminator 1
+ 123 006e 7B68     		ldr	r3, [r7, #4]
+ 124 0070 1B68     		ldr	r3, [r3, #0]
+ 125 0072 B3F5005F 		cmp	r3, #8192
+ 126 0076 04D0     		beq	.L5
+ 127              		.loc 1 186 0 discriminator 2
+ 128 0078 3348     		ldr	r0, .L10
+ 129 007a 4FF0BA01 		mov	r1, #186
+ 130 007e FFF7FEFF 		bl	assert_failed
+ 131              	.L5:
+ 187:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_CLOCK_BYPASS(SDIO_InitStruct->SDIO_ClockBypass));
+ 132              		.loc 1 187 0 is_stmt 1
+ 133 0082 7B68     		ldr	r3, [r7, #4]
+ 134 0084 5B68     		ldr	r3, [r3, #4]
+ 135 0086 002B     		cmp	r3, #0
+ 136 0088 09D0     		beq	.L6
+ 137              		.loc 1 187 0 is_stmt 0 discriminator 1
+ 138 008a 7B68     		ldr	r3, [r7, #4]
+ 139 008c 5B68     		ldr	r3, [r3, #4]
+ 140 008e B3F5806F 		cmp	r3, #1024
+ 141 0092 04D0     		beq	.L6
+ 142              		.loc 1 187 0 discriminator 2
+ 143 0094 2C48     		ldr	r0, .L10
+ 144 0096 4FF0BB01 		mov	r1, #187
+ 145 009a FFF7FEFF 		bl	assert_failed
+ 146              	.L6:
+ 188:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_CLOCK_POWER_SAVE(SDIO_InitStruct->SDIO_ClockPowerSave));
+ 147              		.loc 1 188 0 is_stmt 1
+ 148 009e 7B68     		ldr	r3, [r7, #4]
+ 149 00a0 9B68     		ldr	r3, [r3, #8]
+ 150 00a2 002B     		cmp	r3, #0
+ 151 00a4 09D0     		beq	.L7
+ 152              		.loc 1 188 0 is_stmt 0 discriminator 1
+ 153 00a6 7B68     		ldr	r3, [r7, #4]
+ 154 00a8 9B68     		ldr	r3, [r3, #8]
+ 155 00aa B3F5007F 		cmp	r3, #512
+ 156 00ae 04D0     		beq	.L7
+ 157              		.loc 1 188 0 discriminator 2
+ 158 00b0 2548     		ldr	r0, .L10
+ 159 00b2 4FF0BC01 		mov	r1, #188
+ 160 00b6 FFF7FEFF 		bl	assert_failed
+ 161              	.L7:
+ 189:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_BUS_WIDE(SDIO_InitStruct->SDIO_BusWide));
+ 162              		.loc 1 189 0 is_stmt 1
+ 163 00ba 7B68     		ldr	r3, [r7, #4]
+ 164 00bc DB68     		ldr	r3, [r3, #12]
+ 165 00be 002B     		cmp	r3, #0
+ 166 00c0 0ED0     		beq	.L8
+ 167              		.loc 1 189 0 is_stmt 0 discriminator 1
+ 168 00c2 7B68     		ldr	r3, [r7, #4]
+ 169 00c4 DB68     		ldr	r3, [r3, #12]
+ 170 00c6 B3F5006F 		cmp	r3, #2048
+ 171 00ca 09D0     		beq	.L8
+ 172              		.loc 1 189 0 discriminator 2
+ 173 00cc 7B68     		ldr	r3, [r7, #4]
+ 174 00ce DB68     		ldr	r3, [r3, #12]
+ 175 00d0 B3F5805F 		cmp	r3, #4096
+ 176 00d4 04D0     		beq	.L8
+ 177              		.loc 1 189 0 discriminator 3
+ 178 00d6 1C48     		ldr	r0, .L10
+ 179 00d8 4FF0BD01 		mov	r1, #189
+ 180 00dc FFF7FEFF 		bl	assert_failed
+ 181              	.L8:
+ 190:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_HARDWARE_FLOW_CONTROL(SDIO_InitStruct->SDIO_HardwareFlowControl)); 
+ 182              		.loc 1 190 0 is_stmt 1
+ 183 00e0 7B68     		ldr	r3, [r7, #4]
+ 184 00e2 1B69     		ldr	r3, [r3, #16]
+ 185 00e4 002B     		cmp	r3, #0
+ 186 00e6 09D0     		beq	.L9
+ 187              		.loc 1 190 0 is_stmt 0 discriminator 1
+ 188 00e8 7B68     		ldr	r3, [r7, #4]
+ 189 00ea 1B69     		ldr	r3, [r3, #16]
+ 190 00ec B3F5804F 		cmp	r3, #16384
+ 191 00f0 04D0     		beq	.L9
+ 192              		.loc 1 190 0 discriminator 2
+ 193 00f2 1548     		ldr	r0, .L10
+ 194 00f4 4FF0BE01 		mov	r1, #190
+ 195 00f8 FFF7FEFF 		bl	assert_failed
+ 196              	.L9:
+ 191:../SPL/src/stm32f10x_sdio.c ****    
+ 192:../SPL/src/stm32f10x_sdio.c **** /*---------------------------- SDIO CLKCR Configuration ------------------------*/  
+ 193:../SPL/src/stm32f10x_sdio.c ****   /* Get the SDIO CLKCR value */
+ 194:../SPL/src/stm32f10x_sdio.c ****   tmpreg = SDIO->CLKCR;
+ 197              		.loc 1 194 0 is_stmt 1
+ 198 00fc 134B     		ldr	r3, .L10+4
+ 199 00fe 5B68     		ldr	r3, [r3, #4]
+ 200 0100 FB60     		str	r3, [r7, #12]
+ 195:../SPL/src/stm32f10x_sdio.c ****   
+ 196:../SPL/src/stm32f10x_sdio.c ****   /* Clear CLKDIV, PWRSAV, BYPASS, WIDBUS, NEGEDGE, HWFC_EN bits */
+ 197:../SPL/src/stm32f10x_sdio.c ****   tmpreg &= CLKCR_CLEAR_MASK;
+ 201              		.loc 1 197 0
+ 202 0102 FB68     		ldr	r3, [r7, #12]
+ 203 0104 23F4FD43 		bic	r3, r3, #32384
+ 204 0108 23F07F03 		bic	r3, r3, #127
+ 205 010c FB60     		str	r3, [r7, #12]
+ 198:../SPL/src/stm32f10x_sdio.c ****   
+ 199:../SPL/src/stm32f10x_sdio.c ****   /* Set CLKDIV bits according to SDIO_ClockDiv value */
+ 200:../SPL/src/stm32f10x_sdio.c ****   /* Set PWRSAV bit according to SDIO_ClockPowerSave value */
+ 201:../SPL/src/stm32f10x_sdio.c ****   /* Set BYPASS bit according to SDIO_ClockBypass value */
+ 202:../SPL/src/stm32f10x_sdio.c ****   /* Set WIDBUS bits according to SDIO_BusWide value */
+ 203:../SPL/src/stm32f10x_sdio.c ****   /* Set NEGEDGE bits according to SDIO_ClockEdge value */
+ 204:../SPL/src/stm32f10x_sdio.c ****   /* Set HWFC_EN bits according to SDIO_HardwareFlowControl value */
+ 205:../SPL/src/stm32f10x_sdio.c ****   tmpreg |= (SDIO_InitStruct->SDIO_ClockDiv  | SDIO_InitStruct->SDIO_ClockPowerSave |
+ 206              		.loc 1 205 0
+ 207 010e 7B68     		ldr	r3, [r7, #4]
+ 208 0110 1B7D     		ldrb	r3, [r3, #20]	@ zero_extendqisi2
+ 209 0112 1A46     		mov	r2, r3
+ 210 0114 7B68     		ldr	r3, [r7, #4]
+ 211 0116 9B68     		ldr	r3, [r3, #8]
+ 212 0118 1A43     		orrs	r2, r2, r3
+ 206:../SPL/src/stm32f10x_sdio.c ****              SDIO_InitStruct->SDIO_ClockBypass | SDIO_InitStruct->SDIO_BusWide |
+ 213              		.loc 1 206 0
+ 214 011a 7B68     		ldr	r3, [r7, #4]
+ 215 011c 5B68     		ldr	r3, [r3, #4]
+ 205:../SPL/src/stm32f10x_sdio.c ****   tmpreg |= (SDIO_InitStruct->SDIO_ClockDiv  | SDIO_InitStruct->SDIO_ClockPowerSave |
+ 216              		.loc 1 205 0
+ 217 011e 1A43     		orrs	r2, r2, r3
+ 218              		.loc 1 206 0
+ 219 0120 7B68     		ldr	r3, [r7, #4]
+ 220 0122 DB68     		ldr	r3, [r3, #12]
+ 221 0124 1A43     		orrs	r2, r2, r3
+ 207:../SPL/src/stm32f10x_sdio.c ****              SDIO_InitStruct->SDIO_ClockEdge | SDIO_InitStruct->SDIO_HardwareFlowControl); 
+ 222              		.loc 1 207 0
+ 223 0126 7B68     		ldr	r3, [r7, #4]
+ 224 0128 1B68     		ldr	r3, [r3, #0]
+ 206:../SPL/src/stm32f10x_sdio.c ****              SDIO_InitStruct->SDIO_ClockBypass | SDIO_InitStruct->SDIO_BusWide |
+ 225              		.loc 1 206 0
+ 226 012a 1A43     		orrs	r2, r2, r3
+ 227              		.loc 1 207 0
+ 228 012c 7B68     		ldr	r3, [r7, #4]
+ 229 012e 1B69     		ldr	r3, [r3, #16]
+ 230 0130 1343     		orrs	r3, r3, r2
+ 205:../SPL/src/stm32f10x_sdio.c ****   tmpreg |= (SDIO_InitStruct->SDIO_ClockDiv  | SDIO_InitStruct->SDIO_ClockPowerSave |
+ 231              		.loc 1 205 0
+ 232 0132 FA68     		ldr	r2, [r7, #12]
+ 233 0134 1343     		orrs	r3, r3, r2
+ 234 0136 FB60     		str	r3, [r7, #12]
+ 208:../SPL/src/stm32f10x_sdio.c ****   
+ 209:../SPL/src/stm32f10x_sdio.c ****   /* Write to SDIO CLKCR */
+ 210:../SPL/src/stm32f10x_sdio.c ****   SDIO->CLKCR = tmpreg;
+ 235              		.loc 1 210 0
+ 236 0138 044B     		ldr	r3, .L10+4
+ 237 013a FA68     		ldr	r2, [r7, #12]
+ 238 013c 5A60     		str	r2, [r3, #4]
+ 211:../SPL/src/stm32f10x_sdio.c **** }
+ 239              		.loc 1 211 0
+ 240 013e 07F11007 		add	r7, r7, #16
+ 241 0142 BD46     		mov	sp, r7
+ 242 0144 80BD     		pop	{r7, pc}
+ 243              	.L11:
+ 244 0146 00BF     		.align	2
+ 245              	.L10:
+ 246 0148 00000000 		.word	.LC0
+ 247 014c 00800140 		.word	1073840128
+ 248              		.cfi_endproc
+ 249              	.LFE30:
+ 251              		.align	2
+ 252              		.global	SDIO_StructInit
+ 253              		.thumb
+ 254              		.thumb_func
+ 256              	SDIO_StructInit:
+ 257              	.LFB31:
+ 212:../SPL/src/stm32f10x_sdio.c **** 
+ 213:../SPL/src/stm32f10x_sdio.c **** /**
+ 214:../SPL/src/stm32f10x_sdio.c ****   * @brief  Fills each SDIO_InitStruct member with its default value.
+ 215:../SPL/src/stm32f10x_sdio.c ****   * @param  SDIO_InitStruct: pointer to an SDIO_InitTypeDef structure which 
+ 216:../SPL/src/stm32f10x_sdio.c ****   *   will be initialized.
+ 217:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 218:../SPL/src/stm32f10x_sdio.c ****   */
+ 219:../SPL/src/stm32f10x_sdio.c **** void SDIO_StructInit(SDIO_InitTypeDef* SDIO_InitStruct)
+ 220:../SPL/src/stm32f10x_sdio.c **** {
+ 258              		.loc 1 220 0
+ 259              		.cfi_startproc
+ 260              		@ args = 0, pretend = 0, frame = 8
+ 261              		@ frame_needed = 1, uses_anonymous_args = 0
+ 262              		@ link register save eliminated.
+ 263 0150 80B4     		push	{r7}
+ 264              	.LCFI5:
+ 265              		.cfi_def_cfa_offset 4
+ 266              		.cfi_offset 7, -4
+ 267 0152 83B0     		sub	sp, sp, #12
+ 268              	.LCFI6:
+ 269              		.cfi_def_cfa_offset 16
+ 270 0154 00AF     		add	r7, sp, #0
+ 271              	.LCFI7:
+ 272              		.cfi_def_cfa_register 7
+ 273 0156 7860     		str	r0, [r7, #4]
+ 221:../SPL/src/stm32f10x_sdio.c ****   /* SDIO_InitStruct members default value */
+ 222:../SPL/src/stm32f10x_sdio.c ****   SDIO_InitStruct->SDIO_ClockDiv = 0x00;
+ 274              		.loc 1 222 0
+ 275 0158 7B68     		ldr	r3, [r7, #4]
+ 276 015a 4FF00002 		mov	r2, #0
+ 277 015e 1A75     		strb	r2, [r3, #20]
+ 223:../SPL/src/stm32f10x_sdio.c ****   SDIO_InitStruct->SDIO_ClockEdge = SDIO_ClockEdge_Rising;
+ 278              		.loc 1 223 0
+ 279 0160 7B68     		ldr	r3, [r7, #4]
+ 280 0162 4FF00002 		mov	r2, #0
+ 281 0166 1A60     		str	r2, [r3, #0]
+ 224:../SPL/src/stm32f10x_sdio.c ****   SDIO_InitStruct->SDIO_ClockBypass = SDIO_ClockBypass_Disable;
+ 282              		.loc 1 224 0
+ 283 0168 7B68     		ldr	r3, [r7, #4]
+ 284 016a 4FF00002 		mov	r2, #0
+ 285 016e 5A60     		str	r2, [r3, #4]
+ 225:../SPL/src/stm32f10x_sdio.c ****   SDIO_InitStruct->SDIO_ClockPowerSave = SDIO_ClockPowerSave_Disable;
+ 286              		.loc 1 225 0
+ 287 0170 7B68     		ldr	r3, [r7, #4]
+ 288 0172 4FF00002 		mov	r2, #0
+ 289 0176 9A60     		str	r2, [r3, #8]
+ 226:../SPL/src/stm32f10x_sdio.c ****   SDIO_InitStruct->SDIO_BusWide = SDIO_BusWide_1b;
+ 290              		.loc 1 226 0
+ 291 0178 7B68     		ldr	r3, [r7, #4]
+ 292 017a 4FF00002 		mov	r2, #0
+ 293 017e DA60     		str	r2, [r3, #12]
+ 227:../SPL/src/stm32f10x_sdio.c ****   SDIO_InitStruct->SDIO_HardwareFlowControl = SDIO_HardwareFlowControl_Disable;
+ 294              		.loc 1 227 0
+ 295 0180 7B68     		ldr	r3, [r7, #4]
+ 296 0182 4FF00002 		mov	r2, #0
+ 297 0186 1A61     		str	r2, [r3, #16]
+ 228:../SPL/src/stm32f10x_sdio.c **** }
+ 298              		.loc 1 228 0
+ 299 0188 07F10C07 		add	r7, r7, #12
+ 300 018c BD46     		mov	sp, r7
+ 301 018e 80BC     		pop	{r7}
+ 302 0190 7047     		bx	lr
+ 303              		.cfi_endproc
+ 304              	.LFE31:
+ 306 0192 00BF     		.align	2
+ 307              		.global	SDIO_ClockCmd
+ 308              		.thumb
+ 309              		.thumb_func
+ 311              	SDIO_ClockCmd:
+ 312              	.LFB32:
+ 229:../SPL/src/stm32f10x_sdio.c **** 
+ 230:../SPL/src/stm32f10x_sdio.c **** /**
+ 231:../SPL/src/stm32f10x_sdio.c ****   * @brief  Enables or disables the SDIO Clock.
+ 232:../SPL/src/stm32f10x_sdio.c ****   * @param  NewState: new state of the SDIO Clock. This parameter can be: ENABLE or DISABLE.
+ 233:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 234:../SPL/src/stm32f10x_sdio.c ****   */
+ 235:../SPL/src/stm32f10x_sdio.c **** void SDIO_ClockCmd(FunctionalState NewState)
+ 236:../SPL/src/stm32f10x_sdio.c **** {
+ 313              		.loc 1 236 0
+ 314              		.cfi_startproc
+ 315              		@ args = 0, pretend = 0, frame = 8
+ 316              		@ frame_needed = 1, uses_anonymous_args = 0
+ 317 0194 80B5     		push	{r7, lr}
+ 318              	.LCFI8:
+ 319              		.cfi_def_cfa_offset 8
+ 320              		.cfi_offset 7, -8
+ 321              		.cfi_offset 14, -4
+ 322 0196 82B0     		sub	sp, sp, #8
+ 323              	.LCFI9:
+ 324              		.cfi_def_cfa_offset 16
+ 325 0198 00AF     		add	r7, sp, #0
+ 326              	.LCFI10:
+ 327              		.cfi_def_cfa_register 7
+ 328 019a 0346     		mov	r3, r0
+ 329 019c FB71     		strb	r3, [r7, #7]
+ 237:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 238:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 330              		.loc 1 238 0
+ 331 019e FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 332 01a0 002B     		cmp	r3, #0
+ 333 01a2 07D0     		beq	.L14
+ 334              		.loc 1 238 0 is_stmt 0 discriminator 1
+ 335 01a4 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 336 01a6 012B     		cmp	r3, #1
+ 337 01a8 04D0     		beq	.L14
+ 338              		.loc 1 238 0 discriminator 2
+ 339 01aa 0648     		ldr	r0, .L15
+ 340 01ac 4FF0EE01 		mov	r1, #238
+ 341 01b0 FFF7FEFF 		bl	assert_failed
+ 342              	.L14:
+ 239:../SPL/src/stm32f10x_sdio.c ****   
+ 240:../SPL/src/stm32f10x_sdio.c ****   *(__IO uint32_t *) CLKCR_CLKEN_BB = (uint32_t)NewState;
+ 343              		.loc 1 240 0 is_stmt 1
+ 344 01b4 044B     		ldr	r3, .L15+4
+ 345 01b6 FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 346 01b8 1A60     		str	r2, [r3, #0]
+ 241:../SPL/src/stm32f10x_sdio.c **** }
+ 347              		.loc 1 241 0
+ 348 01ba 07F10807 		add	r7, r7, #8
+ 349 01be BD46     		mov	sp, r7
+ 350 01c0 80BD     		pop	{r7, pc}
+ 351              	.L16:
+ 352 01c2 00BF     		.align	2
+ 353              	.L15:
+ 354 01c4 00000000 		.word	.LC0
+ 355 01c8 A0003042 		.word	1110442144
+ 356              		.cfi_endproc
+ 357              	.LFE32:
+ 359              		.align	2
+ 360              		.global	SDIO_SetPowerState
+ 361              		.thumb
+ 362              		.thumb_func
+ 364              	SDIO_SetPowerState:
+ 365              	.LFB33:
+ 242:../SPL/src/stm32f10x_sdio.c **** 
+ 243:../SPL/src/stm32f10x_sdio.c **** /**
+ 244:../SPL/src/stm32f10x_sdio.c ****   * @brief  Sets the power status of the controller.
+ 245:../SPL/src/stm32f10x_sdio.c ****   * @param  SDIO_PowerState: new state of the Power state. 
+ 246:../SPL/src/stm32f10x_sdio.c ****   *   This parameter can be one of the following values:
+ 247:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_PowerState_OFF
+ 248:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_PowerState_ON
+ 249:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 250:../SPL/src/stm32f10x_sdio.c ****   */
+ 251:../SPL/src/stm32f10x_sdio.c **** void SDIO_SetPowerState(uint32_t SDIO_PowerState)
+ 252:../SPL/src/stm32f10x_sdio.c **** {
+ 366              		.loc 1 252 0
+ 367              		.cfi_startproc
+ 368              		@ args = 0, pretend = 0, frame = 8
+ 369              		@ frame_needed = 1, uses_anonymous_args = 0
+ 370 01cc 80B5     		push	{r7, lr}
+ 371              	.LCFI11:
+ 372              		.cfi_def_cfa_offset 8
+ 373              		.cfi_offset 7, -8
+ 374              		.cfi_offset 14, -4
+ 375 01ce 82B0     		sub	sp, sp, #8
+ 376              	.LCFI12:
+ 377              		.cfi_def_cfa_offset 16
+ 378 01d0 00AF     		add	r7, sp, #0
+ 379              	.LCFI13:
+ 380              		.cfi_def_cfa_register 7
+ 381 01d2 7860     		str	r0, [r7, #4]
+ 253:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 254:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_POWER_STATE(SDIO_PowerState));
+ 382              		.loc 1 254 0
+ 383 01d4 7B68     		ldr	r3, [r7, #4]
+ 384 01d6 002B     		cmp	r3, #0
+ 385 01d8 07D0     		beq	.L18
+ 386              		.loc 1 254 0 is_stmt 0 discriminator 1
+ 387 01da 7B68     		ldr	r3, [r7, #4]
+ 388 01dc 032B     		cmp	r3, #3
+ 389 01de 04D0     		beq	.L18
+ 390              		.loc 1 254 0 discriminator 2
+ 391 01e0 0A48     		ldr	r0, .L19
+ 392 01e2 4FF0FE01 		mov	r1, #254
+ 393 01e6 FFF7FEFF 		bl	assert_failed
+ 394              	.L18:
+ 255:../SPL/src/stm32f10x_sdio.c ****   
+ 256:../SPL/src/stm32f10x_sdio.c ****   SDIO->POWER &= PWR_PWRCTRL_MASK;
+ 395              		.loc 1 256 0 is_stmt 1
+ 396 01ea 094B     		ldr	r3, .L19+4
+ 397 01ec 084A     		ldr	r2, .L19+4
+ 398 01ee 1268     		ldr	r2, [r2, #0]
+ 399 01f0 22F00302 		bic	r2, r2, #3
+ 400 01f4 1A60     		str	r2, [r3, #0]
+ 257:../SPL/src/stm32f10x_sdio.c ****   SDIO->POWER |= SDIO_PowerState;
+ 401              		.loc 1 257 0
+ 402 01f6 064B     		ldr	r3, .L19+4
+ 403 01f8 054A     		ldr	r2, .L19+4
+ 404 01fa 1168     		ldr	r1, [r2, #0]
+ 405 01fc 7A68     		ldr	r2, [r7, #4]
+ 406 01fe 0A43     		orrs	r2, r2, r1
+ 407 0200 1A60     		str	r2, [r3, #0]
+ 258:../SPL/src/stm32f10x_sdio.c **** }
+ 408              		.loc 1 258 0
+ 409 0202 07F10807 		add	r7, r7, #8
+ 410 0206 BD46     		mov	sp, r7
+ 411 0208 80BD     		pop	{r7, pc}
+ 412              	.L20:
+ 413 020a 00BF     		.align	2
+ 414              	.L19:
+ 415 020c 00000000 		.word	.LC0
+ 416 0210 00800140 		.word	1073840128
+ 417              		.cfi_endproc
+ 418              	.LFE33:
+ 420              		.align	2
+ 421              		.global	SDIO_GetPowerState
+ 422              		.thumb
+ 423              		.thumb_func
+ 425              	SDIO_GetPowerState:
+ 426              	.LFB34:
+ 259:../SPL/src/stm32f10x_sdio.c **** 
+ 260:../SPL/src/stm32f10x_sdio.c **** /**
+ 261:../SPL/src/stm32f10x_sdio.c ****   * @brief  Gets the power status of the controller.
+ 262:../SPL/src/stm32f10x_sdio.c ****   * @param  None
+ 263:../SPL/src/stm32f10x_sdio.c ****   * @retval Power status of the controller. The returned value can
+ 264:../SPL/src/stm32f10x_sdio.c ****   *   be one of the following:
+ 265:../SPL/src/stm32f10x_sdio.c ****   * - 0x00: Power OFF
+ 266:../SPL/src/stm32f10x_sdio.c ****   * - 0x02: Power UP
+ 267:../SPL/src/stm32f10x_sdio.c ****   * - 0x03: Power ON 
+ 268:../SPL/src/stm32f10x_sdio.c ****   */
+ 269:../SPL/src/stm32f10x_sdio.c **** uint32_t SDIO_GetPowerState(void)
+ 270:../SPL/src/stm32f10x_sdio.c **** {
+ 427              		.loc 1 270 0
+ 428              		.cfi_startproc
+ 429              		@ args = 0, pretend = 0, frame = 0
+ 430              		@ frame_needed = 1, uses_anonymous_args = 0
+ 431              		@ link register save eliminated.
+ 432 0214 80B4     		push	{r7}
+ 433              	.LCFI14:
+ 434              		.cfi_def_cfa_offset 4
+ 435              		.cfi_offset 7, -4
+ 436 0216 00AF     		add	r7, sp, #0
+ 437              	.LCFI15:
+ 438              		.cfi_def_cfa_register 7
+ 271:../SPL/src/stm32f10x_sdio.c ****   return (SDIO->POWER & (~PWR_PWRCTRL_MASK));
+ 439              		.loc 1 271 0
+ 440 0218 034B     		ldr	r3, .L23
+ 441 021a 1B68     		ldr	r3, [r3, #0]
+ 442 021c 03F00303 		and	r3, r3, #3
+ 272:../SPL/src/stm32f10x_sdio.c **** }
+ 443              		.loc 1 272 0
+ 444 0220 1846     		mov	r0, r3
+ 445 0222 BD46     		mov	sp, r7
+ 446 0224 80BC     		pop	{r7}
+ 447 0226 7047     		bx	lr
+ 448              	.L24:
+ 449              		.align	2
+ 450              	.L23:
+ 451 0228 00800140 		.word	1073840128
+ 452              		.cfi_endproc
+ 453              	.LFE34:
+ 455              		.align	2
+ 456              		.global	SDIO_ITConfig
+ 457              		.thumb
+ 458              		.thumb_func
+ 460              	SDIO_ITConfig:
+ 461              	.LFB35:
+ 273:../SPL/src/stm32f10x_sdio.c **** 
+ 274:../SPL/src/stm32f10x_sdio.c **** /**
+ 275:../SPL/src/stm32f10x_sdio.c ****   * @brief  Enables or disables the SDIO interrupts.
+ 276:../SPL/src/stm32f10x_sdio.c ****   * @param  SDIO_IT: specifies the SDIO interrupt sources to be enabled or disabled.
+ 277:../SPL/src/stm32f10x_sdio.c ****   *   This parameter can be one or a combination of the following values:
+ 278:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CCRCFAIL: Command response received (CRC check failed) interrupt
+ 279:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_DCRCFAIL: Data block sent/received (CRC check failed) interrupt
+ 280:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CTIMEOUT: Command response timeout interrupt
+ 281:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_DTIMEOUT: Data timeout interrupt
+ 282:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_TXUNDERR: Transmit FIFO underrun error interrupt
+ 283:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_RXOVERR:  Received FIFO overrun error interrupt
+ 284:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CMDREND:  Command response received (CRC check passed) interrupt
+ 285:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CMDSENT:  Command sent (no response required) interrupt
+ 286:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_DATAEND:  Data end (data counter, SDIDCOUNT, is zero) interrupt
+ 287:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_STBITERR: Start bit not detected on all data signals in wide 
+ 288:../SPL/src/stm32f10x_sdio.c ****   *                            bus mode interrupt
+ 289:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_DBCKEND:  Data block sent/received (CRC check passed) interrupt
+ 290:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CMDACT:   Command transfer in progress interrupt
+ 291:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_TXACT:    Data transmit in progress interrupt
+ 292:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_RXACT:    Data receive in progress interrupt
+ 293:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_TXFIFOHE: Transmit FIFO Half Empty interrupt
+ 294:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_RXFIFOHF: Receive FIFO Half Full interrupt
+ 295:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_TXFIFOF:  Transmit FIFO full interrupt
+ 296:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_RXFIFOF:  Receive FIFO full interrupt
+ 297:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_TXFIFOE:  Transmit FIFO empty interrupt
+ 298:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_RXFIFOE:  Receive FIFO empty interrupt
+ 299:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_TXDAVL:   Data available in transmit FIFO interrupt
+ 300:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_RXDAVL:   Data available in receive FIFO interrupt
+ 301:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_SDIOIT:   SD I/O interrupt received interrupt
+ 302:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CEATAEND: CE-ATA command completion signal received for CMD61 interrupt
+ 303:../SPL/src/stm32f10x_sdio.c ****   * @param  NewState: new state of the specified SDIO interrupts.
+ 304:../SPL/src/stm32f10x_sdio.c ****   *   This parameter can be: ENABLE or DISABLE.
+ 305:../SPL/src/stm32f10x_sdio.c ****   * @retval None 
+ 306:../SPL/src/stm32f10x_sdio.c ****   */
+ 307:../SPL/src/stm32f10x_sdio.c **** void SDIO_ITConfig(uint32_t SDIO_IT, FunctionalState NewState)
+ 308:../SPL/src/stm32f10x_sdio.c **** {
+ 462              		.loc 1 308 0
+ 463              		.cfi_startproc
+ 464              		@ args = 0, pretend = 0, frame = 8
+ 465              		@ frame_needed = 1, uses_anonymous_args = 0
+ 466 022c 80B5     		push	{r7, lr}
+ 467              	.LCFI16:
+ 468              		.cfi_def_cfa_offset 8
+ 469              		.cfi_offset 7, -8
+ 470              		.cfi_offset 14, -4
+ 471 022e 82B0     		sub	sp, sp, #8
+ 472              	.LCFI17:
+ 473              		.cfi_def_cfa_offset 16
+ 474 0230 00AF     		add	r7, sp, #0
+ 475              	.LCFI18:
+ 476              		.cfi_def_cfa_register 7
+ 477 0232 7860     		str	r0, [r7, #4]
+ 478 0234 0B46     		mov	r3, r1
+ 479 0236 FB70     		strb	r3, [r7, #3]
+ 309:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 310:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_IT(SDIO_IT));
+ 480              		.loc 1 310 0
+ 481 0238 7B68     		ldr	r3, [r7, #4]
+ 482 023a 03F07F43 		and	r3, r3, #-16777216
+ 483 023e 002B     		cmp	r3, #0
+ 484 0240 02D1     		bne	.L26
+ 485              		.loc 1 310 0 is_stmt 0 discriminator 2
+ 486 0242 7B68     		ldr	r3, [r7, #4]
+ 487 0244 002B     		cmp	r3, #0
+ 488 0246 04D1     		bne	.L27
+ 489              	.L26:
+ 490              		.loc 1 310 0 discriminator 1
+ 491 0248 1248     		ldr	r0, .L31
+ 492 024a 4FF49B71 		mov	r1, #310
+ 493 024e FFF7FEFF 		bl	assert_failed
+ 494              	.L27:
+ 311:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 495              		.loc 1 311 0 is_stmt 1
+ 496 0252 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 497 0254 002B     		cmp	r3, #0
+ 498 0256 07D0     		beq	.L28
+ 499              		.loc 1 311 0 is_stmt 0 discriminator 1
+ 500 0258 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 501 025a 012B     		cmp	r3, #1
+ 502 025c 04D0     		beq	.L28
+ 503              		.loc 1 311 0 discriminator 2
+ 504 025e 0D48     		ldr	r0, .L31
+ 505 0260 40F23711 		movw	r1, #311
+ 506 0264 FFF7FEFF 		bl	assert_failed
+ 507              	.L28:
+ 312:../SPL/src/stm32f10x_sdio.c ****   
+ 313:../SPL/src/stm32f10x_sdio.c ****   if (NewState != DISABLE)
+ 508              		.loc 1 313 0 is_stmt 1
+ 509 0268 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 510 026a 002B     		cmp	r3, #0
+ 511 026c 06D0     		beq	.L29
+ 314:../SPL/src/stm32f10x_sdio.c ****   {
+ 315:../SPL/src/stm32f10x_sdio.c ****     /* Enable the SDIO interrupts */
+ 316:../SPL/src/stm32f10x_sdio.c ****     SDIO->MASK |= SDIO_IT;
+ 512              		.loc 1 316 0
+ 513 026e 0A4B     		ldr	r3, .L31+4
+ 514 0270 094A     		ldr	r2, .L31+4
+ 515 0272 D16B     		ldr	r1, [r2, #60]
+ 516 0274 7A68     		ldr	r2, [r7, #4]
+ 517 0276 0A43     		orrs	r2, r2, r1
+ 518 0278 DA63     		str	r2, [r3, #60]
+ 519 027a 07E0     		b	.L25
+ 520              	.L29:
+ 317:../SPL/src/stm32f10x_sdio.c ****   }
+ 318:../SPL/src/stm32f10x_sdio.c ****   else
+ 319:../SPL/src/stm32f10x_sdio.c ****   {
+ 320:../SPL/src/stm32f10x_sdio.c ****     /* Disable the SDIO interrupts */
+ 321:../SPL/src/stm32f10x_sdio.c ****     SDIO->MASK &= ~SDIO_IT;
+ 521              		.loc 1 321 0
+ 522 027c 064B     		ldr	r3, .L31+4
+ 523 027e 064A     		ldr	r2, .L31+4
+ 524 0280 D16B     		ldr	r1, [r2, #60]
+ 525 0282 7A68     		ldr	r2, [r7, #4]
+ 526 0284 6FEA0202 		mvn	r2, r2
+ 527 0288 0A40     		ands	r2, r2, r1
+ 528 028a DA63     		str	r2, [r3, #60]
+ 529              	.L25:
+ 322:../SPL/src/stm32f10x_sdio.c ****   } 
+ 323:../SPL/src/stm32f10x_sdio.c **** }
+ 530              		.loc 1 323 0
+ 531 028c 07F10807 		add	r7, r7, #8
+ 532 0290 BD46     		mov	sp, r7
+ 533 0292 80BD     		pop	{r7, pc}
+ 534              	.L32:
+ 535              		.align	2
+ 536              	.L31:
+ 537 0294 00000000 		.word	.LC0
+ 538 0298 00800140 		.word	1073840128
+ 539              		.cfi_endproc
+ 540              	.LFE35:
+ 542              		.align	2
+ 543              		.global	SDIO_DMACmd
+ 544              		.thumb
+ 545              		.thumb_func
+ 547              	SDIO_DMACmd:
+ 548              	.LFB36:
+ 324:../SPL/src/stm32f10x_sdio.c **** 
+ 325:../SPL/src/stm32f10x_sdio.c **** /**
+ 326:../SPL/src/stm32f10x_sdio.c ****   * @brief  Enables or disables the SDIO DMA request.
+ 327:../SPL/src/stm32f10x_sdio.c ****   * @param  NewState: new state of the selected SDIO DMA request.
+ 328:../SPL/src/stm32f10x_sdio.c ****   *   This parameter can be: ENABLE or DISABLE.
+ 329:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 330:../SPL/src/stm32f10x_sdio.c ****   */
+ 331:../SPL/src/stm32f10x_sdio.c **** void SDIO_DMACmd(FunctionalState NewState)
+ 332:../SPL/src/stm32f10x_sdio.c **** {
+ 549              		.loc 1 332 0
+ 550              		.cfi_startproc
+ 551              		@ args = 0, pretend = 0, frame = 8
+ 552              		@ frame_needed = 1, uses_anonymous_args = 0
+ 553 029c 80B5     		push	{r7, lr}
+ 554              	.LCFI19:
+ 555              		.cfi_def_cfa_offset 8
+ 556              		.cfi_offset 7, -8
+ 557              		.cfi_offset 14, -4
+ 558 029e 82B0     		sub	sp, sp, #8
+ 559              	.LCFI20:
+ 560              		.cfi_def_cfa_offset 16
+ 561 02a0 00AF     		add	r7, sp, #0
+ 562              	.LCFI21:
+ 563              		.cfi_def_cfa_register 7
+ 564 02a2 0346     		mov	r3, r0
+ 565 02a4 FB71     		strb	r3, [r7, #7]
+ 333:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 334:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 566              		.loc 1 334 0
+ 567 02a6 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 568 02a8 002B     		cmp	r3, #0
+ 569 02aa 07D0     		beq	.L34
+ 570              		.loc 1 334 0 is_stmt 0 discriminator 1
+ 571 02ac FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 572 02ae 012B     		cmp	r3, #1
+ 573 02b0 04D0     		beq	.L34
+ 574              		.loc 1 334 0 discriminator 2
+ 575 02b2 0648     		ldr	r0, .L35
+ 576 02b4 4FF4A771 		mov	r1, #334
+ 577 02b8 FFF7FEFF 		bl	assert_failed
+ 578              	.L34:
+ 335:../SPL/src/stm32f10x_sdio.c ****   
+ 336:../SPL/src/stm32f10x_sdio.c ****   *(__IO uint32_t *) DCTRL_DMAEN_BB = (uint32_t)NewState;
+ 579              		.loc 1 336 0 is_stmt 1
+ 580 02bc 044B     		ldr	r3, .L35+4
+ 581 02be FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 582 02c0 1A60     		str	r2, [r3, #0]
+ 337:../SPL/src/stm32f10x_sdio.c **** }
+ 583              		.loc 1 337 0
+ 584 02c2 07F10807 		add	r7, r7, #8
+ 585 02c6 BD46     		mov	sp, r7
+ 586 02c8 80BD     		pop	{r7, pc}
+ 587              	.L36:
+ 588 02ca 00BF     		.align	2
+ 589              	.L35:
+ 590 02cc 00000000 		.word	.LC0
+ 591 02d0 8C053042 		.word	1110443404
+ 592              		.cfi_endproc
+ 593              	.LFE36:
+ 595              		.align	2
+ 596              		.global	SDIO_SendCommand
+ 597              		.thumb
+ 598              		.thumb_func
+ 600              	SDIO_SendCommand:
+ 601              	.LFB37:
+ 338:../SPL/src/stm32f10x_sdio.c **** 
+ 339:../SPL/src/stm32f10x_sdio.c **** /**
+ 340:../SPL/src/stm32f10x_sdio.c ****   * @brief  Initializes the SDIO Command according to the specified 
+ 341:../SPL/src/stm32f10x_sdio.c ****   *         parameters in the SDIO_CmdInitStruct and send the command.
+ 342:../SPL/src/stm32f10x_sdio.c ****   * @param  SDIO_CmdInitStruct : pointer to a SDIO_CmdInitTypeDef 
+ 343:../SPL/src/stm32f10x_sdio.c ****   *         structure that contains the configuration information for the SDIO command.
+ 344:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 345:../SPL/src/stm32f10x_sdio.c ****   */
+ 346:../SPL/src/stm32f10x_sdio.c **** void SDIO_SendCommand(SDIO_CmdInitTypeDef *SDIO_CmdInitStruct)
+ 347:../SPL/src/stm32f10x_sdio.c **** {
+ 602              		.loc 1 347 0
+ 603              		.cfi_startproc
+ 604              		@ args = 0, pretend = 0, frame = 16
+ 605              		@ frame_needed = 1, uses_anonymous_args = 0
+ 606 02d4 80B5     		push	{r7, lr}
+ 607              	.LCFI22:
+ 608              		.cfi_def_cfa_offset 8
+ 609              		.cfi_offset 7, -8
+ 610              		.cfi_offset 14, -4
+ 611 02d6 84B0     		sub	sp, sp, #16
+ 612              	.LCFI23:
+ 613              		.cfi_def_cfa_offset 24
+ 614 02d8 00AF     		add	r7, sp, #0
+ 615              	.LCFI24:
+ 616              		.cfi_def_cfa_register 7
+ 617 02da 7860     		str	r0, [r7, #4]
+ 348:../SPL/src/stm32f10x_sdio.c ****   uint32_t tmpreg = 0;
+ 618              		.loc 1 348 0
+ 619 02dc 4FF00003 		mov	r3, #0
+ 620 02e0 FB60     		str	r3, [r7, #12]
+ 349:../SPL/src/stm32f10x_sdio.c ****   
+ 350:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 351:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_CMD_INDEX(SDIO_CmdInitStruct->SDIO_CmdIndex));
+ 621              		.loc 1 351 0
+ 622 02e2 7B68     		ldr	r3, [r7, #4]
+ 623 02e4 5B68     		ldr	r3, [r3, #4]
+ 624 02e6 3F2B     		cmp	r3, #63
+ 625 02e8 04D9     		bls	.L38
+ 626              		.loc 1 351 0 is_stmt 0 discriminator 1
+ 627 02ea 2C48     		ldr	r0, .L42
+ 628 02ec 40F25F11 		movw	r1, #351
+ 629 02f0 FFF7FEFF 		bl	assert_failed
+ 630              	.L38:
+ 352:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_RESPONSE(SDIO_CmdInitStruct->SDIO_Response));
+ 631              		.loc 1 352 0 is_stmt 1
+ 632 02f4 7B68     		ldr	r3, [r7, #4]
+ 633 02f6 9B68     		ldr	r3, [r3, #8]
+ 634 02f8 002B     		cmp	r3, #0
+ 635 02fa 0CD0     		beq	.L39
+ 636              		.loc 1 352 0 is_stmt 0 discriminator 1
+ 637 02fc 7B68     		ldr	r3, [r7, #4]
+ 638 02fe 9B68     		ldr	r3, [r3, #8]
+ 639 0300 402B     		cmp	r3, #64
+ 640 0302 08D0     		beq	.L39
+ 641              		.loc 1 352 0 discriminator 2
+ 642 0304 7B68     		ldr	r3, [r7, #4]
+ 643 0306 9B68     		ldr	r3, [r3, #8]
+ 644 0308 C02B     		cmp	r3, #192
+ 645 030a 04D0     		beq	.L39
+ 646              		.loc 1 352 0 discriminator 3
+ 647 030c 2348     		ldr	r0, .L42
+ 648 030e 4FF4B071 		mov	r1, #352
+ 649 0312 FFF7FEFF 		bl	assert_failed
+ 650              	.L39:
+ 353:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_WAIT(SDIO_CmdInitStruct->SDIO_Wait));
+ 651              		.loc 1 353 0 is_stmt 1
+ 652 0316 7B68     		ldr	r3, [r7, #4]
+ 653 0318 DB68     		ldr	r3, [r3, #12]
+ 654 031a 002B     		cmp	r3, #0
+ 655 031c 0ED0     		beq	.L40
+ 656              		.loc 1 353 0 is_stmt 0 discriminator 1
+ 657 031e 7B68     		ldr	r3, [r7, #4]
+ 658 0320 DB68     		ldr	r3, [r3, #12]
+ 659 0322 B3F5807F 		cmp	r3, #256
+ 660 0326 09D0     		beq	.L40
+ 661              		.loc 1 353 0 discriminator 2
+ 662 0328 7B68     		ldr	r3, [r7, #4]
+ 663 032a DB68     		ldr	r3, [r3, #12]
+ 664 032c B3F5007F 		cmp	r3, #512
+ 665 0330 04D0     		beq	.L40
+ 666              		.loc 1 353 0 discriminator 3
+ 667 0332 1A48     		ldr	r0, .L42
+ 668 0334 40F26111 		movw	r1, #353
+ 669 0338 FFF7FEFF 		bl	assert_failed
+ 670              	.L40:
+ 354:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_CPSM(SDIO_CmdInitStruct->SDIO_CPSM));
+ 671              		.loc 1 354 0 is_stmt 1
+ 672 033c 7B68     		ldr	r3, [r7, #4]
+ 673 033e 1B69     		ldr	r3, [r3, #16]
+ 674 0340 B3F5806F 		cmp	r3, #1024
+ 675 0344 08D0     		beq	.L41
+ 676              		.loc 1 354 0 is_stmt 0 discriminator 1
+ 677 0346 7B68     		ldr	r3, [r7, #4]
+ 678 0348 1B69     		ldr	r3, [r3, #16]
+ 679 034a 002B     		cmp	r3, #0
+ 680 034c 04D0     		beq	.L41
+ 681              		.loc 1 354 0 discriminator 2
+ 682 034e 1348     		ldr	r0, .L42
+ 683 0350 4FF4B171 		mov	r1, #354
+ 684 0354 FFF7FEFF 		bl	assert_failed
+ 685              	.L41:
+ 355:../SPL/src/stm32f10x_sdio.c ****   
+ 356:../SPL/src/stm32f10x_sdio.c **** /*---------------------------- SDIO ARG Configuration ------------------------*/
+ 357:../SPL/src/stm32f10x_sdio.c ****   /* Set the SDIO Argument value */
+ 358:../SPL/src/stm32f10x_sdio.c ****   SDIO->ARG = SDIO_CmdInitStruct->SDIO_Argument;
+ 686              		.loc 1 358 0 is_stmt 1
+ 687 0358 114B     		ldr	r3, .L42+4
+ 688 035a 7A68     		ldr	r2, [r7, #4]
+ 689 035c 1268     		ldr	r2, [r2, #0]
+ 690 035e 9A60     		str	r2, [r3, #8]
+ 359:../SPL/src/stm32f10x_sdio.c ****   
+ 360:../SPL/src/stm32f10x_sdio.c **** /*---------------------------- SDIO CMD Configuration ------------------------*/  
+ 361:../SPL/src/stm32f10x_sdio.c ****   /* Get the SDIO CMD value */
+ 362:../SPL/src/stm32f10x_sdio.c ****   tmpreg = SDIO->CMD;
+ 691              		.loc 1 362 0
+ 692 0360 0F4B     		ldr	r3, .L42+4
+ 693 0362 DB68     		ldr	r3, [r3, #12]
+ 694 0364 FB60     		str	r3, [r7, #12]
+ 363:../SPL/src/stm32f10x_sdio.c ****   /* Clear CMDINDEX, WAITRESP, WAITINT, WAITPEND, CPSMEN bits */
+ 364:../SPL/src/stm32f10x_sdio.c ****   tmpreg &= CMD_CLEAR_MASK;
+ 695              		.loc 1 364 0
+ 696 0366 FB68     		ldr	r3, [r7, #12]
+ 697 0368 23F4FF63 		bic	r3, r3, #2040
+ 698 036c 23F00703 		bic	r3, r3, #7
+ 699 0370 FB60     		str	r3, [r7, #12]
+ 365:../SPL/src/stm32f10x_sdio.c ****   /* Set CMDINDEX bits according to SDIO_CmdIndex value */
+ 366:../SPL/src/stm32f10x_sdio.c ****   /* Set WAITRESP bits according to SDIO_Response value */
+ 367:../SPL/src/stm32f10x_sdio.c ****   /* Set WAITINT and WAITPEND bits according to SDIO_Wait value */
+ 368:../SPL/src/stm32f10x_sdio.c ****   /* Set CPSMEN bits according to SDIO_CPSM value */
+ 369:../SPL/src/stm32f10x_sdio.c ****   tmpreg |= (uint32_t)SDIO_CmdInitStruct->SDIO_CmdIndex | SDIO_CmdInitStruct->SDIO_Response
+ 700              		.loc 1 369 0
+ 701 0372 7B68     		ldr	r3, [r7, #4]
+ 702 0374 5A68     		ldr	r2, [r3, #4]
+ 703 0376 7B68     		ldr	r3, [r7, #4]
+ 704 0378 9B68     		ldr	r3, [r3, #8]
+ 705 037a 1A43     		orrs	r2, r2, r3
+ 370:../SPL/src/stm32f10x_sdio.c ****            | SDIO_CmdInitStruct->SDIO_Wait | SDIO_CmdInitStruct->SDIO_CPSM;
+ 706              		.loc 1 370 0
+ 707 037c 7B68     		ldr	r3, [r7, #4]
+ 708 037e DB68     		ldr	r3, [r3, #12]
+ 709 0380 1A43     		orrs	r2, r2, r3
+ 710 0382 7B68     		ldr	r3, [r7, #4]
+ 711 0384 1B69     		ldr	r3, [r3, #16]
+ 712 0386 1343     		orrs	r3, r3, r2
+ 369:../SPL/src/stm32f10x_sdio.c ****   tmpreg |= (uint32_t)SDIO_CmdInitStruct->SDIO_CmdIndex | SDIO_CmdInitStruct->SDIO_Response
+ 713              		.loc 1 369 0
+ 714 0388 FA68     		ldr	r2, [r7, #12]
+ 715 038a 1343     		orrs	r3, r3, r2
+ 716 038c FB60     		str	r3, [r7, #12]
+ 371:../SPL/src/stm32f10x_sdio.c ****   
+ 372:../SPL/src/stm32f10x_sdio.c ****   /* Write to SDIO CMD */
+ 373:../SPL/src/stm32f10x_sdio.c ****   SDIO->CMD = tmpreg;
+ 717              		.loc 1 373 0
+ 718 038e 044B     		ldr	r3, .L42+4
+ 719 0390 FA68     		ldr	r2, [r7, #12]
+ 720 0392 DA60     		str	r2, [r3, #12]
+ 374:../SPL/src/stm32f10x_sdio.c **** }
+ 721              		.loc 1 374 0
+ 722 0394 07F11007 		add	r7, r7, #16
+ 723 0398 BD46     		mov	sp, r7
+ 724 039a 80BD     		pop	{r7, pc}
+ 725              	.L43:
+ 726              		.align	2
+ 727              	.L42:
+ 728 039c 00000000 		.word	.LC0
+ 729 03a0 00800140 		.word	1073840128
+ 730              		.cfi_endproc
+ 731              	.LFE37:
+ 733              		.align	2
+ 734              		.global	SDIO_CmdStructInit
+ 735              		.thumb
+ 736              		.thumb_func
+ 738              	SDIO_CmdStructInit:
+ 739              	.LFB38:
+ 375:../SPL/src/stm32f10x_sdio.c **** 
+ 376:../SPL/src/stm32f10x_sdio.c **** /**
+ 377:../SPL/src/stm32f10x_sdio.c ****   * @brief  Fills each SDIO_CmdInitStruct member with its default value.
+ 378:../SPL/src/stm32f10x_sdio.c ****   * @param  SDIO_CmdInitStruct: pointer to an SDIO_CmdInitTypeDef 
+ 379:../SPL/src/stm32f10x_sdio.c ****   *         structure which will be initialized.
+ 380:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 381:../SPL/src/stm32f10x_sdio.c ****   */
+ 382:../SPL/src/stm32f10x_sdio.c **** void SDIO_CmdStructInit(SDIO_CmdInitTypeDef* SDIO_CmdInitStruct)
+ 383:../SPL/src/stm32f10x_sdio.c **** {
+ 740              		.loc 1 383 0
+ 741              		.cfi_startproc
+ 742              		@ args = 0, pretend = 0, frame = 8
+ 743              		@ frame_needed = 1, uses_anonymous_args = 0
+ 744              		@ link register save eliminated.
+ 745 03a4 80B4     		push	{r7}
+ 746              	.LCFI25:
+ 747              		.cfi_def_cfa_offset 4
+ 748              		.cfi_offset 7, -4
+ 749 03a6 83B0     		sub	sp, sp, #12
+ 750              	.LCFI26:
+ 751              		.cfi_def_cfa_offset 16
+ 752 03a8 00AF     		add	r7, sp, #0
+ 753              	.LCFI27:
+ 754              		.cfi_def_cfa_register 7
+ 755 03aa 7860     		str	r0, [r7, #4]
+ 384:../SPL/src/stm32f10x_sdio.c ****   /* SDIO_CmdInitStruct members default value */
+ 385:../SPL/src/stm32f10x_sdio.c ****   SDIO_CmdInitStruct->SDIO_Argument = 0x00;
+ 756              		.loc 1 385 0
+ 757 03ac 7B68     		ldr	r3, [r7, #4]
+ 758 03ae 4FF00002 		mov	r2, #0
+ 759 03b2 1A60     		str	r2, [r3, #0]
+ 386:../SPL/src/stm32f10x_sdio.c ****   SDIO_CmdInitStruct->SDIO_CmdIndex = 0x00;
+ 760              		.loc 1 386 0
+ 761 03b4 7B68     		ldr	r3, [r7, #4]
+ 762 03b6 4FF00002 		mov	r2, #0
+ 763 03ba 5A60     		str	r2, [r3, #4]
+ 387:../SPL/src/stm32f10x_sdio.c ****   SDIO_CmdInitStruct->SDIO_Response = SDIO_Response_No;
+ 764              		.loc 1 387 0
+ 765 03bc 7B68     		ldr	r3, [r7, #4]
+ 766 03be 4FF00002 		mov	r2, #0
+ 767 03c2 9A60     		str	r2, [r3, #8]
+ 388:../SPL/src/stm32f10x_sdio.c ****   SDIO_CmdInitStruct->SDIO_Wait = SDIO_Wait_No;
+ 768              		.loc 1 388 0
+ 769 03c4 7B68     		ldr	r3, [r7, #4]
+ 770 03c6 4FF00002 		mov	r2, #0
+ 771 03ca DA60     		str	r2, [r3, #12]
+ 389:../SPL/src/stm32f10x_sdio.c ****   SDIO_CmdInitStruct->SDIO_CPSM = SDIO_CPSM_Disable;
+ 772              		.loc 1 389 0
+ 773 03cc 7B68     		ldr	r3, [r7, #4]
+ 774 03ce 4FF00002 		mov	r2, #0
+ 775 03d2 1A61     		str	r2, [r3, #16]
+ 390:../SPL/src/stm32f10x_sdio.c **** }
+ 776              		.loc 1 390 0
+ 777 03d4 07F10C07 		add	r7, r7, #12
+ 778 03d8 BD46     		mov	sp, r7
+ 779 03da 80BC     		pop	{r7}
+ 780 03dc 7047     		bx	lr
+ 781              		.cfi_endproc
+ 782              	.LFE38:
+ 784 03de 00BF     		.align	2
+ 785              		.global	SDIO_GetCommandResponse
+ 786              		.thumb
+ 787              		.thumb_func
+ 789              	SDIO_GetCommandResponse:
+ 790              	.LFB39:
+ 391:../SPL/src/stm32f10x_sdio.c **** 
+ 392:../SPL/src/stm32f10x_sdio.c **** /**
+ 393:../SPL/src/stm32f10x_sdio.c ****   * @brief  Returns command index of last command for which response received.
+ 394:../SPL/src/stm32f10x_sdio.c ****   * @param  None
+ 395:../SPL/src/stm32f10x_sdio.c ****   * @retval Returns the command index of the last command response received.
+ 396:../SPL/src/stm32f10x_sdio.c ****   */
+ 397:../SPL/src/stm32f10x_sdio.c **** uint8_t SDIO_GetCommandResponse(void)
+ 398:../SPL/src/stm32f10x_sdio.c **** {
+ 791              		.loc 1 398 0
+ 792              		.cfi_startproc
+ 793              		@ args = 0, pretend = 0, frame = 0
+ 794              		@ frame_needed = 1, uses_anonymous_args = 0
+ 795              		@ link register save eliminated.
+ 796 03e0 80B4     		push	{r7}
+ 797              	.LCFI28:
+ 798              		.cfi_def_cfa_offset 4
+ 799              		.cfi_offset 7, -4
+ 800 03e2 00AF     		add	r7, sp, #0
+ 801              	.LCFI29:
+ 802              		.cfi_def_cfa_register 7
+ 399:../SPL/src/stm32f10x_sdio.c ****   return (uint8_t)(SDIO->RESPCMD);
+ 803              		.loc 1 399 0
+ 804 03e4 034B     		ldr	r3, .L47
+ 805 03e6 1B69     		ldr	r3, [r3, #16]
+ 806 03e8 DBB2     		uxtb	r3, r3
+ 400:../SPL/src/stm32f10x_sdio.c **** }
+ 807              		.loc 1 400 0
+ 808 03ea 1846     		mov	r0, r3
+ 809 03ec BD46     		mov	sp, r7
+ 810 03ee 80BC     		pop	{r7}
+ 811 03f0 7047     		bx	lr
+ 812              	.L48:
+ 813 03f2 00BF     		.align	2
+ 814              	.L47:
+ 815 03f4 00800140 		.word	1073840128
+ 816              		.cfi_endproc
+ 817              	.LFE39:
+ 819              		.align	2
+ 820              		.global	SDIO_GetResponse
+ 821              		.thumb
+ 822              		.thumb_func
+ 824              	SDIO_GetResponse:
+ 825              	.LFB40:
+ 401:../SPL/src/stm32f10x_sdio.c **** 
+ 402:../SPL/src/stm32f10x_sdio.c **** /**
+ 403:../SPL/src/stm32f10x_sdio.c ****   * @brief  Returns response received from the card for the last command.
+ 404:../SPL/src/stm32f10x_sdio.c ****   * @param  SDIO_RESP: Specifies the SDIO response register. 
+ 405:../SPL/src/stm32f10x_sdio.c ****   *   This parameter can be one of the following values:
+ 406:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_RESP1: Response Register 1
+ 407:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_RESP2: Response Register 2
+ 408:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_RESP3: Response Register 3
+ 409:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_RESP4: Response Register 4
+ 410:../SPL/src/stm32f10x_sdio.c ****   * @retval The Corresponding response register value.
+ 411:../SPL/src/stm32f10x_sdio.c ****   */
+ 412:../SPL/src/stm32f10x_sdio.c **** uint32_t SDIO_GetResponse(uint32_t SDIO_RESP)
+ 413:../SPL/src/stm32f10x_sdio.c **** {
+ 826              		.loc 1 413 0
+ 827              		.cfi_startproc
+ 828              		@ args = 0, pretend = 0, frame = 16
+ 829              		@ frame_needed = 1, uses_anonymous_args = 0
+ 830 03f8 80B5     		push	{r7, lr}
+ 831              	.LCFI30:
+ 832              		.cfi_def_cfa_offset 8
+ 833              		.cfi_offset 7, -8
+ 834              		.cfi_offset 14, -4
+ 835 03fa 84B0     		sub	sp, sp, #16
+ 836              	.LCFI31:
+ 837              		.cfi_def_cfa_offset 24
+ 838 03fc 00AF     		add	r7, sp, #0
+ 839              	.LCFI32:
+ 840              		.cfi_def_cfa_register 7
+ 841 03fe 7860     		str	r0, [r7, #4]
+ 414:../SPL/src/stm32f10x_sdio.c ****   __IO uint32_t tmp = 0;
+ 842              		.loc 1 414 0
+ 843 0400 4FF00003 		mov	r3, #0
+ 844 0404 FB60     		str	r3, [r7, #12]
+ 415:../SPL/src/stm32f10x_sdio.c **** 
+ 416:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 417:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_RESP(SDIO_RESP));
+ 845              		.loc 1 417 0
+ 846 0406 7B68     		ldr	r3, [r7, #4]
+ 847 0408 002B     		cmp	r3, #0
+ 848 040a 0DD0     		beq	.L50
+ 849              		.loc 1 417 0 is_stmt 0 discriminator 1
+ 850 040c 7B68     		ldr	r3, [r7, #4]
+ 851 040e 042B     		cmp	r3, #4
+ 852 0410 0AD0     		beq	.L50
+ 853              		.loc 1 417 0 discriminator 2
+ 854 0412 7B68     		ldr	r3, [r7, #4]
+ 855 0414 082B     		cmp	r3, #8
+ 856 0416 07D0     		beq	.L50
+ 857              		.loc 1 417 0 discriminator 3
+ 858 0418 7B68     		ldr	r3, [r7, #4]
+ 859 041a 0C2B     		cmp	r3, #12
+ 860 041c 04D0     		beq	.L50
+ 861              		.loc 1 417 0 discriminator 4
+ 862 041e 0848     		ldr	r0, .L52
+ 863 0420 40F2A111 		movw	r1, #417
+ 864 0424 FFF7FEFF 		bl	assert_failed
+ 865              	.L50:
+ 418:../SPL/src/stm32f10x_sdio.c **** 
+ 419:../SPL/src/stm32f10x_sdio.c ****   tmp = SDIO_RESP_ADDR + SDIO_RESP;
+ 866              		.loc 1 419 0 is_stmt 1
+ 867 0428 7A68     		ldr	r2, [r7, #4]
+ 868 042a 064B     		ldr	r3, .L52+4
+ 869 042c D318     		adds	r3, r2, r3
+ 870 042e FB60     		str	r3, [r7, #12]
+ 420:../SPL/src/stm32f10x_sdio.c ****   
+ 421:../SPL/src/stm32f10x_sdio.c ****   return (*(__IO uint32_t *) tmp); 
+ 871              		.loc 1 421 0
+ 872 0430 FB68     		ldr	r3, [r7, #12]
+ 873 0432 1B68     		ldr	r3, [r3, #0]
+ 422:../SPL/src/stm32f10x_sdio.c **** }
+ 874              		.loc 1 422 0
+ 875 0434 1846     		mov	r0, r3
+ 876 0436 07F11007 		add	r7, r7, #16
+ 877 043a BD46     		mov	sp, r7
+ 878 043c 80BD     		pop	{r7, pc}
+ 879              	.L53:
+ 880 043e 00BF     		.align	2
+ 881              	.L52:
+ 882 0440 00000000 		.word	.LC0
+ 883 0444 14800140 		.word	1073840148
+ 884              		.cfi_endproc
+ 885              	.LFE40:
+ 887              		.align	2
+ 888              		.global	SDIO_DataConfig
+ 889              		.thumb
+ 890              		.thumb_func
+ 892              	SDIO_DataConfig:
+ 893              	.LFB41:
+ 423:../SPL/src/stm32f10x_sdio.c **** 
+ 424:../SPL/src/stm32f10x_sdio.c **** /**
+ 425:../SPL/src/stm32f10x_sdio.c ****   * @brief  Initializes the SDIO data path according to the specified 
+ 426:../SPL/src/stm32f10x_sdio.c ****   *   parameters in the SDIO_DataInitStruct.
+ 427:../SPL/src/stm32f10x_sdio.c ****   * @param  SDIO_DataInitStruct : pointer to a SDIO_DataInitTypeDef structure that
+ 428:../SPL/src/stm32f10x_sdio.c ****   *   contains the configuration information for the SDIO command.
+ 429:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 430:../SPL/src/stm32f10x_sdio.c ****   */
+ 431:../SPL/src/stm32f10x_sdio.c **** void SDIO_DataConfig(SDIO_DataInitTypeDef* SDIO_DataInitStruct)
+ 432:../SPL/src/stm32f10x_sdio.c **** {
+ 894              		.loc 1 432 0
+ 895              		.cfi_startproc
+ 896              		@ args = 0, pretend = 0, frame = 16
+ 897              		@ frame_needed = 1, uses_anonymous_args = 0
+ 898 0448 80B5     		push	{r7, lr}
+ 899              	.LCFI33:
+ 900              		.cfi_def_cfa_offset 8
+ 901              		.cfi_offset 7, -8
+ 902              		.cfi_offset 14, -4
+ 903 044a 84B0     		sub	sp, sp, #16
+ 904              	.LCFI34:
+ 905              		.cfi_def_cfa_offset 24
+ 906 044c 00AF     		add	r7, sp, #0
+ 907              	.LCFI35:
+ 908              		.cfi_def_cfa_register 7
+ 909 044e 7860     		str	r0, [r7, #4]
+ 433:../SPL/src/stm32f10x_sdio.c ****   uint32_t tmpreg = 0;
+ 910              		.loc 1 433 0
+ 911 0450 4FF00003 		mov	r3, #0
+ 912 0454 FB60     		str	r3, [r7, #12]
+ 434:../SPL/src/stm32f10x_sdio.c ****   
+ 435:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 436:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_DATA_LENGTH(SDIO_DataInitStruct->SDIO_DataLength));
+ 913              		.loc 1 436 0
+ 914 0456 7B68     		ldr	r3, [r7, #4]
+ 915 0458 5A68     		ldr	r2, [r3, #4]
+ 916 045a 6FF07E43 		mvn	r3, #-33554432
+ 917 045e 9A42     		cmp	r2, r3
+ 918 0460 04D9     		bls	.L55
+ 919              		.loc 1 436 0 is_stmt 0 discriminator 1
+ 920 0462 4848     		ldr	r0, .L60
+ 921 0464 4FF4DA71 		mov	r1, #436
+ 922 0468 FFF7FEFF 		bl	assert_failed
+ 923              	.L55:
+ 437:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_BLOCK_SIZE(SDIO_DataInitStruct->SDIO_DataBlockSize));
+ 924              		.loc 1 437 0 is_stmt 1
+ 925 046c 7B68     		ldr	r3, [r7, #4]
+ 926 046e 9B68     		ldr	r3, [r3, #8]
+ 927 0470 002B     		cmp	r3, #0
+ 928 0472 3CD0     		beq	.L56
+ 929              		.loc 1 437 0 is_stmt 0 discriminator 1
+ 930 0474 7B68     		ldr	r3, [r7, #4]
+ 931 0476 9B68     		ldr	r3, [r3, #8]
+ 932 0478 102B     		cmp	r3, #16
+ 933 047a 38D0     		beq	.L56
+ 934              		.loc 1 437 0 discriminator 2
+ 935 047c 7B68     		ldr	r3, [r7, #4]
+ 936 047e 9B68     		ldr	r3, [r3, #8]
+ 937 0480 202B     		cmp	r3, #32
+ 938 0482 34D0     		beq	.L56
+ 939              		.loc 1 437 0 discriminator 3
+ 940 0484 7B68     		ldr	r3, [r7, #4]
+ 941 0486 9B68     		ldr	r3, [r3, #8]
+ 942 0488 302B     		cmp	r3, #48
+ 943 048a 30D0     		beq	.L56
+ 944              		.loc 1 437 0 discriminator 4
+ 945 048c 7B68     		ldr	r3, [r7, #4]
+ 946 048e 9B68     		ldr	r3, [r3, #8]
+ 947 0490 402B     		cmp	r3, #64
+ 948 0492 2CD0     		beq	.L56
+ 949              		.loc 1 437 0 discriminator 5
+ 950 0494 7B68     		ldr	r3, [r7, #4]
+ 951 0496 9B68     		ldr	r3, [r3, #8]
+ 952 0498 502B     		cmp	r3, #80
+ 953 049a 28D0     		beq	.L56
+ 954              		.loc 1 437 0 discriminator 6
+ 955 049c 7B68     		ldr	r3, [r7, #4]
+ 956 049e 9B68     		ldr	r3, [r3, #8]
+ 957 04a0 602B     		cmp	r3, #96
+ 958 04a2 24D0     		beq	.L56
+ 959              		.loc 1 437 0 discriminator 7
+ 960 04a4 7B68     		ldr	r3, [r7, #4]
+ 961 04a6 9B68     		ldr	r3, [r3, #8]
+ 962 04a8 702B     		cmp	r3, #112
+ 963 04aa 20D0     		beq	.L56
+ 964              		.loc 1 437 0 discriminator 8
+ 965 04ac 7B68     		ldr	r3, [r7, #4]
+ 966 04ae 9B68     		ldr	r3, [r3, #8]
+ 967 04b0 802B     		cmp	r3, #128
+ 968 04b2 1CD0     		beq	.L56
+ 969              		.loc 1 437 0 discriminator 9
+ 970 04b4 7B68     		ldr	r3, [r7, #4]
+ 971 04b6 9B68     		ldr	r3, [r3, #8]
+ 972 04b8 902B     		cmp	r3, #144
+ 973 04ba 18D0     		beq	.L56
+ 974              		.loc 1 437 0 discriminator 10
+ 975 04bc 7B68     		ldr	r3, [r7, #4]
+ 976 04be 9B68     		ldr	r3, [r3, #8]
+ 977 04c0 A02B     		cmp	r3, #160
+ 978 04c2 14D0     		beq	.L56
+ 979              		.loc 1 437 0 discriminator 11
+ 980 04c4 7B68     		ldr	r3, [r7, #4]
+ 981 04c6 9B68     		ldr	r3, [r3, #8]
+ 982 04c8 B02B     		cmp	r3, #176
+ 983 04ca 10D0     		beq	.L56
+ 984              		.loc 1 437 0 discriminator 12
+ 985 04cc 7B68     		ldr	r3, [r7, #4]
+ 986 04ce 9B68     		ldr	r3, [r3, #8]
+ 987 04d0 C02B     		cmp	r3, #192
+ 988 04d2 0CD0     		beq	.L56
+ 989              		.loc 1 437 0 discriminator 13
+ 990 04d4 7B68     		ldr	r3, [r7, #4]
+ 991 04d6 9B68     		ldr	r3, [r3, #8]
+ 992 04d8 D02B     		cmp	r3, #208
+ 993 04da 08D0     		beq	.L56
+ 994              		.loc 1 437 0 discriminator 14
+ 995 04dc 7B68     		ldr	r3, [r7, #4]
+ 996 04de 9B68     		ldr	r3, [r3, #8]
+ 997 04e0 E02B     		cmp	r3, #224
+ 998 04e2 04D0     		beq	.L56
+ 999              		.loc 1 437 0 discriminator 15
+ 1000 04e4 2748     		ldr	r0, .L60
+ 1001 04e6 40F2B511 		movw	r1, #437
+ 1002 04ea FFF7FEFF 		bl	assert_failed
+ 1003              	.L56:
+ 438:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_TRANSFER_DIR(SDIO_DataInitStruct->SDIO_TransferDir));
+ 1004              		.loc 1 438 0 is_stmt 1
+ 1005 04ee 7B68     		ldr	r3, [r7, #4]
+ 1006 04f0 DB68     		ldr	r3, [r3, #12]
+ 1007 04f2 002B     		cmp	r3, #0
+ 1008 04f4 08D0     		beq	.L57
+ 1009              		.loc 1 438 0 is_stmt 0 discriminator 1
+ 1010 04f6 7B68     		ldr	r3, [r7, #4]
+ 1011 04f8 DB68     		ldr	r3, [r3, #12]
+ 1012 04fa 022B     		cmp	r3, #2
+ 1013 04fc 04D0     		beq	.L57
+ 1014              		.loc 1 438 0 discriminator 2
+ 1015 04fe 2148     		ldr	r0, .L60
+ 1016 0500 4FF4DB71 		mov	r1, #438
+ 1017 0504 FFF7FEFF 		bl	assert_failed
+ 1018              	.L57:
+ 439:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_TRANSFER_MODE(SDIO_DataInitStruct->SDIO_TransferMode));
+ 1019              		.loc 1 439 0 is_stmt 1
+ 1020 0508 7B68     		ldr	r3, [r7, #4]
+ 1021 050a 1B69     		ldr	r3, [r3, #16]
+ 1022 050c 042B     		cmp	r3, #4
+ 1023 050e 08D0     		beq	.L58
+ 1024              		.loc 1 439 0 is_stmt 0 discriminator 1
+ 1025 0510 7B68     		ldr	r3, [r7, #4]
+ 1026 0512 1B69     		ldr	r3, [r3, #16]
+ 1027 0514 002B     		cmp	r3, #0
+ 1028 0516 04D0     		beq	.L58
+ 1029              		.loc 1 439 0 discriminator 2
+ 1030 0518 1A48     		ldr	r0, .L60
+ 1031 051a 40F2B711 		movw	r1, #439
+ 1032 051e FFF7FEFF 		bl	assert_failed
+ 1033              	.L58:
+ 440:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_DPSM(SDIO_DataInitStruct->SDIO_DPSM));
+ 1034              		.loc 1 440 0 is_stmt 1
+ 1035 0522 7B68     		ldr	r3, [r7, #4]
+ 1036 0524 5B69     		ldr	r3, [r3, #20]
+ 1037 0526 012B     		cmp	r3, #1
+ 1038 0528 08D0     		beq	.L59
+ 1039              		.loc 1 440 0 is_stmt 0 discriminator 1
+ 1040 052a 7B68     		ldr	r3, [r7, #4]
+ 1041 052c 5B69     		ldr	r3, [r3, #20]
+ 1042 052e 002B     		cmp	r3, #0
+ 1043 0530 04D0     		beq	.L59
+ 1044              		.loc 1 440 0 discriminator 2
+ 1045 0532 1448     		ldr	r0, .L60
+ 1046 0534 4FF4DC71 		mov	r1, #440
+ 1047 0538 FFF7FEFF 		bl	assert_failed
+ 1048              	.L59:
+ 441:../SPL/src/stm32f10x_sdio.c **** 
+ 442:../SPL/src/stm32f10x_sdio.c **** /*---------------------------- SDIO DTIMER Configuration ---------------------*/
+ 443:../SPL/src/stm32f10x_sdio.c ****   /* Set the SDIO Data TimeOut value */
+ 444:../SPL/src/stm32f10x_sdio.c ****   SDIO->DTIMER = SDIO_DataInitStruct->SDIO_DataTimeOut;
+ 1049              		.loc 1 444 0 is_stmt 1
+ 1050 053c 124B     		ldr	r3, .L60+4
+ 1051 053e 7A68     		ldr	r2, [r7, #4]
+ 1052 0540 1268     		ldr	r2, [r2, #0]
+ 1053 0542 5A62     		str	r2, [r3, #36]
+ 445:../SPL/src/stm32f10x_sdio.c **** 
+ 446:../SPL/src/stm32f10x_sdio.c **** /*---------------------------- SDIO DLEN Configuration -----------------------*/
+ 447:../SPL/src/stm32f10x_sdio.c ****   /* Set the SDIO DataLength value */
+ 448:../SPL/src/stm32f10x_sdio.c ****   SDIO->DLEN = SDIO_DataInitStruct->SDIO_DataLength;
+ 1054              		.loc 1 448 0
+ 1055 0544 104B     		ldr	r3, .L60+4
+ 1056 0546 7A68     		ldr	r2, [r7, #4]
+ 1057 0548 5268     		ldr	r2, [r2, #4]
+ 1058 054a 9A62     		str	r2, [r3, #40]
+ 449:../SPL/src/stm32f10x_sdio.c **** 
+ 450:../SPL/src/stm32f10x_sdio.c **** /*---------------------------- SDIO DCTRL Configuration ----------------------*/  
+ 451:../SPL/src/stm32f10x_sdio.c ****   /* Get the SDIO DCTRL value */
+ 452:../SPL/src/stm32f10x_sdio.c ****   tmpreg = SDIO->DCTRL;
+ 1059              		.loc 1 452 0
+ 1060 054c 0E4B     		ldr	r3, .L60+4
+ 1061 054e DB6A     		ldr	r3, [r3, #44]
+ 1062 0550 FB60     		str	r3, [r7, #12]
+ 453:../SPL/src/stm32f10x_sdio.c ****   /* Clear DEN, DTMODE, DTDIR and DBCKSIZE bits */
+ 454:../SPL/src/stm32f10x_sdio.c ****   tmpreg &= DCTRL_CLEAR_MASK;
+ 1063              		.loc 1 454 0
+ 1064 0552 FB68     		ldr	r3, [r7, #12]
+ 1065 0554 23F0F703 		bic	r3, r3, #247
+ 1066 0558 FB60     		str	r3, [r7, #12]
+ 455:../SPL/src/stm32f10x_sdio.c ****   /* Set DEN bit according to SDIO_DPSM value */
+ 456:../SPL/src/stm32f10x_sdio.c ****   /* Set DTMODE bit according to SDIO_TransferMode value */
+ 457:../SPL/src/stm32f10x_sdio.c ****   /* Set DTDIR bit according to SDIO_TransferDir value */
+ 458:../SPL/src/stm32f10x_sdio.c ****   /* Set DBCKSIZE bits according to SDIO_DataBlockSize value */
+ 459:../SPL/src/stm32f10x_sdio.c ****   tmpreg |= (uint32_t)SDIO_DataInitStruct->SDIO_DataBlockSize | SDIO_DataInitStruct->SDIO_TransferD
+ 1067              		.loc 1 459 0
+ 1068 055a 7B68     		ldr	r3, [r7, #4]
+ 1069 055c 9A68     		ldr	r2, [r3, #8]
+ 1070 055e 7B68     		ldr	r3, [r7, #4]
+ 1071 0560 DB68     		ldr	r3, [r3, #12]
+ 1072 0562 1A43     		orrs	r2, r2, r3
+ 460:../SPL/src/stm32f10x_sdio.c ****            | SDIO_DataInitStruct->SDIO_TransferMode | SDIO_DataInitStruct->SDIO_DPSM;
+ 1073              		.loc 1 460 0
+ 1074 0564 7B68     		ldr	r3, [r7, #4]
+ 1075 0566 1B69     		ldr	r3, [r3, #16]
+ 1076 0568 1A43     		orrs	r2, r2, r3
+ 1077 056a 7B68     		ldr	r3, [r7, #4]
+ 1078 056c 5B69     		ldr	r3, [r3, #20]
+ 1079 056e 1343     		orrs	r3, r3, r2
+ 459:../SPL/src/stm32f10x_sdio.c ****   tmpreg |= (uint32_t)SDIO_DataInitStruct->SDIO_DataBlockSize | SDIO_DataInitStruct->SDIO_TransferD
+ 1080              		.loc 1 459 0
+ 1081 0570 FA68     		ldr	r2, [r7, #12]
+ 1082 0572 1343     		orrs	r3, r3, r2
+ 1083 0574 FB60     		str	r3, [r7, #12]
+ 461:../SPL/src/stm32f10x_sdio.c **** 
+ 462:../SPL/src/stm32f10x_sdio.c ****   /* Write to SDIO DCTRL */
+ 463:../SPL/src/stm32f10x_sdio.c ****   SDIO->DCTRL = tmpreg;
+ 1084              		.loc 1 463 0
+ 1085 0576 044B     		ldr	r3, .L60+4
+ 1086 0578 FA68     		ldr	r2, [r7, #12]
+ 1087 057a DA62     		str	r2, [r3, #44]
+ 464:../SPL/src/stm32f10x_sdio.c **** }
+ 1088              		.loc 1 464 0
+ 1089 057c 07F11007 		add	r7, r7, #16
+ 1090 0580 BD46     		mov	sp, r7
+ 1091 0582 80BD     		pop	{r7, pc}
+ 1092              	.L61:
+ 1093              		.align	2
+ 1094              	.L60:
+ 1095 0584 00000000 		.word	.LC0
+ 1096 0588 00800140 		.word	1073840128
+ 1097              		.cfi_endproc
+ 1098              	.LFE41:
+ 1100              		.align	2
+ 1101              		.global	SDIO_DataStructInit
+ 1102              		.thumb
+ 1103              		.thumb_func
+ 1105              	SDIO_DataStructInit:
+ 1106              	.LFB42:
+ 465:../SPL/src/stm32f10x_sdio.c **** 
+ 466:../SPL/src/stm32f10x_sdio.c **** /**
+ 467:../SPL/src/stm32f10x_sdio.c ****   * @brief  Fills each SDIO_DataInitStruct member with its default value.
+ 468:../SPL/src/stm32f10x_sdio.c ****   * @param  SDIO_DataInitStruct: pointer to an SDIO_DataInitTypeDef structure which
+ 469:../SPL/src/stm32f10x_sdio.c ****   *         will be initialized.
+ 470:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 471:../SPL/src/stm32f10x_sdio.c ****   */
+ 472:../SPL/src/stm32f10x_sdio.c **** void SDIO_DataStructInit(SDIO_DataInitTypeDef* SDIO_DataInitStruct)
+ 473:../SPL/src/stm32f10x_sdio.c **** {
+ 1107              		.loc 1 473 0
+ 1108              		.cfi_startproc
+ 1109              		@ args = 0, pretend = 0, frame = 8
+ 1110              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1111              		@ link register save eliminated.
+ 1112 058c 80B4     		push	{r7}
+ 1113              	.LCFI36:
+ 1114              		.cfi_def_cfa_offset 4
+ 1115              		.cfi_offset 7, -4
+ 1116 058e 83B0     		sub	sp, sp, #12
+ 1117              	.LCFI37:
+ 1118              		.cfi_def_cfa_offset 16
+ 1119 0590 00AF     		add	r7, sp, #0
+ 1120              	.LCFI38:
+ 1121              		.cfi_def_cfa_register 7
+ 1122 0592 7860     		str	r0, [r7, #4]
+ 474:../SPL/src/stm32f10x_sdio.c ****   /* SDIO_DataInitStruct members default value */
+ 475:../SPL/src/stm32f10x_sdio.c ****   SDIO_DataInitStruct->SDIO_DataTimeOut = 0xFFFFFFFF;
+ 1123              		.loc 1 475 0
+ 1124 0594 7B68     		ldr	r3, [r7, #4]
+ 1125 0596 4FF0FF32 		mov	r2, #-1
+ 1126 059a 1A60     		str	r2, [r3, #0]
+ 476:../SPL/src/stm32f10x_sdio.c ****   SDIO_DataInitStruct->SDIO_DataLength = 0x00;
+ 1127              		.loc 1 476 0
+ 1128 059c 7B68     		ldr	r3, [r7, #4]
+ 1129 059e 4FF00002 		mov	r2, #0
+ 1130 05a2 5A60     		str	r2, [r3, #4]
+ 477:../SPL/src/stm32f10x_sdio.c ****   SDIO_DataInitStruct->SDIO_DataBlockSize = SDIO_DataBlockSize_1b;
+ 1131              		.loc 1 477 0
+ 1132 05a4 7B68     		ldr	r3, [r7, #4]
+ 1133 05a6 4FF00002 		mov	r2, #0
+ 1134 05aa 9A60     		str	r2, [r3, #8]
+ 478:../SPL/src/stm32f10x_sdio.c ****   SDIO_DataInitStruct->SDIO_TransferDir = SDIO_TransferDir_ToCard;
+ 1135              		.loc 1 478 0
+ 1136 05ac 7B68     		ldr	r3, [r7, #4]
+ 1137 05ae 4FF00002 		mov	r2, #0
+ 1138 05b2 DA60     		str	r2, [r3, #12]
+ 479:../SPL/src/stm32f10x_sdio.c ****   SDIO_DataInitStruct->SDIO_TransferMode = SDIO_TransferMode_Block;  
+ 1139              		.loc 1 479 0
+ 1140 05b4 7B68     		ldr	r3, [r7, #4]
+ 1141 05b6 4FF00002 		mov	r2, #0
+ 1142 05ba 1A61     		str	r2, [r3, #16]
+ 480:../SPL/src/stm32f10x_sdio.c ****   SDIO_DataInitStruct->SDIO_DPSM = SDIO_DPSM_Disable;
+ 1143              		.loc 1 480 0
+ 1144 05bc 7B68     		ldr	r3, [r7, #4]
+ 1145 05be 4FF00002 		mov	r2, #0
+ 1146 05c2 5A61     		str	r2, [r3, #20]
+ 481:../SPL/src/stm32f10x_sdio.c **** }
+ 1147              		.loc 1 481 0
+ 1148 05c4 07F10C07 		add	r7, r7, #12
+ 1149 05c8 BD46     		mov	sp, r7
+ 1150 05ca 80BC     		pop	{r7}
+ 1151 05cc 7047     		bx	lr
+ 1152              		.cfi_endproc
+ 1153              	.LFE42:
+ 1155 05ce 00BF     		.align	2
+ 1156              		.global	SDIO_GetDataCounter
+ 1157              		.thumb
+ 1158              		.thumb_func
+ 1160              	SDIO_GetDataCounter:
+ 1161              	.LFB43:
+ 482:../SPL/src/stm32f10x_sdio.c **** 
+ 483:../SPL/src/stm32f10x_sdio.c **** /**
+ 484:../SPL/src/stm32f10x_sdio.c ****   * @brief  Returns number of remaining data bytes to be transferred.
+ 485:../SPL/src/stm32f10x_sdio.c ****   * @param  None
+ 486:../SPL/src/stm32f10x_sdio.c ****   * @retval Number of remaining data bytes to be transferred
+ 487:../SPL/src/stm32f10x_sdio.c ****   */
+ 488:../SPL/src/stm32f10x_sdio.c **** uint32_t SDIO_GetDataCounter(void)
+ 489:../SPL/src/stm32f10x_sdio.c **** { 
+ 1162              		.loc 1 489 0
+ 1163              		.cfi_startproc
+ 1164              		@ args = 0, pretend = 0, frame = 0
+ 1165              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1166              		@ link register save eliminated.
+ 1167 05d0 80B4     		push	{r7}
+ 1168              	.LCFI39:
+ 1169              		.cfi_def_cfa_offset 4
+ 1170              		.cfi_offset 7, -4
+ 1171 05d2 00AF     		add	r7, sp, #0
+ 1172              	.LCFI40:
+ 1173              		.cfi_def_cfa_register 7
+ 490:../SPL/src/stm32f10x_sdio.c ****   return SDIO->DCOUNT;
+ 1174              		.loc 1 490 0
+ 1175 05d4 024B     		ldr	r3, .L65
+ 1176 05d6 1B6B     		ldr	r3, [r3, #48]
+ 491:../SPL/src/stm32f10x_sdio.c **** }
+ 1177              		.loc 1 491 0
+ 1178 05d8 1846     		mov	r0, r3
+ 1179 05da BD46     		mov	sp, r7
+ 1180 05dc 80BC     		pop	{r7}
+ 1181 05de 7047     		bx	lr
+ 1182              	.L66:
+ 1183              		.align	2
+ 1184              	.L65:
+ 1185 05e0 00800140 		.word	1073840128
+ 1186              		.cfi_endproc
+ 1187              	.LFE43:
+ 1189              		.align	2
+ 1190              		.global	SDIO_ReadData
+ 1191              		.thumb
+ 1192              		.thumb_func
+ 1194              	SDIO_ReadData:
+ 1195              	.LFB44:
+ 492:../SPL/src/stm32f10x_sdio.c **** 
+ 493:../SPL/src/stm32f10x_sdio.c **** /**
+ 494:../SPL/src/stm32f10x_sdio.c ****   * @brief  Read one data word from Rx FIFO.
+ 495:../SPL/src/stm32f10x_sdio.c ****   * @param  None
+ 496:../SPL/src/stm32f10x_sdio.c ****   * @retval Data received
+ 497:../SPL/src/stm32f10x_sdio.c ****   */
+ 498:../SPL/src/stm32f10x_sdio.c **** uint32_t SDIO_ReadData(void)
+ 499:../SPL/src/stm32f10x_sdio.c **** { 
+ 1196              		.loc 1 499 0
+ 1197              		.cfi_startproc
+ 1198              		@ args = 0, pretend = 0, frame = 0
+ 1199              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1200              		@ link register save eliminated.
+ 1201 05e4 80B4     		push	{r7}
+ 1202              	.LCFI41:
+ 1203              		.cfi_def_cfa_offset 4
+ 1204              		.cfi_offset 7, -4
+ 1205 05e6 00AF     		add	r7, sp, #0
+ 1206              	.LCFI42:
+ 1207              		.cfi_def_cfa_register 7
+ 500:../SPL/src/stm32f10x_sdio.c ****   return SDIO->FIFO;
+ 1208              		.loc 1 500 0
+ 1209 05e8 034B     		ldr	r3, .L69
+ 1210 05ea D3F88030 		ldr	r3, [r3, #128]
+ 501:../SPL/src/stm32f10x_sdio.c **** }
+ 1211              		.loc 1 501 0
+ 1212 05ee 1846     		mov	r0, r3
+ 1213 05f0 BD46     		mov	sp, r7
+ 1214 05f2 80BC     		pop	{r7}
+ 1215 05f4 7047     		bx	lr
+ 1216              	.L70:
+ 1217 05f6 00BF     		.align	2
+ 1218              	.L69:
+ 1219 05f8 00800140 		.word	1073840128
+ 1220              		.cfi_endproc
+ 1221              	.LFE44:
+ 1223              		.align	2
+ 1224              		.global	SDIO_WriteData
+ 1225              		.thumb
+ 1226              		.thumb_func
+ 1228              	SDIO_WriteData:
+ 1229              	.LFB45:
+ 502:../SPL/src/stm32f10x_sdio.c **** 
+ 503:../SPL/src/stm32f10x_sdio.c **** /**
+ 504:../SPL/src/stm32f10x_sdio.c ****   * @brief  Write one data word to Tx FIFO.
+ 505:../SPL/src/stm32f10x_sdio.c ****   * @param  Data: 32-bit data word to write.
+ 506:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 507:../SPL/src/stm32f10x_sdio.c ****   */
+ 508:../SPL/src/stm32f10x_sdio.c **** void SDIO_WriteData(uint32_t Data)
+ 509:../SPL/src/stm32f10x_sdio.c **** { 
+ 1230              		.loc 1 509 0
+ 1231              		.cfi_startproc
+ 1232              		@ args = 0, pretend = 0, frame = 8
+ 1233              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1234              		@ link register save eliminated.
+ 1235 05fc 80B4     		push	{r7}
+ 1236              	.LCFI43:
+ 1237              		.cfi_def_cfa_offset 4
+ 1238              		.cfi_offset 7, -4
+ 1239 05fe 83B0     		sub	sp, sp, #12
+ 1240              	.LCFI44:
+ 1241              		.cfi_def_cfa_offset 16
+ 1242 0600 00AF     		add	r7, sp, #0
+ 1243              	.LCFI45:
+ 1244              		.cfi_def_cfa_register 7
+ 1245 0602 7860     		str	r0, [r7, #4]
+ 510:../SPL/src/stm32f10x_sdio.c ****   SDIO->FIFO = Data;
+ 1246              		.loc 1 510 0
+ 1247 0604 044B     		ldr	r3, .L72
+ 1248 0606 7A68     		ldr	r2, [r7, #4]
+ 1249 0608 C3F88020 		str	r2, [r3, #128]
+ 511:../SPL/src/stm32f10x_sdio.c **** }
+ 1250              		.loc 1 511 0
+ 1251 060c 07F10C07 		add	r7, r7, #12
+ 1252 0610 BD46     		mov	sp, r7
+ 1253 0612 80BC     		pop	{r7}
+ 1254 0614 7047     		bx	lr
+ 1255              	.L73:
+ 1256 0616 00BF     		.align	2
+ 1257              	.L72:
+ 1258 0618 00800140 		.word	1073840128
+ 1259              		.cfi_endproc
+ 1260              	.LFE45:
+ 1262              		.align	2
+ 1263              		.global	SDIO_GetFIFOCount
+ 1264              		.thumb
+ 1265              		.thumb_func
+ 1267              	SDIO_GetFIFOCount:
+ 1268              	.LFB46:
+ 512:../SPL/src/stm32f10x_sdio.c **** 
+ 513:../SPL/src/stm32f10x_sdio.c **** /**
+ 514:../SPL/src/stm32f10x_sdio.c ****   * @brief  Returns the number of words left to be written to or read from FIFO.	
+ 515:../SPL/src/stm32f10x_sdio.c ****   * @param  None
+ 516:../SPL/src/stm32f10x_sdio.c ****   * @retval Remaining number of words.
+ 517:../SPL/src/stm32f10x_sdio.c ****   */
+ 518:../SPL/src/stm32f10x_sdio.c **** uint32_t SDIO_GetFIFOCount(void)
+ 519:../SPL/src/stm32f10x_sdio.c **** { 
+ 1269              		.loc 1 519 0
+ 1270              		.cfi_startproc
+ 1271              		@ args = 0, pretend = 0, frame = 0
+ 1272              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1273              		@ link register save eliminated.
+ 1274 061c 80B4     		push	{r7}
+ 1275              	.LCFI46:
+ 1276              		.cfi_def_cfa_offset 4
+ 1277              		.cfi_offset 7, -4
+ 1278 061e 00AF     		add	r7, sp, #0
+ 1279              	.LCFI47:
+ 1280              		.cfi_def_cfa_register 7
+ 520:../SPL/src/stm32f10x_sdio.c ****   return SDIO->FIFOCNT;
+ 1281              		.loc 1 520 0
+ 1282 0620 024B     		ldr	r3, .L76
+ 1283 0622 9B6C     		ldr	r3, [r3, #72]
+ 521:../SPL/src/stm32f10x_sdio.c **** }
+ 1284              		.loc 1 521 0
+ 1285 0624 1846     		mov	r0, r3
+ 1286 0626 BD46     		mov	sp, r7
+ 1287 0628 80BC     		pop	{r7}
+ 1288 062a 7047     		bx	lr
+ 1289              	.L77:
+ 1290              		.align	2
+ 1291              	.L76:
+ 1292 062c 00800140 		.word	1073840128
+ 1293              		.cfi_endproc
+ 1294              	.LFE46:
+ 1296              		.align	2
+ 1297              		.global	SDIO_StartSDIOReadWait
+ 1298              		.thumb
+ 1299              		.thumb_func
+ 1301              	SDIO_StartSDIOReadWait:
+ 1302              	.LFB47:
+ 522:../SPL/src/stm32f10x_sdio.c **** 
+ 523:../SPL/src/stm32f10x_sdio.c **** /**
+ 524:../SPL/src/stm32f10x_sdio.c ****   * @brief  Starts the SD I/O Read Wait operation.	
+ 525:../SPL/src/stm32f10x_sdio.c ****   * @param  NewState: new state of the Start SDIO Read Wait operation. 
+ 526:../SPL/src/stm32f10x_sdio.c ****   *   This parameter can be: ENABLE or DISABLE.
+ 527:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 528:../SPL/src/stm32f10x_sdio.c ****   */
+ 529:../SPL/src/stm32f10x_sdio.c **** void SDIO_StartSDIOReadWait(FunctionalState NewState)
+ 530:../SPL/src/stm32f10x_sdio.c **** { 
+ 1303              		.loc 1 530 0
+ 1304              		.cfi_startproc
+ 1305              		@ args = 0, pretend = 0, frame = 8
+ 1306              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1307 0630 80B5     		push	{r7, lr}
+ 1308              	.LCFI48:
+ 1309              		.cfi_def_cfa_offset 8
+ 1310              		.cfi_offset 7, -8
+ 1311              		.cfi_offset 14, -4
+ 1312 0632 82B0     		sub	sp, sp, #8
+ 1313              	.LCFI49:
+ 1314              		.cfi_def_cfa_offset 16
+ 1315 0634 00AF     		add	r7, sp, #0
+ 1316              	.LCFI50:
+ 1317              		.cfi_def_cfa_register 7
+ 1318 0636 0346     		mov	r3, r0
+ 1319 0638 FB71     		strb	r3, [r7, #7]
+ 531:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 532:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 1320              		.loc 1 532 0
+ 1321 063a FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1322 063c 002B     		cmp	r3, #0
+ 1323 063e 07D0     		beq	.L79
+ 1324              		.loc 1 532 0 is_stmt 0 discriminator 1
+ 1325 0640 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1326 0642 012B     		cmp	r3, #1
+ 1327 0644 04D0     		beq	.L79
+ 1328              		.loc 1 532 0 discriminator 2
+ 1329 0646 0648     		ldr	r0, .L80
+ 1330 0648 4FF40571 		mov	r1, #532
+ 1331 064c FFF7FEFF 		bl	assert_failed
+ 1332              	.L79:
+ 533:../SPL/src/stm32f10x_sdio.c ****   
+ 534:../SPL/src/stm32f10x_sdio.c ****   *(__IO uint32_t *) DCTRL_RWSTART_BB = (uint32_t) NewState;
+ 1333              		.loc 1 534 0 is_stmt 1
+ 1334 0650 044B     		ldr	r3, .L80+4
+ 1335 0652 FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 1336 0654 1A60     		str	r2, [r3, #0]
+ 535:../SPL/src/stm32f10x_sdio.c **** }
+ 1337              		.loc 1 535 0
+ 1338 0656 07F10807 		add	r7, r7, #8
+ 1339 065a BD46     		mov	sp, r7
+ 1340 065c 80BD     		pop	{r7, pc}
+ 1341              	.L81:
+ 1342 065e 00BF     		.align	2
+ 1343              	.L80:
+ 1344 0660 00000000 		.word	.LC0
+ 1345 0664 A0053042 		.word	1110443424
+ 1346              		.cfi_endproc
+ 1347              	.LFE47:
+ 1349              		.align	2
+ 1350              		.global	SDIO_StopSDIOReadWait
+ 1351              		.thumb
+ 1352              		.thumb_func
+ 1354              	SDIO_StopSDIOReadWait:
+ 1355              	.LFB48:
+ 536:../SPL/src/stm32f10x_sdio.c **** 
+ 537:../SPL/src/stm32f10x_sdio.c **** /**
+ 538:../SPL/src/stm32f10x_sdio.c ****   * @brief  Stops the SD I/O Read Wait operation.	
+ 539:../SPL/src/stm32f10x_sdio.c ****   * @param  NewState: new state of the Stop SDIO Read Wait operation. 
+ 540:../SPL/src/stm32f10x_sdio.c ****   *   This parameter can be: ENABLE or DISABLE.
+ 541:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 542:../SPL/src/stm32f10x_sdio.c ****   */
+ 543:../SPL/src/stm32f10x_sdio.c **** void SDIO_StopSDIOReadWait(FunctionalState NewState)
+ 544:../SPL/src/stm32f10x_sdio.c **** { 
+ 1356              		.loc 1 544 0
+ 1357              		.cfi_startproc
+ 1358              		@ args = 0, pretend = 0, frame = 8
+ 1359              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1360 0668 80B5     		push	{r7, lr}
+ 1361              	.LCFI51:
+ 1362              		.cfi_def_cfa_offset 8
+ 1363              		.cfi_offset 7, -8
+ 1364              		.cfi_offset 14, -4
+ 1365 066a 82B0     		sub	sp, sp, #8
+ 1366              	.LCFI52:
+ 1367              		.cfi_def_cfa_offset 16
+ 1368 066c 00AF     		add	r7, sp, #0
+ 1369              	.LCFI53:
+ 1370              		.cfi_def_cfa_register 7
+ 1371 066e 0346     		mov	r3, r0
+ 1372 0670 FB71     		strb	r3, [r7, #7]
+ 545:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 546:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 1373              		.loc 1 546 0
+ 1374 0672 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1375 0674 002B     		cmp	r3, #0
+ 1376 0676 07D0     		beq	.L83
+ 1377              		.loc 1 546 0 is_stmt 0 discriminator 1
+ 1378 0678 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1379 067a 012B     		cmp	r3, #1
+ 1380 067c 04D0     		beq	.L83
+ 1381              		.loc 1 546 0 discriminator 2
+ 1382 067e 0648     		ldr	r0, .L84
+ 1383 0680 40F22221 		movw	r1, #546
+ 1384 0684 FFF7FEFF 		bl	assert_failed
+ 1385              	.L83:
+ 547:../SPL/src/stm32f10x_sdio.c ****   
+ 548:../SPL/src/stm32f10x_sdio.c ****   *(__IO uint32_t *) DCTRL_RWSTOP_BB = (uint32_t) NewState;
+ 1386              		.loc 1 548 0 is_stmt 1
+ 1387 0688 044B     		ldr	r3, .L84+4
+ 1388 068a FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 1389 068c 1A60     		str	r2, [r3, #0]
+ 549:../SPL/src/stm32f10x_sdio.c **** }
+ 1390              		.loc 1 549 0
+ 1391 068e 07F10807 		add	r7, r7, #8
+ 1392 0692 BD46     		mov	sp, r7
+ 1393 0694 80BD     		pop	{r7, pc}
+ 1394              	.L85:
+ 1395 0696 00BF     		.align	2
+ 1396              	.L84:
+ 1397 0698 00000000 		.word	.LC0
+ 1398 069c A4053042 		.word	1110443428
+ 1399              		.cfi_endproc
+ 1400              	.LFE48:
+ 1402              		.align	2
+ 1403              		.global	SDIO_SetSDIOReadWaitMode
+ 1404              		.thumb
+ 1405              		.thumb_func
+ 1407              	SDIO_SetSDIOReadWaitMode:
+ 1408              	.LFB49:
+ 550:../SPL/src/stm32f10x_sdio.c **** 
+ 551:../SPL/src/stm32f10x_sdio.c **** /**
+ 552:../SPL/src/stm32f10x_sdio.c ****   * @brief  Sets one of the two options of inserting read wait interval.
+ 553:../SPL/src/stm32f10x_sdio.c ****   * @param  SDIO_ReadWaitMode: SD I/O Read Wait operation mode.
+ 554:../SPL/src/stm32f10x_sdio.c ****   *   This parameter can be:
+ 555:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_ReadWaitMode_CLK: Read Wait control by stopping SDIOCLK
+ 556:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_ReadWaitMode_DATA2: Read Wait control using SDIO_DATA2
+ 557:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 558:../SPL/src/stm32f10x_sdio.c ****   */
+ 559:../SPL/src/stm32f10x_sdio.c **** void SDIO_SetSDIOReadWaitMode(uint32_t SDIO_ReadWaitMode)
+ 560:../SPL/src/stm32f10x_sdio.c **** {
+ 1409              		.loc 1 560 0
+ 1410              		.cfi_startproc
+ 1411              		@ args = 0, pretend = 0, frame = 8
+ 1412              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1413 06a0 80B5     		push	{r7, lr}
+ 1414              	.LCFI54:
+ 1415              		.cfi_def_cfa_offset 8
+ 1416              		.cfi_offset 7, -8
+ 1417              		.cfi_offset 14, -4
+ 1418 06a2 82B0     		sub	sp, sp, #8
+ 1419              	.LCFI55:
+ 1420              		.cfi_def_cfa_offset 16
+ 1421 06a4 00AF     		add	r7, sp, #0
+ 1422              	.LCFI56:
+ 1423              		.cfi_def_cfa_register 7
+ 1424 06a6 7860     		str	r0, [r7, #4]
+ 561:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 562:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_READWAIT_MODE(SDIO_ReadWaitMode));
+ 1425              		.loc 1 562 0
+ 1426 06a8 7B68     		ldr	r3, [r7, #4]
+ 1427 06aa 012B     		cmp	r3, #1
+ 1428 06ac 07D0     		beq	.L87
+ 1429              		.loc 1 562 0 is_stmt 0 discriminator 1
+ 1430 06ae 7B68     		ldr	r3, [r7, #4]
+ 1431 06b0 002B     		cmp	r3, #0
+ 1432 06b2 04D0     		beq	.L87
+ 1433              		.loc 1 562 0 discriminator 2
+ 1434 06b4 0548     		ldr	r0, .L88
+ 1435 06b6 40F23221 		movw	r1, #562
+ 1436 06ba FFF7FEFF 		bl	assert_failed
+ 1437              	.L87:
+ 563:../SPL/src/stm32f10x_sdio.c ****   
+ 564:../SPL/src/stm32f10x_sdio.c ****   *(__IO uint32_t *) DCTRL_RWMOD_BB = SDIO_ReadWaitMode;
+ 1438              		.loc 1 564 0 is_stmt 1
+ 1439 06be 044B     		ldr	r3, .L88+4
+ 1440 06c0 7A68     		ldr	r2, [r7, #4]
+ 1441 06c2 1A60     		str	r2, [r3, #0]
+ 565:../SPL/src/stm32f10x_sdio.c **** }
+ 1442              		.loc 1 565 0
+ 1443 06c4 07F10807 		add	r7, r7, #8
+ 1444 06c8 BD46     		mov	sp, r7
+ 1445 06ca 80BD     		pop	{r7, pc}
+ 1446              	.L89:
+ 1447              		.align	2
+ 1448              	.L88:
+ 1449 06cc 00000000 		.word	.LC0
+ 1450 06d0 A8053042 		.word	1110443432
+ 1451              		.cfi_endproc
+ 1452              	.LFE49:
+ 1454              		.align	2
+ 1455              		.global	SDIO_SetSDIOOperation
+ 1456              		.thumb
+ 1457              		.thumb_func
+ 1459              	SDIO_SetSDIOOperation:
+ 1460              	.LFB50:
+ 566:../SPL/src/stm32f10x_sdio.c **** 
+ 567:../SPL/src/stm32f10x_sdio.c **** /**
+ 568:../SPL/src/stm32f10x_sdio.c ****   * @brief  Enables or disables the SD I/O Mode Operation.
+ 569:../SPL/src/stm32f10x_sdio.c ****   * @param  NewState: new state of SDIO specific operation. 
+ 570:../SPL/src/stm32f10x_sdio.c ****   *   This parameter can be: ENABLE or DISABLE.
+ 571:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 572:../SPL/src/stm32f10x_sdio.c ****   */
+ 573:../SPL/src/stm32f10x_sdio.c **** void SDIO_SetSDIOOperation(FunctionalState NewState)
+ 574:../SPL/src/stm32f10x_sdio.c **** { 
+ 1461              		.loc 1 574 0
+ 1462              		.cfi_startproc
+ 1463              		@ args = 0, pretend = 0, frame = 8
+ 1464              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1465 06d4 80B5     		push	{r7, lr}
+ 1466              	.LCFI57:
+ 1467              		.cfi_def_cfa_offset 8
+ 1468              		.cfi_offset 7, -8
+ 1469              		.cfi_offset 14, -4
+ 1470 06d6 82B0     		sub	sp, sp, #8
+ 1471              	.LCFI58:
+ 1472              		.cfi_def_cfa_offset 16
+ 1473 06d8 00AF     		add	r7, sp, #0
+ 1474              	.LCFI59:
+ 1475              		.cfi_def_cfa_register 7
+ 1476 06da 0346     		mov	r3, r0
+ 1477 06dc FB71     		strb	r3, [r7, #7]
+ 575:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 576:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 1478              		.loc 1 576 0
+ 1479 06de FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1480 06e0 002B     		cmp	r3, #0
+ 1481 06e2 07D0     		beq	.L91
+ 1482              		.loc 1 576 0 is_stmt 0 discriminator 1
+ 1483 06e4 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1484 06e6 012B     		cmp	r3, #1
+ 1485 06e8 04D0     		beq	.L91
+ 1486              		.loc 1 576 0 discriminator 2
+ 1487 06ea 0648     		ldr	r0, .L92
+ 1488 06ec 4FF41071 		mov	r1, #576
+ 1489 06f0 FFF7FEFF 		bl	assert_failed
+ 1490              	.L91:
+ 577:../SPL/src/stm32f10x_sdio.c ****   
+ 578:../SPL/src/stm32f10x_sdio.c ****   *(__IO uint32_t *) DCTRL_SDIOEN_BB = (uint32_t)NewState;
+ 1491              		.loc 1 578 0 is_stmt 1
+ 1492 06f4 044B     		ldr	r3, .L92+4
+ 1493 06f6 FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 1494 06f8 1A60     		str	r2, [r3, #0]
+ 579:../SPL/src/stm32f10x_sdio.c **** }
+ 1495              		.loc 1 579 0
+ 1496 06fa 07F10807 		add	r7, r7, #8
+ 1497 06fe BD46     		mov	sp, r7
+ 1498 0700 80BD     		pop	{r7, pc}
+ 1499              	.L93:
+ 1500 0702 00BF     		.align	2
+ 1501              	.L92:
+ 1502 0704 00000000 		.word	.LC0
+ 1503 0708 AC053042 		.word	1110443436
+ 1504              		.cfi_endproc
+ 1505              	.LFE50:
+ 1507              		.align	2
+ 1508              		.global	SDIO_SendSDIOSuspendCmd
+ 1509              		.thumb
+ 1510              		.thumb_func
+ 1512              	SDIO_SendSDIOSuspendCmd:
+ 1513              	.LFB51:
+ 580:../SPL/src/stm32f10x_sdio.c **** 
+ 581:../SPL/src/stm32f10x_sdio.c **** /**
+ 582:../SPL/src/stm32f10x_sdio.c ****   * @brief  Enables or disables the SD I/O Mode suspend command sending.
+ 583:../SPL/src/stm32f10x_sdio.c ****   * @param  NewState: new state of the SD I/O Mode suspend command.
+ 584:../SPL/src/stm32f10x_sdio.c ****   *   This parameter can be: ENABLE or DISABLE.
+ 585:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 586:../SPL/src/stm32f10x_sdio.c ****   */
+ 587:../SPL/src/stm32f10x_sdio.c **** void SDIO_SendSDIOSuspendCmd(FunctionalState NewState)
+ 588:../SPL/src/stm32f10x_sdio.c **** { 
+ 1514              		.loc 1 588 0
+ 1515              		.cfi_startproc
+ 1516              		@ args = 0, pretend = 0, frame = 8
+ 1517              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1518 070c 80B5     		push	{r7, lr}
+ 1519              	.LCFI60:
+ 1520              		.cfi_def_cfa_offset 8
+ 1521              		.cfi_offset 7, -8
+ 1522              		.cfi_offset 14, -4
+ 1523 070e 82B0     		sub	sp, sp, #8
+ 1524              	.LCFI61:
+ 1525              		.cfi_def_cfa_offset 16
+ 1526 0710 00AF     		add	r7, sp, #0
+ 1527              	.LCFI62:
+ 1528              		.cfi_def_cfa_register 7
+ 1529 0712 0346     		mov	r3, r0
+ 1530 0714 FB71     		strb	r3, [r7, #7]
+ 589:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 590:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 1531              		.loc 1 590 0
+ 1532 0716 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1533 0718 002B     		cmp	r3, #0
+ 1534 071a 07D0     		beq	.L95
+ 1535              		.loc 1 590 0 is_stmt 0 discriminator 1
+ 1536 071c FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1537 071e 012B     		cmp	r3, #1
+ 1538 0720 04D0     		beq	.L95
+ 1539              		.loc 1 590 0 discriminator 2
+ 1540 0722 0648     		ldr	r0, .L96
+ 1541 0724 40F24E21 		movw	r1, #590
+ 1542 0728 FFF7FEFF 		bl	assert_failed
+ 1543              	.L95:
+ 591:../SPL/src/stm32f10x_sdio.c ****   
+ 592:../SPL/src/stm32f10x_sdio.c ****   *(__IO uint32_t *) CMD_SDIOSUSPEND_BB = (uint32_t)NewState;
+ 1544              		.loc 1 592 0 is_stmt 1
+ 1545 072c 044B     		ldr	r3, .L96+4
+ 1546 072e FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 1547 0730 1A60     		str	r2, [r3, #0]
+ 593:../SPL/src/stm32f10x_sdio.c **** }
+ 1548              		.loc 1 593 0
+ 1549 0732 07F10807 		add	r7, r7, #8
+ 1550 0736 BD46     		mov	sp, r7
+ 1551 0738 80BD     		pop	{r7, pc}
+ 1552              	.L97:
+ 1553 073a 00BF     		.align	2
+ 1554              	.L96:
+ 1555 073c 00000000 		.word	.LC0
+ 1556 0740 AC013042 		.word	1110442412
+ 1557              		.cfi_endproc
+ 1558              	.LFE51:
+ 1560              		.align	2
+ 1561              		.global	SDIO_CommandCompletionCmd
+ 1562              		.thumb
+ 1563              		.thumb_func
+ 1565              	SDIO_CommandCompletionCmd:
+ 1566              	.LFB52:
+ 594:../SPL/src/stm32f10x_sdio.c **** 
+ 595:../SPL/src/stm32f10x_sdio.c **** /**
+ 596:../SPL/src/stm32f10x_sdio.c ****   * @brief  Enables or disables the command completion signal.
+ 597:../SPL/src/stm32f10x_sdio.c ****   * @param  NewState: new state of command completion signal. 
+ 598:../SPL/src/stm32f10x_sdio.c ****   *   This parameter can be: ENABLE or DISABLE.
+ 599:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 600:../SPL/src/stm32f10x_sdio.c ****   */
+ 601:../SPL/src/stm32f10x_sdio.c **** void SDIO_CommandCompletionCmd(FunctionalState NewState)
+ 602:../SPL/src/stm32f10x_sdio.c **** { 
+ 1567              		.loc 1 602 0
+ 1568              		.cfi_startproc
+ 1569              		@ args = 0, pretend = 0, frame = 8
+ 1570              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1571 0744 80B5     		push	{r7, lr}
+ 1572              	.LCFI63:
+ 1573              		.cfi_def_cfa_offset 8
+ 1574              		.cfi_offset 7, -8
+ 1575              		.cfi_offset 14, -4
+ 1576 0746 82B0     		sub	sp, sp, #8
+ 1577              	.LCFI64:
+ 1578              		.cfi_def_cfa_offset 16
+ 1579 0748 00AF     		add	r7, sp, #0
+ 1580              	.LCFI65:
+ 1581              		.cfi_def_cfa_register 7
+ 1582 074a 0346     		mov	r3, r0
+ 1583 074c FB71     		strb	r3, [r7, #7]
+ 603:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 604:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 1584              		.loc 1 604 0
+ 1585 074e FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1586 0750 002B     		cmp	r3, #0
+ 1587 0752 07D0     		beq	.L99
+ 1588              		.loc 1 604 0 is_stmt 0 discriminator 1
+ 1589 0754 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1590 0756 012B     		cmp	r3, #1
+ 1591 0758 04D0     		beq	.L99
+ 1592              		.loc 1 604 0 discriminator 2
+ 1593 075a 0648     		ldr	r0, .L100
+ 1594 075c 4FF41771 		mov	r1, #604
+ 1595 0760 FFF7FEFF 		bl	assert_failed
+ 1596              	.L99:
+ 605:../SPL/src/stm32f10x_sdio.c ****   
+ 606:../SPL/src/stm32f10x_sdio.c ****   *(__IO uint32_t *) CMD_ENCMDCOMPL_BB = (uint32_t)NewState;
+ 1597              		.loc 1 606 0 is_stmt 1
+ 1598 0764 044B     		ldr	r3, .L100+4
+ 1599 0766 FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 1600 0768 1A60     		str	r2, [r3, #0]
+ 607:../SPL/src/stm32f10x_sdio.c **** }
+ 1601              		.loc 1 607 0
+ 1602 076a 07F10807 		add	r7, r7, #8
+ 1603 076e BD46     		mov	sp, r7
+ 1604 0770 80BD     		pop	{r7, pc}
+ 1605              	.L101:
+ 1606 0772 00BF     		.align	2
+ 1607              	.L100:
+ 1608 0774 00000000 		.word	.LC0
+ 1609 0778 B0013042 		.word	1110442416
+ 1610              		.cfi_endproc
+ 1611              	.LFE52:
+ 1613              		.align	2
+ 1614              		.global	SDIO_CEATAITCmd
+ 1615              		.thumb
+ 1616              		.thumb_func
+ 1618              	SDIO_CEATAITCmd:
+ 1619              	.LFB53:
+ 608:../SPL/src/stm32f10x_sdio.c **** 
+ 609:../SPL/src/stm32f10x_sdio.c **** /**
+ 610:../SPL/src/stm32f10x_sdio.c ****   * @brief  Enables or disables the CE-ATA interrupt.
+ 611:../SPL/src/stm32f10x_sdio.c ****   * @param  NewState: new state of CE-ATA interrupt. This parameter can be: ENABLE or DISABLE.
+ 612:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 613:../SPL/src/stm32f10x_sdio.c ****   */
+ 614:../SPL/src/stm32f10x_sdio.c **** void SDIO_CEATAITCmd(FunctionalState NewState)
+ 615:../SPL/src/stm32f10x_sdio.c **** { 
+ 1620              		.loc 1 615 0
+ 1621              		.cfi_startproc
+ 1622              		@ args = 0, pretend = 0, frame = 8
+ 1623              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1624 077c 80B5     		push	{r7, lr}
+ 1625              	.LCFI66:
+ 1626              		.cfi_def_cfa_offset 8
+ 1627              		.cfi_offset 7, -8
+ 1628              		.cfi_offset 14, -4
+ 1629 077e 82B0     		sub	sp, sp, #8
+ 1630              	.LCFI67:
+ 1631              		.cfi_def_cfa_offset 16
+ 1632 0780 00AF     		add	r7, sp, #0
+ 1633              	.LCFI68:
+ 1634              		.cfi_def_cfa_register 7
+ 1635 0782 0346     		mov	r3, r0
+ 1636 0784 FB71     		strb	r3, [r7, #7]
+ 616:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 617:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 1637              		.loc 1 617 0
+ 1638 0786 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1639 0788 002B     		cmp	r3, #0
+ 1640 078a 07D0     		beq	.L103
+ 1641              		.loc 1 617 0 is_stmt 0 discriminator 1
+ 1642 078c FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1643 078e 012B     		cmp	r3, #1
+ 1644 0790 04D0     		beq	.L103
+ 1645              		.loc 1 617 0 discriminator 2
+ 1646 0792 0948     		ldr	r0, .L104
+ 1647 0794 40F26921 		movw	r1, #617
+ 1648 0798 FFF7FEFF 		bl	assert_failed
+ 1649              	.L103:
+ 618:../SPL/src/stm32f10x_sdio.c ****   
+ 619:../SPL/src/stm32f10x_sdio.c ****   *(__IO uint32_t *) CMD_NIEN_BB = (uint32_t)((~((uint32_t)NewState)) & ((uint32_t)0x1));
+ 1650              		.loc 1 619 0 is_stmt 1
+ 1651 079c 074B     		ldr	r3, .L104+4
+ 1652 079e FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 1653 07a0 02F00102 		and	r2, r2, #1
+ 1654 07a4 002A     		cmp	r2, #0
+ 1655 07a6 14BF     		ite	ne
+ 1656 07a8 0022     		movne	r2, #0
+ 1657 07aa 0122     		moveq	r2, #1
+ 1658 07ac D2B2     		uxtb	r2, r2
+ 1659 07ae 1A60     		str	r2, [r3, #0]
+ 620:../SPL/src/stm32f10x_sdio.c **** }
+ 1660              		.loc 1 620 0
+ 1661 07b0 07F10807 		add	r7, r7, #8
+ 1662 07b4 BD46     		mov	sp, r7
+ 1663 07b6 80BD     		pop	{r7, pc}
+ 1664              	.L105:
+ 1665              		.align	2
+ 1666              	.L104:
+ 1667 07b8 00000000 		.word	.LC0
+ 1668 07bc B4013042 		.word	1110442420
+ 1669              		.cfi_endproc
+ 1670              	.LFE53:
+ 1672              		.align	2
+ 1673              		.global	SDIO_SendCEATACmd
+ 1674              		.thumb
+ 1675              		.thumb_func
+ 1677              	SDIO_SendCEATACmd:
+ 1678              	.LFB54:
+ 621:../SPL/src/stm32f10x_sdio.c **** 
+ 622:../SPL/src/stm32f10x_sdio.c **** /**
+ 623:../SPL/src/stm32f10x_sdio.c ****   * @brief  Sends CE-ATA command (CMD61).
+ 624:../SPL/src/stm32f10x_sdio.c ****   * @param  NewState: new state of CE-ATA command. This parameter can be: ENABLE or DISABLE.
+ 625:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 626:../SPL/src/stm32f10x_sdio.c ****   */
+ 627:../SPL/src/stm32f10x_sdio.c **** void SDIO_SendCEATACmd(FunctionalState NewState)
+ 628:../SPL/src/stm32f10x_sdio.c **** { 
+ 1679              		.loc 1 628 0
+ 1680              		.cfi_startproc
+ 1681              		@ args = 0, pretend = 0, frame = 8
+ 1682              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1683 07c0 80B5     		push	{r7, lr}
+ 1684              	.LCFI69:
+ 1685              		.cfi_def_cfa_offset 8
+ 1686              		.cfi_offset 7, -8
+ 1687              		.cfi_offset 14, -4
+ 1688 07c2 82B0     		sub	sp, sp, #8
+ 1689              	.LCFI70:
+ 1690              		.cfi_def_cfa_offset 16
+ 1691 07c4 00AF     		add	r7, sp, #0
+ 1692              	.LCFI71:
+ 1693              		.cfi_def_cfa_register 7
+ 1694 07c6 0346     		mov	r3, r0
+ 1695 07c8 FB71     		strb	r3, [r7, #7]
+ 629:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 630:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 1696              		.loc 1 630 0
+ 1697 07ca FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1698 07cc 002B     		cmp	r3, #0
+ 1699 07ce 07D0     		beq	.L107
+ 1700              		.loc 1 630 0 is_stmt 0 discriminator 1
+ 1701 07d0 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1702 07d2 012B     		cmp	r3, #1
+ 1703 07d4 04D0     		beq	.L107
+ 1704              		.loc 1 630 0 discriminator 2
+ 1705 07d6 0648     		ldr	r0, .L108
+ 1706 07d8 40F27621 		movw	r1, #630
+ 1707 07dc FFF7FEFF 		bl	assert_failed
+ 1708              	.L107:
+ 631:../SPL/src/stm32f10x_sdio.c ****   
+ 632:../SPL/src/stm32f10x_sdio.c ****   *(__IO uint32_t *) CMD_ATACMD_BB = (uint32_t)NewState;
+ 1709              		.loc 1 632 0 is_stmt 1
+ 1710 07e0 044B     		ldr	r3, .L108+4
+ 1711 07e2 FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 1712 07e4 1A60     		str	r2, [r3, #0]
+ 633:../SPL/src/stm32f10x_sdio.c **** }
+ 1713              		.loc 1 633 0
+ 1714 07e6 07F10807 		add	r7, r7, #8
+ 1715 07ea BD46     		mov	sp, r7
+ 1716 07ec 80BD     		pop	{r7, pc}
+ 1717              	.L109:
+ 1718 07ee 00BF     		.align	2
+ 1719              	.L108:
+ 1720 07f0 00000000 		.word	.LC0
+ 1721 07f4 B8013042 		.word	1110442424
+ 1722              		.cfi_endproc
+ 1723              	.LFE54:
+ 1725              		.align	2
+ 1726              		.global	SDIO_GetFlagStatus
+ 1727              		.thumb
+ 1728              		.thumb_func
+ 1730              	SDIO_GetFlagStatus:
+ 1731              	.LFB55:
+ 634:../SPL/src/stm32f10x_sdio.c **** 
+ 635:../SPL/src/stm32f10x_sdio.c **** /**
+ 636:../SPL/src/stm32f10x_sdio.c ****   * @brief  Checks whether the specified SDIO flag is set or not.
+ 637:../SPL/src/stm32f10x_sdio.c ****   * @param  SDIO_FLAG: specifies the flag to check. 
+ 638:../SPL/src/stm32f10x_sdio.c ****   *   This parameter can be one of the following values:
+ 639:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_CCRCFAIL: Command response received (CRC check failed)
+ 640:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_DCRCFAIL: Data block sent/received (CRC check failed)
+ 641:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_CTIMEOUT: Command response timeout
+ 642:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_DTIMEOUT: Data timeout
+ 643:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_TXUNDERR: Transmit FIFO underrun error
+ 644:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_RXOVERR:  Received FIFO overrun error
+ 645:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_CMDREND:  Command response received (CRC check passed)
+ 646:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_CMDSENT:  Command sent (no response required)
+ 647:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_DATAEND:  Data end (data counter, SDIDCOUNT, is zero)
+ 648:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_STBITERR: Start bit not detected on all data signals in wide 
+ 649:../SPL/src/stm32f10x_sdio.c ****   *                              bus mode.
+ 650:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_DBCKEND:  Data block sent/received (CRC check passed)
+ 651:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_CMDACT:   Command transfer in progress
+ 652:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_TXACT:    Data transmit in progress
+ 653:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_RXACT:    Data receive in progress
+ 654:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_TXFIFOHE: Transmit FIFO Half Empty
+ 655:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_RXFIFOHF: Receive FIFO Half Full
+ 656:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_TXFIFOF:  Transmit FIFO full
+ 657:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_RXFIFOF:  Receive FIFO full
+ 658:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_TXFIFOE:  Transmit FIFO empty
+ 659:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_RXFIFOE:  Receive FIFO empty
+ 660:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_TXDAVL:   Data available in transmit FIFO
+ 661:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_RXDAVL:   Data available in receive FIFO
+ 662:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_SDIOIT:   SD I/O interrupt received
+ 663:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_CEATAEND: CE-ATA command completion signal received for CMD61
+ 664:../SPL/src/stm32f10x_sdio.c ****   * @retval The new state of SDIO_FLAG (SET or RESET).
+ 665:../SPL/src/stm32f10x_sdio.c ****   */
+ 666:../SPL/src/stm32f10x_sdio.c **** FlagStatus SDIO_GetFlagStatus(uint32_t SDIO_FLAG)
+ 667:../SPL/src/stm32f10x_sdio.c **** { 
+ 1732              		.loc 1 667 0
+ 1733              		.cfi_startproc
+ 1734              		@ args = 0, pretend = 0, frame = 16
+ 1735              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1736 07f8 80B5     		push	{r7, lr}
+ 1737              	.LCFI72:
+ 1738              		.cfi_def_cfa_offset 8
+ 1739              		.cfi_offset 7, -8
+ 1740              		.cfi_offset 14, -4
+ 1741 07fa 84B0     		sub	sp, sp, #16
+ 1742              	.LCFI73:
+ 1743              		.cfi_def_cfa_offset 24
+ 1744 07fc 00AF     		add	r7, sp, #0
+ 1745              	.LCFI74:
+ 1746              		.cfi_def_cfa_register 7
+ 1747 07fe 7860     		str	r0, [r7, #4]
+ 668:../SPL/src/stm32f10x_sdio.c ****   FlagStatus bitstatus = RESET;
+ 1748              		.loc 1 668 0
+ 1749 0800 4FF00003 		mov	r3, #0
+ 1750 0804 FB73     		strb	r3, [r7, #15]
+ 669:../SPL/src/stm32f10x_sdio.c ****   
+ 670:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 671:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_FLAG(SDIO_FLAG));
+ 1751              		.loc 1 671 0
+ 1752 0806 7B68     		ldr	r3, [r7, #4]
+ 1753 0808 012B     		cmp	r3, #1
+ 1754 080a 59D0     		beq	.L111
+ 1755              		.loc 1 671 0 is_stmt 0 discriminator 1
+ 1756 080c 7B68     		ldr	r3, [r7, #4]
+ 1757 080e 022B     		cmp	r3, #2
+ 1758 0810 56D0     		beq	.L111
+ 1759              		.loc 1 671 0 discriminator 2
+ 1760 0812 7B68     		ldr	r3, [r7, #4]
+ 1761 0814 042B     		cmp	r3, #4
+ 1762 0816 53D0     		beq	.L111
+ 1763              		.loc 1 671 0 discriminator 3
+ 1764 0818 7B68     		ldr	r3, [r7, #4]
+ 1765 081a 082B     		cmp	r3, #8
+ 1766 081c 50D0     		beq	.L111
+ 1767              		.loc 1 671 0 discriminator 4
+ 1768 081e 7B68     		ldr	r3, [r7, #4]
+ 1769 0820 102B     		cmp	r3, #16
+ 1770 0822 4DD0     		beq	.L111
+ 1771              		.loc 1 671 0 discriminator 5
+ 1772 0824 7B68     		ldr	r3, [r7, #4]
+ 1773 0826 202B     		cmp	r3, #32
+ 1774 0828 4AD0     		beq	.L111
+ 1775              		.loc 1 671 0 discriminator 6
+ 1776 082a 7B68     		ldr	r3, [r7, #4]
+ 1777 082c 402B     		cmp	r3, #64
+ 1778 082e 47D0     		beq	.L111
+ 1779              		.loc 1 671 0 discriminator 7
+ 1780 0830 7B68     		ldr	r3, [r7, #4]
+ 1781 0832 802B     		cmp	r3, #128
+ 1782 0834 44D0     		beq	.L111
+ 1783              		.loc 1 671 0 discriminator 8
+ 1784 0836 7B68     		ldr	r3, [r7, #4]
+ 1785 0838 B3F5807F 		cmp	r3, #256
+ 1786 083c 40D0     		beq	.L111
+ 1787              		.loc 1 671 0 discriminator 9
+ 1788 083e 7B68     		ldr	r3, [r7, #4]
+ 1789 0840 B3F5007F 		cmp	r3, #512
+ 1790 0844 3CD0     		beq	.L111
+ 1791              		.loc 1 671 0 discriminator 10
+ 1792 0846 7B68     		ldr	r3, [r7, #4]
+ 1793 0848 B3F5806F 		cmp	r3, #1024
+ 1794 084c 38D0     		beq	.L111
+ 1795              		.loc 1 671 0 discriminator 11
+ 1796 084e 7B68     		ldr	r3, [r7, #4]
+ 1797 0850 B3F5006F 		cmp	r3, #2048
+ 1798 0854 34D0     		beq	.L111
+ 1799              		.loc 1 671 0 discriminator 12
+ 1800 0856 7B68     		ldr	r3, [r7, #4]
+ 1801 0858 B3F5805F 		cmp	r3, #4096
+ 1802 085c 30D0     		beq	.L111
+ 1803              		.loc 1 671 0 discriminator 13
+ 1804 085e 7B68     		ldr	r3, [r7, #4]
+ 1805 0860 B3F5005F 		cmp	r3, #8192
+ 1806 0864 2CD0     		beq	.L111
+ 1807              		.loc 1 671 0 discriminator 14
+ 1808 0866 7B68     		ldr	r3, [r7, #4]
+ 1809 0868 B3F5804F 		cmp	r3, #16384
+ 1810 086c 28D0     		beq	.L111
+ 1811              		.loc 1 671 0 discriminator 15
+ 1812 086e 7B68     		ldr	r3, [r7, #4]
+ 1813 0870 B3F5004F 		cmp	r3, #32768
+ 1814 0874 24D0     		beq	.L111
+ 1815              		.loc 1 671 0 discriminator 16
+ 1816 0876 7B68     		ldr	r3, [r7, #4]
+ 1817 0878 B3F5803F 		cmp	r3, #65536
+ 1818 087c 20D0     		beq	.L111
+ 1819              		.loc 1 671 0 discriminator 17
+ 1820 087e 7B68     		ldr	r3, [r7, #4]
+ 1821 0880 B3F5003F 		cmp	r3, #131072
+ 1822 0884 1CD0     		beq	.L111
+ 1823              		.loc 1 671 0 discriminator 18
+ 1824 0886 7B68     		ldr	r3, [r7, #4]
+ 1825 0888 B3F5802F 		cmp	r3, #262144
+ 1826 088c 18D0     		beq	.L111
+ 1827              		.loc 1 671 0 discriminator 19
+ 1828 088e 7B68     		ldr	r3, [r7, #4]
+ 1829 0890 B3F5002F 		cmp	r3, #524288
+ 1830 0894 14D0     		beq	.L111
+ 1831              		.loc 1 671 0 discriminator 20
+ 1832 0896 7B68     		ldr	r3, [r7, #4]
+ 1833 0898 B3F5801F 		cmp	r3, #1048576
+ 1834 089c 10D0     		beq	.L111
+ 1835              		.loc 1 671 0 discriminator 21
+ 1836 089e 7B68     		ldr	r3, [r7, #4]
+ 1837 08a0 B3F5001F 		cmp	r3, #2097152
+ 1838 08a4 0CD0     		beq	.L111
+ 1839              		.loc 1 671 0 discriminator 22
+ 1840 08a6 7B68     		ldr	r3, [r7, #4]
+ 1841 08a8 B3F5800F 		cmp	r3, #4194304
+ 1842 08ac 08D0     		beq	.L111
+ 1843              		.loc 1 671 0 discriminator 23
+ 1844 08ae 7B68     		ldr	r3, [r7, #4]
+ 1845 08b0 B3F5000F 		cmp	r3, #8388608
+ 1846 08b4 04D0     		beq	.L111
+ 1847              		.loc 1 671 0 discriminator 24
+ 1848 08b6 0C48     		ldr	r0, .L115
+ 1849 08b8 40F29F21 		movw	r1, #671
+ 1850 08bc FFF7FEFF 		bl	assert_failed
+ 1851              	.L111:
+ 672:../SPL/src/stm32f10x_sdio.c ****   
+ 673:../SPL/src/stm32f10x_sdio.c ****   if ((SDIO->STA & SDIO_FLAG) != (uint32_t)RESET)
+ 1852              		.loc 1 673 0 is_stmt 1
+ 1853 08c0 0A4B     		ldr	r3, .L115+4
+ 1854 08c2 5A6B     		ldr	r2, [r3, #52]
+ 1855 08c4 7B68     		ldr	r3, [r7, #4]
+ 1856 08c6 1340     		ands	r3, r3, r2
+ 1857 08c8 002B     		cmp	r3, #0
+ 1858 08ca 03D0     		beq	.L112
+ 674:../SPL/src/stm32f10x_sdio.c ****   {
+ 675:../SPL/src/stm32f10x_sdio.c ****     bitstatus = SET;
+ 1859              		.loc 1 675 0
+ 1860 08cc 4FF00103 		mov	r3, #1
+ 1861 08d0 FB73     		strb	r3, [r7, #15]
+ 1862 08d2 02E0     		b	.L113
+ 1863              	.L112:
+ 676:../SPL/src/stm32f10x_sdio.c ****   }
+ 677:../SPL/src/stm32f10x_sdio.c ****   else
+ 678:../SPL/src/stm32f10x_sdio.c ****   {
+ 679:../SPL/src/stm32f10x_sdio.c ****     bitstatus = RESET;
+ 1864              		.loc 1 679 0
+ 1865 08d4 4FF00003 		mov	r3, #0
+ 1866 08d8 FB73     		strb	r3, [r7, #15]
+ 1867              	.L113:
+ 680:../SPL/src/stm32f10x_sdio.c ****   }
+ 681:../SPL/src/stm32f10x_sdio.c ****   return bitstatus;
+ 1868              		.loc 1 681 0
+ 1869 08da FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 682:../SPL/src/stm32f10x_sdio.c **** }
+ 1870              		.loc 1 682 0
+ 1871 08dc 1846     		mov	r0, r3
+ 1872 08de 07F11007 		add	r7, r7, #16
+ 1873 08e2 BD46     		mov	sp, r7
+ 1874 08e4 80BD     		pop	{r7, pc}
+ 1875              	.L116:
+ 1876 08e6 00BF     		.align	2
+ 1877              	.L115:
+ 1878 08e8 00000000 		.word	.LC0
+ 1879 08ec 00800140 		.word	1073840128
+ 1880              		.cfi_endproc
+ 1881              	.LFE55:
+ 1883              		.align	2
+ 1884              		.global	SDIO_ClearFlag
+ 1885              		.thumb
+ 1886              		.thumb_func
+ 1888              	SDIO_ClearFlag:
+ 1889              	.LFB56:
+ 683:../SPL/src/stm32f10x_sdio.c **** 
+ 684:../SPL/src/stm32f10x_sdio.c **** /**
+ 685:../SPL/src/stm32f10x_sdio.c ****   * @brief  Clears the SDIO's pending flags.
+ 686:../SPL/src/stm32f10x_sdio.c ****   * @param  SDIO_FLAG: specifies the flag to clear.  
+ 687:../SPL/src/stm32f10x_sdio.c ****   *   This parameter can be one or a combination of the following values:
+ 688:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_CCRCFAIL: Command response received (CRC check failed)
+ 689:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_DCRCFAIL: Data block sent/received (CRC check failed)
+ 690:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_CTIMEOUT: Command response timeout
+ 691:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_DTIMEOUT: Data timeout
+ 692:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_TXUNDERR: Transmit FIFO underrun error
+ 693:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_RXOVERR:  Received FIFO overrun error
+ 694:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_CMDREND:  Command response received (CRC check passed)
+ 695:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_CMDSENT:  Command sent (no response required)
+ 696:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_DATAEND:  Data end (data counter, SDIDCOUNT, is zero)
+ 697:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_STBITERR: Start bit not detected on all data signals in wide 
+ 698:../SPL/src/stm32f10x_sdio.c ****   *                              bus mode
+ 699:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_DBCKEND:  Data block sent/received (CRC check passed)
+ 700:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_SDIOIT:   SD I/O interrupt received
+ 701:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_FLAG_CEATAEND: CE-ATA command completion signal received for CMD61
+ 702:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 703:../SPL/src/stm32f10x_sdio.c ****   */
+ 704:../SPL/src/stm32f10x_sdio.c **** void SDIO_ClearFlag(uint32_t SDIO_FLAG)
+ 705:../SPL/src/stm32f10x_sdio.c **** { 
+ 1890              		.loc 1 705 0
+ 1891              		.cfi_startproc
+ 1892              		@ args = 0, pretend = 0, frame = 8
+ 1893              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1894 08f0 80B5     		push	{r7, lr}
+ 1895              	.LCFI75:
+ 1896              		.cfi_def_cfa_offset 8
+ 1897              		.cfi_offset 7, -8
+ 1898              		.cfi_offset 14, -4
+ 1899 08f2 82B0     		sub	sp, sp, #8
+ 1900              	.LCFI76:
+ 1901              		.cfi_def_cfa_offset 16
+ 1902 08f4 00AF     		add	r7, sp, #0
+ 1903              	.LCFI77:
+ 1904              		.cfi_def_cfa_register 7
+ 1905 08f6 7860     		str	r0, [r7, #4]
+ 706:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 707:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_CLEAR_FLAG(SDIO_FLAG));
+ 1906              		.loc 1 707 0
+ 1907 08f8 7A68     		ldr	r2, [r7, #4]
+ 1908 08fa 094B     		ldr	r3, .L120
+ 1909 08fc 1340     		ands	r3, r3, r2
+ 1910 08fe 002B     		cmp	r3, #0
+ 1911 0900 02D1     		bne	.L118
+ 1912              		.loc 1 707 0 is_stmt 0 discriminator 2
+ 1913 0902 7B68     		ldr	r3, [r7, #4]
+ 1914 0904 002B     		cmp	r3, #0
+ 1915 0906 04D1     		bne	.L119
+ 1916              	.L118:
+ 1917              		.loc 1 707 0 discriminator 1
+ 1918 0908 0648     		ldr	r0, .L120+4
+ 1919 090a 40F2C321 		movw	r1, #707
+ 1920 090e FFF7FEFF 		bl	assert_failed
+ 1921              	.L119:
+ 708:../SPL/src/stm32f10x_sdio.c ****    
+ 709:../SPL/src/stm32f10x_sdio.c ****   SDIO->ICR = SDIO_FLAG;
+ 1922              		.loc 1 709 0 is_stmt 1
+ 1923 0912 054B     		ldr	r3, .L120+8
+ 1924 0914 7A68     		ldr	r2, [r7, #4]
+ 1925 0916 9A63     		str	r2, [r3, #56]
+ 710:../SPL/src/stm32f10x_sdio.c **** }
+ 1926              		.loc 1 710 0
+ 1927 0918 07F10807 		add	r7, r7, #8
+ 1928 091c BD46     		mov	sp, r7
+ 1929 091e 80BD     		pop	{r7, pc}
+ 1930              	.L121:
+ 1931              		.align	2
+ 1932              	.L120:
+ 1933 0920 00F83FFF 		.word	-12584960
+ 1934 0924 00000000 		.word	.LC0
+ 1935 0928 00800140 		.word	1073840128
+ 1936              		.cfi_endproc
+ 1937              	.LFE56:
+ 1939              		.align	2
+ 1940              		.global	SDIO_GetITStatus
+ 1941              		.thumb
+ 1942              		.thumb_func
+ 1944              	SDIO_GetITStatus:
+ 1945              	.LFB57:
+ 711:../SPL/src/stm32f10x_sdio.c **** 
+ 712:../SPL/src/stm32f10x_sdio.c **** /**
+ 713:../SPL/src/stm32f10x_sdio.c ****   * @brief  Checks whether the specified SDIO interrupt has occurred or not.
+ 714:../SPL/src/stm32f10x_sdio.c ****   * @param  SDIO_IT: specifies the SDIO interrupt source to check. 
+ 715:../SPL/src/stm32f10x_sdio.c ****   *   This parameter can be one of the following values:
+ 716:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CCRCFAIL: Command response received (CRC check failed) interrupt
+ 717:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_DCRCFAIL: Data block sent/received (CRC check failed) interrupt
+ 718:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CTIMEOUT: Command response timeout interrupt
+ 719:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_DTIMEOUT: Data timeout interrupt
+ 720:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_TXUNDERR: Transmit FIFO underrun error interrupt
+ 721:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_RXOVERR:  Received FIFO overrun error interrupt
+ 722:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CMDREND:  Command response received (CRC check passed) interrupt
+ 723:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CMDSENT:  Command sent (no response required) interrupt
+ 724:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_DATAEND:  Data end (data counter, SDIDCOUNT, is zero) interrupt
+ 725:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_STBITERR: Start bit not detected on all data signals in wide 
+ 726:../SPL/src/stm32f10x_sdio.c ****   *                            bus mode interrupt
+ 727:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_DBCKEND:  Data block sent/received (CRC check passed) interrupt
+ 728:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CMDACT:   Command transfer in progress interrupt
+ 729:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_TXACT:    Data transmit in progress interrupt
+ 730:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_RXACT:    Data receive in progress interrupt
+ 731:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_TXFIFOHE: Transmit FIFO Half Empty interrupt
+ 732:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_RXFIFOHF: Receive FIFO Half Full interrupt
+ 733:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_TXFIFOF:  Transmit FIFO full interrupt
+ 734:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_RXFIFOF:  Receive FIFO full interrupt
+ 735:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_TXFIFOE:  Transmit FIFO empty interrupt
+ 736:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_RXFIFOE:  Receive FIFO empty interrupt
+ 737:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_TXDAVL:   Data available in transmit FIFO interrupt
+ 738:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_RXDAVL:   Data available in receive FIFO interrupt
+ 739:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_SDIOIT:   SD I/O interrupt received interrupt
+ 740:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CEATAEND: CE-ATA command completion signal received for CMD61 interrupt
+ 741:../SPL/src/stm32f10x_sdio.c ****   * @retval The new state of SDIO_IT (SET or RESET).
+ 742:../SPL/src/stm32f10x_sdio.c ****   */
+ 743:../SPL/src/stm32f10x_sdio.c **** ITStatus SDIO_GetITStatus(uint32_t SDIO_IT)
+ 744:../SPL/src/stm32f10x_sdio.c **** { 
+ 1946              		.loc 1 744 0
+ 1947              		.cfi_startproc
+ 1948              		@ args = 0, pretend = 0, frame = 16
+ 1949              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1950 092c 80B5     		push	{r7, lr}
+ 1951              	.LCFI78:
+ 1952              		.cfi_def_cfa_offset 8
+ 1953              		.cfi_offset 7, -8
+ 1954              		.cfi_offset 14, -4
+ 1955 092e 84B0     		sub	sp, sp, #16
+ 1956              	.LCFI79:
+ 1957              		.cfi_def_cfa_offset 24
+ 1958 0930 00AF     		add	r7, sp, #0
+ 1959              	.LCFI80:
+ 1960              		.cfi_def_cfa_register 7
+ 1961 0932 7860     		str	r0, [r7, #4]
+ 745:../SPL/src/stm32f10x_sdio.c ****   ITStatus bitstatus = RESET;
+ 1962              		.loc 1 745 0
+ 1963 0934 4FF00003 		mov	r3, #0
+ 1964 0938 FB73     		strb	r3, [r7, #15]
+ 746:../SPL/src/stm32f10x_sdio.c ****   
+ 747:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 748:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_GET_IT(SDIO_IT));
+ 1965              		.loc 1 748 0
+ 1966 093a 7B68     		ldr	r3, [r7, #4]
+ 1967 093c 012B     		cmp	r3, #1
+ 1968 093e 59D0     		beq	.L123
+ 1969              		.loc 1 748 0 is_stmt 0 discriminator 1
+ 1970 0940 7B68     		ldr	r3, [r7, #4]
+ 1971 0942 022B     		cmp	r3, #2
+ 1972 0944 56D0     		beq	.L123
+ 1973              		.loc 1 748 0 discriminator 2
+ 1974 0946 7B68     		ldr	r3, [r7, #4]
+ 1975 0948 042B     		cmp	r3, #4
+ 1976 094a 53D0     		beq	.L123
+ 1977              		.loc 1 748 0 discriminator 3
+ 1978 094c 7B68     		ldr	r3, [r7, #4]
+ 1979 094e 082B     		cmp	r3, #8
+ 1980 0950 50D0     		beq	.L123
+ 1981              		.loc 1 748 0 discriminator 4
+ 1982 0952 7B68     		ldr	r3, [r7, #4]
+ 1983 0954 102B     		cmp	r3, #16
+ 1984 0956 4DD0     		beq	.L123
+ 1985              		.loc 1 748 0 discriminator 5
+ 1986 0958 7B68     		ldr	r3, [r7, #4]
+ 1987 095a 202B     		cmp	r3, #32
+ 1988 095c 4AD0     		beq	.L123
+ 1989              		.loc 1 748 0 discriminator 6
+ 1990 095e 7B68     		ldr	r3, [r7, #4]
+ 1991 0960 402B     		cmp	r3, #64
+ 1992 0962 47D0     		beq	.L123
+ 1993              		.loc 1 748 0 discriminator 7
+ 1994 0964 7B68     		ldr	r3, [r7, #4]
+ 1995 0966 802B     		cmp	r3, #128
+ 1996 0968 44D0     		beq	.L123
+ 1997              		.loc 1 748 0 discriminator 8
+ 1998 096a 7B68     		ldr	r3, [r7, #4]
+ 1999 096c B3F5807F 		cmp	r3, #256
+ 2000 0970 40D0     		beq	.L123
+ 2001              		.loc 1 748 0 discriminator 9
+ 2002 0972 7B68     		ldr	r3, [r7, #4]
+ 2003 0974 B3F5007F 		cmp	r3, #512
+ 2004 0978 3CD0     		beq	.L123
+ 2005              		.loc 1 748 0 discriminator 10
+ 2006 097a 7B68     		ldr	r3, [r7, #4]
+ 2007 097c B3F5806F 		cmp	r3, #1024
+ 2008 0980 38D0     		beq	.L123
+ 2009              		.loc 1 748 0 discriminator 11
+ 2010 0982 7B68     		ldr	r3, [r7, #4]
+ 2011 0984 B3F5006F 		cmp	r3, #2048
+ 2012 0988 34D0     		beq	.L123
+ 2013              		.loc 1 748 0 discriminator 12
+ 2014 098a 7B68     		ldr	r3, [r7, #4]
+ 2015 098c B3F5805F 		cmp	r3, #4096
+ 2016 0990 30D0     		beq	.L123
+ 2017              		.loc 1 748 0 discriminator 13
+ 2018 0992 7B68     		ldr	r3, [r7, #4]
+ 2019 0994 B3F5005F 		cmp	r3, #8192
+ 2020 0998 2CD0     		beq	.L123
+ 2021              		.loc 1 748 0 discriminator 14
+ 2022 099a 7B68     		ldr	r3, [r7, #4]
+ 2023 099c B3F5804F 		cmp	r3, #16384
+ 2024 09a0 28D0     		beq	.L123
+ 2025              		.loc 1 748 0 discriminator 15
+ 2026 09a2 7B68     		ldr	r3, [r7, #4]
+ 2027 09a4 B3F5004F 		cmp	r3, #32768
+ 2028 09a8 24D0     		beq	.L123
+ 2029              		.loc 1 748 0 discriminator 16
+ 2030 09aa 7B68     		ldr	r3, [r7, #4]
+ 2031 09ac B3F5803F 		cmp	r3, #65536
+ 2032 09b0 20D0     		beq	.L123
+ 2033              		.loc 1 748 0 discriminator 17
+ 2034 09b2 7B68     		ldr	r3, [r7, #4]
+ 2035 09b4 B3F5003F 		cmp	r3, #131072
+ 2036 09b8 1CD0     		beq	.L123
+ 2037              		.loc 1 748 0 discriminator 18
+ 2038 09ba 7B68     		ldr	r3, [r7, #4]
+ 2039 09bc B3F5802F 		cmp	r3, #262144
+ 2040 09c0 18D0     		beq	.L123
+ 2041              		.loc 1 748 0 discriminator 19
+ 2042 09c2 7B68     		ldr	r3, [r7, #4]
+ 2043 09c4 B3F5002F 		cmp	r3, #524288
+ 2044 09c8 14D0     		beq	.L123
+ 2045              		.loc 1 748 0 discriminator 20
+ 2046 09ca 7B68     		ldr	r3, [r7, #4]
+ 2047 09cc B3F5801F 		cmp	r3, #1048576
+ 2048 09d0 10D0     		beq	.L123
+ 2049              		.loc 1 748 0 discriminator 21
+ 2050 09d2 7B68     		ldr	r3, [r7, #4]
+ 2051 09d4 B3F5001F 		cmp	r3, #2097152
+ 2052 09d8 0CD0     		beq	.L123
+ 2053              		.loc 1 748 0 discriminator 22
+ 2054 09da 7B68     		ldr	r3, [r7, #4]
+ 2055 09dc B3F5800F 		cmp	r3, #4194304
+ 2056 09e0 08D0     		beq	.L123
+ 2057              		.loc 1 748 0 discriminator 23
+ 2058 09e2 7B68     		ldr	r3, [r7, #4]
+ 2059 09e4 B3F5000F 		cmp	r3, #8388608
+ 2060 09e8 04D0     		beq	.L123
+ 2061              		.loc 1 748 0 discriminator 24
+ 2062 09ea 0C48     		ldr	r0, .L127
+ 2063 09ec 4FF43B71 		mov	r1, #748
+ 2064 09f0 FFF7FEFF 		bl	assert_failed
+ 2065              	.L123:
+ 749:../SPL/src/stm32f10x_sdio.c ****   if ((SDIO->STA & SDIO_IT) != (uint32_t)RESET)  
+ 2066              		.loc 1 749 0 is_stmt 1
+ 2067 09f4 0A4B     		ldr	r3, .L127+4
+ 2068 09f6 5A6B     		ldr	r2, [r3, #52]
+ 2069 09f8 7B68     		ldr	r3, [r7, #4]
+ 2070 09fa 1340     		ands	r3, r3, r2
+ 2071 09fc 002B     		cmp	r3, #0
+ 2072 09fe 03D0     		beq	.L124
+ 750:../SPL/src/stm32f10x_sdio.c ****   {
+ 751:../SPL/src/stm32f10x_sdio.c ****     bitstatus = SET;
+ 2073              		.loc 1 751 0
+ 2074 0a00 4FF00103 		mov	r3, #1
+ 2075 0a04 FB73     		strb	r3, [r7, #15]
+ 2076 0a06 02E0     		b	.L125
+ 2077              	.L124:
+ 752:../SPL/src/stm32f10x_sdio.c ****   }
+ 753:../SPL/src/stm32f10x_sdio.c ****   else
+ 754:../SPL/src/stm32f10x_sdio.c ****   {
+ 755:../SPL/src/stm32f10x_sdio.c ****     bitstatus = RESET;
+ 2078              		.loc 1 755 0
+ 2079 0a08 4FF00003 		mov	r3, #0
+ 2080 0a0c FB73     		strb	r3, [r7, #15]
+ 2081              	.L125:
+ 756:../SPL/src/stm32f10x_sdio.c ****   }
+ 757:../SPL/src/stm32f10x_sdio.c ****   return bitstatus;
+ 2082              		.loc 1 757 0
+ 2083 0a0e FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 758:../SPL/src/stm32f10x_sdio.c **** }
+ 2084              		.loc 1 758 0
+ 2085 0a10 1846     		mov	r0, r3
+ 2086 0a12 07F11007 		add	r7, r7, #16
+ 2087 0a16 BD46     		mov	sp, r7
+ 2088 0a18 80BD     		pop	{r7, pc}
+ 2089              	.L128:
+ 2090 0a1a 00BF     		.align	2
+ 2091              	.L127:
+ 2092 0a1c 00000000 		.word	.LC0
+ 2093 0a20 00800140 		.word	1073840128
+ 2094              		.cfi_endproc
+ 2095              	.LFE57:
+ 2097              		.align	2
+ 2098              		.global	SDIO_ClearITPendingBit
+ 2099              		.thumb
+ 2100              		.thumb_func
+ 2102              	SDIO_ClearITPendingBit:
+ 2103              	.LFB58:
+ 759:../SPL/src/stm32f10x_sdio.c **** 
+ 760:../SPL/src/stm32f10x_sdio.c **** /**
+ 761:../SPL/src/stm32f10x_sdio.c ****   * @brief  Clears the SDIO's interrupt pending bits.
+ 762:../SPL/src/stm32f10x_sdio.c ****   * @param  SDIO_IT: specifies the interrupt pending bit to clear. 
+ 763:../SPL/src/stm32f10x_sdio.c ****   *   This parameter can be one or a combination of the following values:
+ 764:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CCRCFAIL: Command response received (CRC check failed) interrupt
+ 765:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_DCRCFAIL: Data block sent/received (CRC check failed) interrupt
+ 766:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CTIMEOUT: Command response timeout interrupt
+ 767:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_DTIMEOUT: Data timeout interrupt
+ 768:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_TXUNDERR: Transmit FIFO underrun error interrupt
+ 769:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_RXOVERR:  Received FIFO overrun error interrupt
+ 770:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CMDREND:  Command response received (CRC check passed) interrupt
+ 771:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CMDSENT:  Command sent (no response required) interrupt
+ 772:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_DATAEND:  Data end (data counter, SDIDCOUNT, is zero) interrupt
+ 773:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_STBITERR: Start bit not detected on all data signals in wide 
+ 774:../SPL/src/stm32f10x_sdio.c ****   *                            bus mode interrupt
+ 775:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_SDIOIT:   SD I/O interrupt received interrupt
+ 776:../SPL/src/stm32f10x_sdio.c ****   *     @arg SDIO_IT_CEATAEND: CE-ATA command completion signal received for CMD61
+ 777:../SPL/src/stm32f10x_sdio.c ****   * @retval None
+ 778:../SPL/src/stm32f10x_sdio.c ****   */
+ 779:../SPL/src/stm32f10x_sdio.c **** void SDIO_ClearITPendingBit(uint32_t SDIO_IT)
+ 780:../SPL/src/stm32f10x_sdio.c **** { 
+ 2104              		.loc 1 780 0
+ 2105              		.cfi_startproc
+ 2106              		@ args = 0, pretend = 0, frame = 8
+ 2107              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2108 0a24 80B5     		push	{r7, lr}
+ 2109              	.LCFI81:
+ 2110              		.cfi_def_cfa_offset 8
+ 2111              		.cfi_offset 7, -8
+ 2112              		.cfi_offset 14, -4
+ 2113 0a26 82B0     		sub	sp, sp, #8
+ 2114              	.LCFI82:
+ 2115              		.cfi_def_cfa_offset 16
+ 2116 0a28 00AF     		add	r7, sp, #0
+ 2117              	.LCFI83:
+ 2118              		.cfi_def_cfa_register 7
+ 2119 0a2a 7860     		str	r0, [r7, #4]
+ 781:../SPL/src/stm32f10x_sdio.c ****   /* Check the parameters */
+ 782:../SPL/src/stm32f10x_sdio.c ****   assert_param(IS_SDIO_CLEAR_IT(SDIO_IT));
+ 2120              		.loc 1 782 0
+ 2121 0a2c 7A68     		ldr	r2, [r7, #4]
+ 2122 0a2e 094B     		ldr	r3, .L132
+ 2123 0a30 1340     		ands	r3, r3, r2
+ 2124 0a32 002B     		cmp	r3, #0
+ 2125 0a34 02D1     		bne	.L130
+ 2126              		.loc 1 782 0 is_stmt 0 discriminator 2
+ 2127 0a36 7B68     		ldr	r3, [r7, #4]
+ 2128 0a38 002B     		cmp	r3, #0
+ 2129 0a3a 04D1     		bne	.L131
+ 2130              	.L130:
+ 2131              		.loc 1 782 0 discriminator 1
+ 2132 0a3c 0648     		ldr	r0, .L132+4
+ 2133 0a3e 40F20E31 		movw	r1, #782
+ 2134 0a42 FFF7FEFF 		bl	assert_failed
+ 2135              	.L131:
+ 783:../SPL/src/stm32f10x_sdio.c ****    
+ 784:../SPL/src/stm32f10x_sdio.c ****   SDIO->ICR = SDIO_IT;
+ 2136              		.loc 1 784 0 is_stmt 1
+ 2137 0a46 054B     		ldr	r3, .L132+8
+ 2138 0a48 7A68     		ldr	r2, [r7, #4]
+ 2139 0a4a 9A63     		str	r2, [r3, #56]
+ 785:../SPL/src/stm32f10x_sdio.c **** }
+ 2140              		.loc 1 785 0
+ 2141 0a4c 07F10807 		add	r7, r7, #8
+ 2142 0a50 BD46     		mov	sp, r7
+ 2143 0a52 80BD     		pop	{r7, pc}
+ 2144              	.L133:
+ 2145              		.align	2
+ 2146              	.L132:
+ 2147 0a54 00F83FFF 		.word	-12584960
+ 2148 0a58 00000000 		.word	.LC0
+ 2149 0a5c 00800140 		.word	1073840128
+ 2150              		.cfi_endproc
+ 2151              	.LFE58:
+ 2153              	.Letext0:
+ 2154              		.file 2 "c:\\program files (x86)\\codesourcery\\sourcery_codebench_lite_for_arm_eabi\\bin\\../lib/
+ 2155              		.file 3 "C:\\Users\\PC108\\Export_project\\stm32_ld_vl\\CMSIS/stm32f10x.h"
+ 2156              		.file 4 "C:\\Users\\PC108\\Export_project\\stm32_ld_vl\\SPL\\inc/stm32f10x_sdio.h"
+ 2157              		.file 5 "C:\\Users\\PC108\\Export_project\\stm32_ld_vl\\CMSIS/core_cm3.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 stm32f10x_sdio.c
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:18     .text:00000000 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:23     .text:00000000 SDIO_DeInit
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:81     .text:00000050 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:87     .rodata:00000000 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:91     .text:00000058 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:96     .text:00000058 SDIO_Init
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:246    .text:00000148 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:251    .text:00000150 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:256    .text:00000150 SDIO_StructInit
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:311    .text:00000194 SDIO_ClockCmd
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:354    .text:000001c4 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:359    .text:000001cc $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:364    .text:000001cc SDIO_SetPowerState
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:415    .text:0000020c $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:420    .text:00000214 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:425    .text:00000214 SDIO_GetPowerState
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:451    .text:00000228 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:455    .text:0000022c $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:460    .text:0000022c SDIO_ITConfig
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:537    .text:00000294 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:542    .text:0000029c $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:547    .text:0000029c SDIO_DMACmd
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:590    .text:000002cc $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:595    .text:000002d4 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:600    .text:000002d4 SDIO_SendCommand
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:728    .text:0000039c $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:733    .text:000003a4 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:738    .text:000003a4 SDIO_CmdStructInit
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:789    .text:000003e0 SDIO_GetCommandResponse
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:815    .text:000003f4 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:819    .text:000003f8 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:824    .text:000003f8 SDIO_GetResponse
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:882    .text:00000440 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:887    .text:00000448 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:892    .text:00000448 SDIO_DataConfig
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1095   .text:00000584 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1100   .text:0000058c $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1105   .text:0000058c SDIO_DataStructInit
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1160   .text:000005d0 SDIO_GetDataCounter
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1185   .text:000005e0 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1189   .text:000005e4 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1194   .text:000005e4 SDIO_ReadData
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1219   .text:000005f8 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1223   .text:000005fc $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1228   .text:000005fc SDIO_WriteData
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1258   .text:00000618 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1262   .text:0000061c $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1267   .text:0000061c SDIO_GetFIFOCount
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1292   .text:0000062c $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1296   .text:00000630 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1301   .text:00000630 SDIO_StartSDIOReadWait
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1344   .text:00000660 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1349   .text:00000668 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1354   .text:00000668 SDIO_StopSDIOReadWait
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1397   .text:00000698 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1402   .text:000006a0 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1407   .text:000006a0 SDIO_SetSDIOReadWaitMode
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1449   .text:000006cc $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1454   .text:000006d4 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1459   .text:000006d4 SDIO_SetSDIOOperation
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1502   .text:00000704 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1507   .text:0000070c $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1512   .text:0000070c SDIO_SendSDIOSuspendCmd
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1555   .text:0000073c $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1560   .text:00000744 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1565   .text:00000744 SDIO_CommandCompletionCmd
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1608   .text:00000774 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1613   .text:0000077c $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1618   .text:0000077c SDIO_CEATAITCmd
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1667   .text:000007b8 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1672   .text:000007c0 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1677   .text:000007c0 SDIO_SendCEATACmd
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1720   .text:000007f0 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1725   .text:000007f8 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1730   .text:000007f8 SDIO_GetFlagStatus
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1878   .text:000008e8 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1883   .text:000008f0 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1888   .text:000008f0 SDIO_ClearFlag
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1933   .text:00000920 $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1939   .text:0000092c $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:1944   .text:0000092c SDIO_GetITStatus
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:2092   .text:00000a1c $d
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:2097   .text:00000a24 $t
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:2102   .text:00000a24 SDIO_ClearITPendingBit
+C:\Users\PC108\AppData\Local\Temp\ccjPjnuJ.s:2147   .text:00000a54 $d
+                     .debug_frame:00000010 $d
+                           .group:00000000 wm4.1.9001f459856fa07d79ce9793bb17c6cd
+                           .group:00000000 wm4.stm32f10x.h.51.b859cb68ed44ee02c916b41cb8c68f1c
+                           .group:00000000 wm4.core_cm3.h.25.d35e9a9b04ec4aaebae9bf79fff061f9
+                           .group:00000000 wm4.stdint.h.10.90b695f550ca6cc3fb08fa83baf01e05
+                           .group:00000000 wm4.core_cm3.h.113.b286929a54d33b4c8909a7132437b244
+                           .group:00000000 wm4.stm32f10x.h.522.115ebb8291fa96f8c9e0b9a9b670f703
+                           .group:00000000 wm4.stm32f10x_exti.h.56.8b2f216f9ded9d03a9eb42ed6973fc04
+                           .group:00000000 wm4.stm32f10x_gpio.h.25.80c981af0e637567395034c576cfb3ce
+                           .group:00000000 wm4.stm32f10x_rcc.h.25.fe8897e7491f2eb0cff54551d08eb765
+                           .group:00000000 wm4.stm32f10x_tim.h.25.21c6ec062f1e74898cb96a57da276fec
+                           .group:00000000 wm4.stm32f10x_usart.h.25.29629c699b65db3f3efd3561f66b0bf6
+                           .group:00000000 wm4.misc.h.25.068e106f368fa5369a681ef57c106f4b
+                           .group:00000000 wm4.stm32f10x.h.8304.f7d8ad90959e99679b3257267c3aadfe
+                           .group:00000000 wm4.stm32f10x_sdio.h.123.338d8df3ea446473bd51d7b2007d9d9a
+
+UNDEFINED SYMBOLS
+assert_failed
